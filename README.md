@@ -1,2 +1,29 @@
 # Lapacom
 Complex life cycles metacommunities in disturbed landscapes
+
+
+Questions
+
+Predicting extinction probabilities in two metapopulations with and without interactions across a disturbance gradient (Leslie matrix in space)
+
+Spatiotemporal synchrony promoted by humans?
+
+Do control sites exhibit higher asyncrhony? (Madeira)
+
+Richness peaks in the sites with intermediate connections? (Lower richness in the more isolated (connected) sites?) :: Richness here can be a trait
+
+ 
+
+
+Data -- Canary Islands and Madeira 
+
+        Main features of the data -- pros/cons
+
+Code -- Octave version of Leslie matrix in space 
+
+        Check references extending Leslie in space
+
+WorkingPaper -- Draft outlining the intro 
+
+                Check format for references
+
