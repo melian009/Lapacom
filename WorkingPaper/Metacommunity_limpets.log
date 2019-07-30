@@ -1,0 +1,390 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.14)  30 JUL 2019 13:13
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**\input Metacommunity_limpets.tex
+(./Metacommunity_limpets.tex
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(./Metacommunity_limpets.aux)
+\openout1 = `Metacommunity_limpets.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 5.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 5.
+
+
+LaTeX Warning: No \author given.
+
+
+Overfull \hbox (3.89961pt too wide) in paragraph at lines 8--9
+\OT1/cmr/m/n/12 sce-nar-ios. We herein de-vel-oped a metapop-u-la-tion dy-nam-i
+cs model for semises-
+ []
+
+
+Overfull \hbox (14.5833pt too wide) in paragraph at lines 11--12
+\OT1/cmr/m/n/12 Metacommunities, patch dy-nam-ics, dis-per-sal dy-nam-ics, indi
+vidual-based model,
+ []
+
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ß in font cmr12!
+./Metacommunity_limpets.tex:14: Misplaced alignment tab character &.
+l.14 ...ecies extinction (Montoya, 2008; Rybicki &
+                                                   Hanksi, 2013; Haddad et a...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:14: Misplaced alignment tab character &.
+l.14 ...theory (e.g. Volkov et al. 2007; Gardner &
+                                                   Engelhardt, 2008). The de...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:14: Misplaced alignment tab character &.
+l.14 ...istence or decrease of assemblages (Supp &
+                                                   Ernest, 2014). Besides pe...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:14: Misplaced alignment tab character &.
+l.14 ...t reproductive potential (e.g. Hendricks &
+                                                   Mulder, 2008; Werner & Gr...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:14: Misplaced alignment tab character &.
+l.14 ...l (e.g. Hendricks & Mulder, 2008; Werner &
+                                                   Griebeler, 2011).
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:15: Misplaced alignment tab character &.
+l.15 ...iscrete individual organisms (De Angelis &
+                                                   Grimm, 2014; Van der V√§a...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+Missing character: There is no √ in font cmr12!
+Missing character: There is no § in font cmr12!
+./Metacommunity_limpets.tex:15: Misplaced alignment tab character &.
+l.15 ...d the landscape they live in (De Angelis &
+                                                   Mooij, 2005). They incorp...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:15: Misplaced alignment tab character &.
+l.15 ...g others (Martin et al. 2013; De Angelis &
+                                                   Grimm, 2014). These model...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:17: Missing $ inserted.
+<inserted text> 
+                $
+l.17 ...populated oceanic islands (> 500 inhab km^
+                                                  {-2}) with a high harvesti...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 17.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 17.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 17.
+./Metacommunity_limpets.tex:18: Missing $ inserted.
+<inserted text> 
+                $
+l.18 
+     
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+Overfull \hbox (3196.19534pt too wide) in paragraph at lines 14--18
+\OT1/cmr/m/n/12 km$[])\OML/cmm/m/it/12 withahighharvestingpressure\OT1/cmr/m/n/
+12 (\OML/cmm/m/it/12 seeRieraetal:\OT1/cmr/m/n/12 2016; \OML/cmm/m/it/12 Sousae
+tal:\OT1/cmr/m/n/12 2018\OML/cmm/m/it/12 fordetails\OT1/cmr/m/n/12 )\OML/cmm/m/
+it/12 :Formerstudieshighlightedthesharpdecreaseofsizesofbothlimpets; asymptonof
+overexploitationandhence; amajordriverforfuturelocalextinctionofthesespeciesinT
+enerife\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 Rieraetal:\OT1/cmr/m/n/12 2016)\OML/cm
+m/m/it/12 andMadeira\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 Sousaetal:\OT1/cmr/m/n/12
+ 2018)\OML/cmm/m/it/12 :Wehereindevelopaseriesofmodelsofmetapopulationdynamicst
+opredictfuturetrendsonthelimpetpopulationsofbothislands:Thepredictivepowerofthe
+semodelsispivotaltoarticulateanintegrativemanagementplantopreservetheseendanger
+edspecies::ASENTENCEABOUTRESULTSANDCONCLUSIONS; TOWRAPUPTHEINTRODUCTIONANDLINKT
+OMATANDMETHODS:$ 
+ []
+
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ß in font cmr12!
+
+./Metacommunity_limpets.tex:30: Misplaced alignment tab character &.
+l.30 Ak√ßakaya, HR, G. Mills, C. Doncaster &
+                                             C. Patrick. 2007. The role of m...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:30: Misplaced alignment tab character &.
+l.30 ...tions in conservation. In, McDonald, DW. &
+                                                   S. Katrina (eds.). Key to...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:31: Misplaced alignment tab character &.
+l.31 DeAngelis, DL. &
+                      V. Grimm. 2014. Individual-based models in ecology aft...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:32: Misplaced alignment tab character &.
+l.32 DeAngelis, DL. &
+                      WM. Mooij. 2005. Individual-based modelling of ecologi...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:34: Misplaced alignment tab character &.
+l.34 Gardner, RH. &
+                    KAM. Engelhardt. 2008. Spatial processes that maintain b...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+Missing character: There is no ¬ in font cmr12!
+Missing character: There is no ¥ in font cmr12!
+./Metacommunity_limpets.tex:37: Misplaced alignment tab character &.
+l.37 Hendricks, AJ. &
+                      C. Mulder. 2008. Scaling of offspring number and mass ...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:38: Misplaced alignment tab character &.
+l.38 ...M. Nisbet, TG. Preuss, M. Hammers-Wirtz. &
+                                                   V. Grimm. 2013. Extrapola...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:40: Misplaced alignment tab character &.
+l.40 ...J., RM. Sibly, J. Tougaard, J. Teilmann. &
+                                                   S. Sveegard. 2014. Effect...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:41: Misplaced alignment tab character &.
+l.41 ...Raposo, EP, Viswanathan, GM. Da Luz, GE. &
+                                                   MR. Pie. 2015. Survival i...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:42: Misplaced alignment tab character &.
+l.42 ...n, J. GE. Beatty, SL. Keating, CA. Maggs &
+                                                   G. Savidge. 2009. High di...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:43: Misplaced alignment tab character &.
+l.43 Punt, AE, T. Huang &
+                          M.N. Maunder. 2013. Review of integrated size-stru...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ì in font cmr12!
+Missing character: There is no √ in font cmr12!
+Missing character: There is no © in font cmr12!
+Missing character: There is no √ in font cmr12!
+Missing character: There is no Å in font cmr12!
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ≥ in font cmr12!
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ≠ in font cmr12!
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ì in font cmr12!
+./Metacommunity_limpets.tex:44: Misplaced alignment tab character &.
+l.44 ...rez, D. Sim√≥n, D. D√≠az, √ì. Monterroso &
+                                                   J. N√∫√±ez. 2016. Clear r...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ∫ in font cmr12!
+Missing character: There is no √ in font cmr12!
+Missing character: There is no ± in font cmr12!
+./Metacommunity_limpets.tex:45: Misplaced alignment tab character &.
+l.45 Supp, Sr. &
+                 SKM. Ernest. 2014. Species level and community level respon...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+Missing character: There is no √ in font cmr12!
+Missing character: There is no § in font cmr12!
+./Metacommunity_limpets.tex:46: Misplaced alignment tab character &.
+l.46 Van de V√§art, E. A. Johnston &
+                                     RM. Sibly. 2016. Predicting how animals...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:47: Misplaced alignment tab character &.
+l.47 Volkov, I. JR. Banavar, SP. Hubbell &
+                                           A. Maritan. 2007. Patterns of rel...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./Metacommunity_limpets.tex:48: Misplaced alignment tab character &.
+l.48 Werner, J. &
+                  EM, Griebeler. 2011. Reproductive biology and its impact o...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+[3] [4] (./Metacommunity_limpets.aux) ) 
+Here is how much of TeX's memory you used:
+ 234 strings out of 492982
+ 2660 string characters out of 6134895
+ 62925 words of memory out of 5000000
+ 3875 multiletter control sequences out of 15000+600000
+ 8541 words of font info for 30 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 22i,6n,19p,1472b,193s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb>
+Output written on Metacommunity_limpets.pdf (4 pages, 96771 bytes).
+PDF statistics:
+ 45 PDF objects out of 1000 (max. 8388607)
+ 31 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+
