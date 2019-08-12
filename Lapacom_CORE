@@ -20,5 +20,13 @@ LAPACOM (MODEL)......Joana, Rodri & Carlos (12th August 2019)
 (3) OUTPUTS
   IN-OUT ratio -> Source or Sink sites
   Overlap with Marine Protected Areas (MPAs), Sources-Sinks?
- (4) Approximate Bayesian Computational (ABC) and Bayes Networks (BN)
+  
+(4) Approximate Bayesian Computational (ABC) and Bayes Networks (BN)
+
+(5) FOUR POTENTIAL HYPOTHESES
+The first model assumes that dispersal rates between patches are distance-dependent, with low rates between highly-separated assemblages. 
+The second model assumes that dispersal rates are positively correlated to individual density. 
+The third model assumes that larger individuals have higher reproductive potential. 
+The fourth model considers a low probability of dispersal to peripheral assemblages relative to central ones.
+ 
   
