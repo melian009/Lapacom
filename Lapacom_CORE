@@ -1,9 +1,9 @@
-LAPACOM (MODEL)
+LAPACOM (MODEL)......Joana, Rodri & Carlos (12th August 2019)
 
 (1) SPATIAL STRUCTURE: STATIC
   1.1. Site matrix, containing 3 vectors, size, exposition and extraction (0 < S < Smax)
   1.2. Distance matrix (0 < Dij < Dmax)
-(2)  AGENTS: Dynamic Spatial and Temporal
+(2) AGENTS: Dynamic Spatial and Temporal
   2.1. Features
        Egg (A), Trocophore (B), Veliger (C), Juvenile (D), Adult (E)
        Transition between stages driven by hours post-fertilization
@@ -17,8 +17,8 @@ LAPACOM (MODEL)
       Natural (Death probability independent to size)
  2.5. Dispersal (Larger size, more eggs; Global dispersion (A, B), Regional dispersion (B, C), Local dispersion (C), No dispersion (D, E))
  
- OUTPUTS
+(3) OUTPUTS
   IN-OUT ratio -> Source or Sink sites
   Overlap with Marine Protected Areas (MPAs), Sources-Sinks?
-  
+ (4) Approximate Bayesian Computational (ABC) and Bayes Networks (BN)
   
