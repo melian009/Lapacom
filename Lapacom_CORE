@@ -1,0 +1,32 @@
+LAPACOM (MODEL)......Joana, Rodri & Carlos (12th August 2019)
+
+(1) SPATIAL STRUCTURE: STATIC
+  1.1. Site matrix, containing 3 vectors, size, exposition and extraction (0 < S < Smax)
+  1.2. Distance matrix (0 < Dij < Dmax)
+(2) AGENTS: Dynamic Spatial and Temporal
+  2.1. Features
+       Egg (A), Trocophore (B), Veliger (C), Juvenile (D), Adult (E)
+       Transition between stages driven by hours post-fertilization
+  2.2. Traits
+       Mating ((1)External fecundation, (2)random encounter (Lottery model), (3) Exponential decay vs. fertilized eggs per time)
+  2.3. Abiotic ((1)Exposition-Extraction trade-offs,(2) Currents to calculate distance between site distance)
+  2.4. Biotic 
+      Human ((1)Close season (December to March) , (2) Extraction probability dependent function size 
+      (40 mm in Madeira, with 15 kg/day for professional, 45 mm in Canaries, with 10 kg/day for professional and 3 kg/day for recreative), 
+      Extraction dependent on size
+      Natural (Death probability independent to size)
+ 2.5. Dispersal (Larger size, more eggs; Global dispersion (A, B), Regional dispersion (B, C), Local dispersion (C), No dispersion (D, E))
+ 
+(3) OUTPUTS
+  IN-OUT ratio -> Source or Sink sites
+  Overlap with Marine Protected Areas (MPAs), Sources-Sinks?
+  
+(4) Approximate Bayesian Computational (ABC) and Bayes Networks (BN)
+
+(5) FOUR POTENTIAL HYPOTHESES
+The first model assumes that dispersal rates between patches are distance-dependent, with low rates between highly-separated assemblages. 
+The second model assumes that dispersal rates are positively correlated to individual density. 
+The third model assumes that larger individuals have higher reproductive potential. 
+The fourth model considers a low probability of dispersal to peripheral assemblages relative to central ones.
+ 
+  
