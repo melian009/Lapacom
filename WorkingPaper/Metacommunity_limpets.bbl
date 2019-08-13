@@ -1,0 +1,24 @@
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem[{Ak{\c{c}}akaya et~al.(2007)Ak{\c{c}}akaya, Mills, and
+  Doncaster}]{akccakaya2007role}
+Ak{\c{c}}akaya, H.~R., G.~Mills, and C.~P. Doncaster, 2007.
+\newblock The role of metapopulations in conservation.
+\newblock Key topics in conservation biology Pp. 64--84.
+
+\bibitem[{Hanski(1999)}]{hanski1999habitat}
+Hanski, I., 1999.
+\newblock Habitat connectivity, habitat continuity, and metapopulations in
+  dynamic landscapes.
+\newblock Oikos Pp. 209--219.
+
+\bibitem[{Montoya(2008)}]{montoya2008habitat}
+Montoya, D., 2008.
+\newblock Habitat loss, dispersal, and the probability of extinction of tree
+  species.
+\newblock Communicative \& integrative biology 1:146--147.
+
+\end{thebibliography}

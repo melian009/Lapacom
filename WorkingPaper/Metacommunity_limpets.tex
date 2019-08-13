@@ -1,40 +1,182 @@
 \documentclass[12pt]{article}
-\\usepackage[utf8]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{color}
 \usepackage[left=2.00cm, right=2.00cm]{geometry}
 \usepackage{graphicx}
+\usepackage{natbib}
 \date{}
+
+\topmargin 0.0cm
+\oddsidemargin 0.5cm
+\evensidemargin 0.5cm
+\textwidth 16cm 
+\textheight 22cm
+
 \begin{document}
-\begin{flushleft}
-\hyphenation{const-ti-tu-tion-al arm-pit}
-\title{Metapopulation dynamics of complex life-cycles in heavily-disturbed landscapes}
+%\begin{flushleft}
+%\hyphenation{const-ti-tu-tion-al arm-pit}
+\title{Metacommunity complex life-cycle dynamics in disturbed landscapes}
+\author{List of authors}
+
+%\end{flushleft}
+
 \maketitle
-\author{AUTHORS}
-\\
-\small{ADDRESSES}
-\\
+
 \section{Abstract}
-The dynamics of sparse populations are of utmost importance in ecology. Structured metapopulation models have been extensively used to determine extinction thresholds and populations persistence in future environmental scenarios. We herein developed a metapopulation dynamics model for semisessile highly-exploited species. Four models were developed considering different the habitat fragmentation, isolation and distance of populations in two oceanic archipelagos. We used as empirical example, the populations of two harvested intertidal limpets (\textit{Patella candei} and \textit{P. crenata}) in Madeira, and Tenerife (Canary Islands), two Atlantic volcanic islands distant to the continent.
+The dynamics of sparse populations are of utmost importance in
+ecology. Structured metapopulation models have been extensively used
+to determine extinction thresholds and populations persistence in
+future environmental scenarios. We herein developed a metapopulation
+dynamics model for semisessile highly-exploited species. Four models
+were developed considering different the habitat fragmentation,
+isolation and distance of populations in two oceanic archipelagos. We
+used as empirical example, the populations of two harvested intertidal
+limpets (\textit{Patella candei} and \textit{P. crenata}) in Madeira,
+and Tenerife (Canary Islands), two Atlantic volcanic islands distant
+to the continent.
 
 \section{Keywords}
 Metacommunities, dispersal dynamics, individual-based model, Approximate Bayesian Computational
 
 \section{Introduction}
-Movement is a pervasive trait among species on Earth. All species disperse to some extent, because resources become limited as population grow, but a few have a worldwide distribution. Mobility occurs during the whole life cycle or limited to dispersal stages, such as seeds in plants or eggs in fish. Most of the species move over short distances and, to a lesser extent, to greater distances (Davidson et al. 2004). Dispersal, defined as the movement of individuals away from their source (Nathan, 2003), is a key strategy to increase fitness in dynamic landscapes by moving to different environments. Hence, ecological and evolutionary proccesses that occur in one location may drive changes at far sites or in other ecosystems through the ecological coupling of long-distance dispersal (Gaines et al. 2007). Fitness variability between habitat patches is the driving force for dispersal evolution, comprising pivotal ecological processes such as, interactions, habitat quality and competition (Bowler and Benton, 2005). Yet, highly-fragmented populations may not experience sufficient levels of dispersal, with a subsequent increase of inbreeding which lead to decreased fitness in many species (Fath, 2018).Small populations with high dispersal rates may be prone to extinction under such situations  whilst marginal populations with immigration rates may experience a rescue effect where individuals may persist (Eriksson et al. 2014).Unfortunately, most models assumed a fixed dispersal strategy (McCallum et al. 2001; Levin et al. 2003), but understanding the link between dispersal and population dynamics is pivotal for predicting population responses to habitat loss and fragmentation, and interaction with aline species (Bowler and Benton, 2005).
+Movement is a pervasive trait among species on Earth. All species
+disperse to some extent, because resources become limited as
+population grow, but a few have a worldwide distribution. Mobility
+occurs during the whole life cycle or limited to dispersal stages,
+such as seeds in plants or eggs in fish. Most of the species move over
+short distances and, to a lesser extent, to greater distances
+(Davidson et al. 2004). Dispersal, defined as the movement of
+individuals away from their source (Nathan, 2003), is a key strategy
+to increase fitness in dynamic landscapes by moving to different
+environments. Hence, ecological and evolutionary proccesses that occur
+in one location may drive changes at far sites or in other ecosystems
+through the ecological coupling of long-distance dispersal (Gaines et
+al. 2007). Fitness variability between habitat patches is the driving
+force for dispersal evolution, comprising pivotal ecological processes
+such as, interactions, habitat quality and competition (Bowler and
+Benton, 2005). Yet, highly-fragmented populations may not experience
+sufficient levels of dispersal, with a subsequent increase of
+inbreeding which lead to decreased fitness in many species (Fath,
+2018).Small populations with high dispersal rates may be prone to
+extinction under such situations whilst marginal populations with
+immigration rates may experience a rescue effect where individuals may
+persist (Eriksson et al. 2014).Unfortunately, most models assumed a
+fixed dispersal strategy (McCallum et al. 2001; Levin et al. 2003),
+but understanding the link between dispersal and population dynamics
+is pivotal for predicting population responses to habitat loss and
+fragmentation, and interaction with aline species (Bowler and Benton,
+2005).
 
-Metapopulation models predict the survival of highly-disperse populations regardless local depletion of species \cite{hanski1999habitat}, \cite{akccakaya2007role}. However, habitat loss and fragmentation may be so extensive that result in a massive species extinction \cite{montoya2008habitat},\citeRybicki and Hanksi, 2013; \cite{haddad2015habitat}. Model predictions have shown that a decrease in connectivity among assemblages, from continuous to sparsely-distributed populations is accompanied by species loss (Metzger et al. 2009; Niebuhr et al. 2015). The role of natural (e.g. stochastic events) and human-driven (e.g. pollution, habitat loss and exploitation) perturbations have been extensively studied in the last decades (Dornelas, 2010 and references therein) and it has been frequently studied in ecological theory (e.g. Volkov et al. 2007; Gardner and Engelhardt, 2008). The degree of anthropogenic pressure may be a capital factor for landscape connectivity, since directly affects the persistence or decrease of assemblages (Supp and Ernest, 2014). Besides perturbations, dispersal rates in disturbed landscapes need to be high in order to maintain viable populations (Provan et al. 2009). However, individual-based models (IBM) are needed to predict dispersal rates in species where small specimens, i.e. juveniles, are not reproductively active and even larger-sized adults harbour the highest reproductive potential (e.g. Hendricks and Mulder, 2008; Werner and Griebeler, 2011). 
-IBM simulate populations as being composed of discrete individual organisms (De Angelis and Grimm, 2014; Van der Väart et al. 2016). In IBMs the actions of single individuals are simulated and they interact with other and the landscape they live in (De Angelis and Mooij, 2005). They incorporate attributes vary among the individuals and can change through time such as, growth, foraging, dispersal and reproduction, among others (Martin et al. 2013; De Angelis and Grimm, 2014). These models have been used as size-structured methods to integrate a high variety of data which output are pivotal for management purposes (Punt et al. 2013) and conservation strategies (Nabe-Nielsen et al. 2014). Metapopulation models have been primarily used to certain vagile species such as insects (Harrison, 1995; Hilker et al. 2006) or mammals (Khrone, 1997; Lawes, 2000), but sessile or semi-sessile species have been neglected though a high proportion have a larval dispersal phase (Sale et al 2006; Gaggiotti, 2017). This strategy is extensively used in most of reduced-mobility marine species, with a subsequent increase of populations connectivity to nearby areas. However, assemblages from distant places are prone to isolation, as genetic analysis showed in semisessile mollusks from oceanic archipelagos (Corte-Real et al. 1996; Bird et al. 2011; Faria et al. 2017). Oceanographic conditions, i.e. currents and eddies, and large geographic distances showed to be pivotal environmental factors to decrease the dispersal capacity (e.g. Palumbi et al. 1994). High larvae mortality plays also a crucial role, mainly due to predation and larvae traits, i.e. growth, reproductive and recruitment strategies, and mobility capacity (Cowen et al. 2000; Cowen and Sponaugle 2009) in a limited connectivity within species. However, genetic analysis have been observed to be insufficient to accurately determine the demographic connectivity among populations of terrestrial (Chapuis et al. 2011), estuarine (Turner et al. 2002) and marine species (Hawkins et al. 2016).
-We herein develop metacommunity models based on individuals of two intertidal species, namely the limpets \textit{Patella aspera} and \textit{P. candei}. The first model assumes that dispersal rates between patches are distance-dependent, with low rates between highly-separated assemblages. The second model assumes that dispersal rates are positively correlated to individual density. The third model assumes that larger individuals have higher reproductive potential. The fourth model considers a low probability of dispersal to peripheral assemblages relative to central ones. We confront the model with long-time series data (1994-2014) of two commercial limpet species (\textit{Patella candei} and \textit{P. aspera}) in two overpopulated oceanic islands (> 500 inhab km^{-2}) with a high harvesting pressure (see Riera et al. 2016; Sousa et al. 2018 for details). Former studies highlighted the sharp decrease of sizes of both limpets, a sympton of overexploitation and hence, a major driver for future local extinction of these species in Tenerife (Riera et al. 2016) and Madeira (Sousa et al. 2018). We herein develop a series of models  of metapopulation dynamics to predict future trends on the limpet populations of both islands. The predictive power of these models is pivotal to articulate an integrative management plan to preserve these endangered species.
+Metapopulation models predict the survival of highly-disperse
+populations regardless local depletion of species
+\citep{hanski1999habitat,akccakaya2007role}. However, habitat
+loss and fragmentation may be so extensive that result in a massive
+species extinction \citep{montoya2008habitat,Rybicki and Hanksi,
+2013,haddad2015habitat}. Model predictions have shown that a
+decrease in connectivity among assemblages, from continuous to
+sparsely-distributed populations is accompanied by species loss
+(Metzger et al. 2009; Niebuhr et al. 2015). The role of natural
+(e.g. stochastic events) and human-driven (e.g. pollution, habitat
+loss and exploitation) perturbations have been extensively studied in
+the last decades (Dornelas, 2010 and references therein) and it has
+been frequently studied in ecological theory (e.g. Volkov et al. 2007;
+Gardner and Engelhardt, 2008). The degree of anthropogenic pressure
+may be a capital factor for landscape connectivity, since directly
+affects the persistence or decrease of assemblages (Supp and Ernest,
+2014). Besides perturbations, dispersal rates in disturbed landscapes
+need to be high in order to maintain viable populations (Provan et
+al. 2009). However, individual-based models (IBM) are needed to
+predict dispersal rates in species where small specimens,
+i.e. juveniles, are not reproductively active and even larger-sized
+adults harbour the highest reproductive potential (e.g. Hendricks and
+Mulder, 2008; Werner and Griebeler, 2011).  IBM simulate populations
+as being composed of discrete individual organisms (De Angelis and
+Grimm, 2014; Van der Väart et al. 2016). In IBMs the actions of single
+individuals are simulated and they interact with other and the
+landscape they live in (De Angelis and Mooij, 2005). They incorporate
+attributes vary among the individuals and can change through time such
+as, growth, foraging, dispersal and reproduction, among others (Martin
+et al. 2013; De Angelis and Grimm, 2014). These models have been used
+as size-structured methods to integrate a high variety of data which
+output are pivotal for management purposes (Punt et al. 2013) and
+conservation strategies (Nabe-Nielsen et al. 2014). Metapopulation
+models have been primarily used to certain vagile species such as
+insects (Harrison, 1995; Hilker et al. 2006) or mammals (Khrone, 1997;
+Lawes, 2000), but sessile or semi-sessile species have been neglected
+though a high proportion have a larval dispersal phase (Sale et al
+2006; Gaggiotti, 2017). This strategy is extensively used in most of
+reduced-mobility marine species, with a subsequent increase of
+populations connectivity to nearby areas. However, assemblages from
+distant places are prone to isolation, as genetic analysis showed in
+semisessile mollusks from oceanic archipelagos (Corte-Real et
+al. 1996; Bird et al. 2011; Faria et al. 2017). Oceanographic
+conditions, i.e. currents and eddies, and large geographic distances
+showed to be pivotal environmental factors to decrease the dispersal
+capacity (e.g. Palumbi et al. 1994). High larvae mortality plays also
+a crucial role, mainly due to predation and larvae traits,
+i.e. growth, reproductive and recruitment strategies, and mobility
+capacity (Cowen et al. 2000; Cowen and Sponaugle 2009) in a limited
+connectivity within species. However, genetic analysis have been
+observed to be insufficient to accurately determine the demographic
+connectivity among populations of terrestrial (Chapuis et al. 2011),
+estuarine (Turner et al. 2002) and marine species (Hawkins et
+al. 2016).  We herein develop metacommunity models based on
+individuals of two intertidal species, namely the limpets
+\textit{Patella aspera} and \textit{P. candei}. The first model
+assumes that dispersal rates between patches are distance-dependent,
+with low rates between highly-separated assemblages. The second model
+assumes that dispersal rates are positively correlated to individual
+density. The third model assumes that larger individuals have higher
+reproductive potential. The fourth model considers a low probability
+of dispersal to peripheral assemblages relative to central ones. We
+confront the model with long-time series data (1994-2014) of two
+commercial limpet species (\textit{Patella candei} and
+\textit{P. aspera}) in two overpopulated oceanic islands (> 500 inhab
+$km^{-2}$) with a high harvesting pressure (see Riera et al. 2016; Sousa
+et al. 2018 for details). Former studies highlighted the sharp
+decrease of sizes of both limpets, a sympton of overexploitation and
+hence, a major driver for future local extinction of these species in
+Tenerife (Riera et al. 2016) and Madeira (Sousa et al. 2018). We
+herein develop a series of models of metapopulation dynamics to
+predict future trends on the limpet populations of both islands. The
+predictive power of these models is pivotal to articulate an
+integrative management plan to preserve these endangered species.
 
 \section{Material and Methods}
 
 % Material and methods where you have to include all methodology and procedures}
 
 \subsection{Metapopulation model}
-A metapopulation model was developed to explore the probability of occupancy of the two studied species in each oceanic island, i.e. Madeira and Tenerife, based on previous spatially-explicit metapopulation models (Hanski, 1999; Hanski and Ovaskainen, 2000; Ovaskainen and Hanski, 2001, 2002; Bertuzzo et al. 2015). Dispersal, recruitment and extinction are taken into account for the previous models. In the present model, each pixel of the modeled landscape is assumed to be a patch that may be either occupied or not by larvae of the studied limpet species. We assumed that the study species are constrained to disperse passively by the large-scale (the Canary Current, Barton et al. 1998) and meso-scale (eddies) oceanographic conditions,  and also by the active dispersion of the larvae (REFERENCES). Former studies have demonstrated that the main driver of the sharp decrease of limpet populations in both islands is the human harvesting pressure, we assumed that remains constant throughout the last 20 years, and with no seasonal variations within a year. Both species (\textit{Patella candei} and \textit{P. aspera}) are in clear regression in both islands due to their commercial interest (Riera et al. 2016; Sousa et al. 2018). We herein used the limpet size as a reproductive proxy, since individuals over 3.5 mm are considered adults, since 50\percent of individuals are reproductive (Henriques et al. 2011), and the higher the size the higher the reproductive potential (Boaventura et al. 2002; Martins et al. 2017). Thus, a decrease of limpet size is a sympton of local extinctions in populations with low connectivity, as currently are those from isolated places such as, the oceanic islands of Madeira and Tenerife.
+A metapopulation model was developed to explore the probability of
+occupancy of the two studied species in each oceanic island,
+i.e. Madeira and Tenerife, based on previous spatially-explicit
+metapopulation models (Hanski, 1999; Hanski and Ovaskainen, 2000;
+Ovaskainen and Hanski, 2001, 2002; Bertuzzo et al. 2015). Dispersal,
+recruitment and extinction are taken into account for the previous
+models. In the present model, each pixel of the modeled landscape is
+assumed to be a patch that may be either occupied or not by larvae of
+the studied limpet species. We assumed that the study species are
+constrained to disperse passively by the large-scale (the Canary
+Current, Barton et al. 1998) and meso-scale (eddies) oceanographic
+conditions, and also by the active dispersion of the larvae
+(REFERENCES). Former studies have demonstrated that the main driver of
+the sharp decrease of limpet populations in both islands is the human
+harvesting pressure, we assumed that remains constant throughout the
+last 20 years, and with no seasonal variations within a year. Both
+species (\textit{Patella candei} and \textit{P. aspera}) are in clear
+regression in both islands due to their commercial interest (Riera et
+al. 2016; Sousa et al. 2018). We herein used the limpet size as a
+reproductive proxy, since individuals over 3.5 mm are considered
+adults, since 50\percent of individuals are reproductive (Henriques et
+al. 2011), and the higher the size the higher the reproductive
+potential (Boaventura et al. 2002; Martins et al. 2017). Thus, a
+decrease of limpet size is a sympton of local extinctions in
+populations with low connectivity, as currently are those from
+isolated places such as, the oceanic islands of Madeira and Tenerife.
 
 \subsection {Model traits}
 MATING
@@ -59,11 +201,11 @@ ABIOTIC FACTORS
 
 
 \section{References}
-\bibliographystyle{unrst}
+\bibliographystyle{evolution}
 \bibliography{BiblioLimpets}
-\insertbibliography
+%\insertbibliography
 
-\end{flushleft}
+
 \end{document}
 
 
