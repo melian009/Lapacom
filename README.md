@@ -31,9 +31,3 @@ WorkingPaper -- Draft outlining the intro
 
                 Check format for references
 
-
-Add following ref to .bib file
-
-Ilkka Hanski and Otso Ovaskainen. The metapopulation capacity of a fragmented landscape. Nature,
-404(6779):755–758, April 2000. ISSN 0028-0836. doi: 10.1038/35008063.
-
