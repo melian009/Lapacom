@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.14)  13 AUG 2019 15:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.14)  16 AUG 2019 12:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -497,18 +497,18 @@ LaTeX Info: Redefining \cite on input line 694.
 (./Metacommunity_limpets.aux)
 \openout1 = `Metacommunity_limpets.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -609,21 +609,8 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-[1
-
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for U+msa on input line 28.
-
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Try loading font information for U+msb on input line 28.
-
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-./Metacommunity_limpets.tex:32: Undefined control sequence.
-l.32 \spacing
+./Metacommunity_limpets.tex:18: Undefined control sequence.
+l.18 \spacing
              {2}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -631,10 +618,224 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./Metacommunity_limpets.tex:40: Undefined control sequence.
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    Try loading font information for U+msa on input line 21.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 21.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+
+LaTeX Warning: No \author given.
+
+./Metacommunity_limpets.tex:22: Missing } inserted.
+<inserted text> 
+                }
+l.22 \author{{Rodrigo Riera${{^1}$
+                                  ,${^{*}}$, Joana Vasconcelos${{^1}{^2}{^3}...
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./Metacommunity_limpets.tex:22: Undefined control sequence.
+l.22 ...icardo Sousa ${{^2}{^4}}$,Carlos J. Meli\�
+                                                  �an${{^5}$
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./Metacommunity_limpets.tex:22: Package inputenc Error: Keyboard character used
+ is undefined
+(inputenc)                in inputencoding `utf8'.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.22 ...cardo Sousa ${{^2}{^4}}$,Carlos J. Meli\´
+                                                  an${{^5}$
+You need to provide a definition with \DeclareInputText 
+or \DeclareInputMath before using this key.
+
+./Metacommunity_limpets.tex:22: Missing } inserted.
+<inserted text> 
+                }
+l.22 ...sa ${{^2}{^4}}$,Carlos J. Meli\´an${{^5}$
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./Metacommunity_limpets.tex:24: Undefined control sequence.
+l.24 \small{$^{1}$Departamento de Ecolog\�
+                                          �ia, Facultad de Ciencias, Univers...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./Metacommunity_limpets.tex:24: Package inputenc Error: Keyboard character used
+ is undefined
+(inputenc)                in inputencoding `utf8'.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 \small{$^{1}$Departamento de Ecolog\´
+                                           ia, Facultad de Ciencias, Univers...
+
+You need to provide a definition with \DeclareInputText 
+or \DeclareInputMath before using this key.
+
+./Metacommunity_limpets.tex:24: Undefined control sequence.
+l.24 ...a, Facultad de Ciencias, Universidad Cat\�
+                                                  �olica de la Sant\´isima ...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./Metacommunity_limpets.tex:24: Package inputenc Error: Keyboard character used
+ is undefined
+(inputenc)                in inputencoding `utf8'.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 ..., Facultad de Ciencias, Universidad Cat\´
+                                                  olica de la Sant\´isima C...
+
+You need to provide a definition with \DeclareInputText 
+or \DeclareInputMath before using this key.
+
+./Metacommunity_limpets.tex:24: Undefined control sequence.
+l.24 ...cias, Universidad Cat\´olica de la Sant\�
+                                                  �isima Concepci\´on, Conc...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./Metacommunity_limpets.tex:24: Package inputenc Error: Keyboard character used
+ is undefined
+(inputenc)                in inputencoding `utf8'.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 ...ias, Universidad Cat\´olica de la Sant\´
+                                                  isima Concepci\´on, Conce...
+
+You need to provide a definition with \DeclareInputText 
+or \DeclareInputMath before using this key.
+
+./Metacommunity_limpets.tex:24: Undefined control sequence.
+l.24 ... Cat\´olica de la Sant\´isima Concepci\�
+                                                  �on, Concepci\´n, Chile\\...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./Metacommunity_limpets.tex:24: Package inputenc Error: Keyboard character used
+ is undefined
+(inputenc)                in inputencoding `utf8'.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 ...Cat\´olica de la Sant\´isima Concepci\´
+                                                  on, Concepci\´n, Chile\\$...
+
+You need to provide a definition with \DeclareInputText 
+or \DeclareInputMath before using this key.
+
+./Metacommunity_limpets.tex:24: Undefined control sequence.
+l.24 ... la Sant\´isima Concepci\´on, Concepci\�
+                                                  �n, Chile\\$^{2}$Research ...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+./Metacommunity_limpets.tex:24: Package inputenc Error: Keyboard character used
+ is undefined
+(inputenc)                in inputencoding `utf8'.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 ...la Sant\´isima Concepci\´on, Concepci\´
+                                                  n, Chile\\$^{2}$Research S...
+
+You need to provide a definition with \DeclareInputText 
+or \DeclareInputMath before using this key.
+
+
+./Metacommunity_limpets.tex:24: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 ...0-044 Caniçal, Madeira, Portugal\\$^{4}\\
+                                                  $^{5}$Department of Fish E...
+
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./Metacommunity_limpets.tex:24: Missing $ inserted.
+<inserted text> 
+                $
+l.24 ...0-044 Caniçal, Madeira, Portugal\\$^{4}\\
+                                                  $^{5}$Department of Fish E...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./Metacommunity_limpets.tex:24: Missing } inserted.
+<inserted text> 
+                }
+l.24 ...0-044 Caniçal, Madeira, Portugal\\$^{4}\\
+                                                  $^{5}$Department of Fish E...
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./Metacommunity_limpets.tex:26: Undefined control sequence.
 <recently read> \doublespacing 
                                
-l.40 \doublespacing
+l.26 \doublespacing
                    
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -645,13 +846,13 @@ and I'll forget about whatever was undefined.
 [2]
 
 Package natbib Warning: Citation `Rybicki and Hanksi' on page 3 undefined on in
-put line 93.
+put line 80.
 
 
-Package natbib Warning: Citation `2013' on page 3 undefined on input line 93.
+Package natbib Warning: Citation `2013' on page 3 undefined on input line 80.
 
 
-./Metacommunity_limpets.tex:164: Package inputenc Error: Unicode char ´ (U+B4)
+./Metacommunity_limpets.tex:151: Package inputenc Error: Unicode char ´ (U+B4)
 
 (inputenc)                not set up for use with LaTeX.
 
@@ -659,15 +860,15 @@ See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.164 ...es et al. 2018; Tournabre, 2014). Earth´
+l.151 ...es et al. 2018; Tournabre, 2014). Earth´
                                                   s ecosystems are becoming ...
 
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-./Metacommunity_limpets.tex:165: Undefined control sequence.
-l.165 ...on \cite{montoya2008habitat},\citeRybicki
+./Metacommunity_limpets.tex:152: Undefined control sequence.
+l.152 ...on \cite{montoya2008habitat},\citeRybicki
                                                    and Hanksi, 2013; \cite{h...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -676,26 +877,26 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 [3] [4]
-./Metacommunity_limpets.tex:170: Missing $ inserted.
+./Metacommunity_limpets.tex:157: Missing $ inserted.
 <inserted text> 
                 $
-l.170 ...opulated oceanic islands (> 500 inhab km^
+l.157 ...opulated oceanic islands (> 500 inhab km^
                                                   {-2}) with a high harvesti...
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./Metacommunity_limpets.tex:171: Missing $ inserted.
+./Metacommunity_limpets.tex:158: Missing $ inserted.
 <inserted text> 
                 $
-l.171 
+l.158 
       
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./Metacommunity_limpets.tex:171: Missing } inserted.
+./Metacommunity_limpets.tex:158: Missing } inserted.
 <inserted text> 
                 }
-l.171 
+l.158 
       
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -704,7 +905,7 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-Overfull \hbox (2194.90207pt too wide) in paragraph at lines 170--171
+Overfull \hbox (2194.90207pt too wide) in paragraph at lines 157--158
 \OT1/cmr/m/n/10.95 km$[])\OML/cmm/m/it/10.95 withahighharvestingpressure\OT1/cm
 r/m/n/10.95 (\OML/cmm/m/it/10.95 seeRieraetal:\OT1/cmr/m/n/10.95 2016; \OML/cmm
 /m/it/10.95 Sousaetal:\OT1/cmr/m/n/10.95 2018\OML/cmm/m/it/10.95 fordetails\OT1
@@ -718,49 +919,38 @@ limpetpopulationsofbothislands:Thepredictivepowerofthesemodelsispivotaltoarticu
 lateanintegrativemanagementplantoguidefutureconservationactions:[]$  
  []
 
-./Metacommunity_limpets.tex:171: Extra }, or forgotten \endgroup.
-\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
-                                                  \fi 
-l.171 
-      
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-[5]
-./Metacommunity_limpets.tex:190: Missing $ inserted.
+[5] [6]
+./Metacommunity_limpets.tex:201: Missing $ inserted.
 <inserted text> 
                 $
-l.190 ...are considered adults, since \dfrac{50} o
-                                                  f individuals are reproduc...
+l.201 adults, since \dfrac{50} o
+                                f individuals are reproductive (Henriques et
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./Metacommunity_limpets.tex:190: Extra }, or forgotten $.
+./Metacommunity_limpets.tex:201: Extra }, or forgotten $.
 \@genfrac ...egingroup #4\endgroup #2#3\relax #5}}
                                                   
-l.190 ...are considered adults, since \dfrac{50} o
-                                                  f individuals are reproduc...
+l.201 adults, since \dfrac{50} o
+                                f individuals are reproductive (Henriques et
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
 you forgot something else, as in `\hbox{$x}'. In such cases
 the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
-./Metacommunity_limpets.tex:192: Missing $ inserted.
+./Metacommunity_limpets.tex:216: Missing $ inserted.
 <inserted text> 
                 $
-l.192 
+l.216 
       
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./Metacommunity_limpets.tex:192: Missing } inserted.
+./Metacommunity_limpets.tex:216: Missing } inserted.
 <inserted text> 
                 }
-l.192 
+l.216 
       
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -769,97 +959,380 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-Overfull \hbox (552.49455pt too wide) in paragraph at lines 189--192
-[]\OML/cmm/m/it/10.95 findividualsarereproductive\OT1/cmr/m/n/10.95 (\OML/cmm/m
-/it/10.95 Henriquesetal:\OT1/cmr/m/n/10.95 2011)\OML/cmm/m/it/10.95 ; andthehig
-herthesizethehigherthereproductivepotential\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10
-.95 Boaventuraetal:\OT1/cmr/m/n/10.95 2002; \OML/cmm/m/it/10.95 Martinsetal:\OT
-1/cmr/m/n/10.95 2017)\OML/cmm/m/it/10.95 :Severalsubmodelswereconductedtointegr
-atethehuman \OMS/cmsy/m/n/10.95 ^^@ 
+Overfull \hbox (623.38406pt too wide) in paragraph at lines 195--216
+[]\OML/cmm/m/it/12 findividualsarereproductive\OT1/cmr/m/n/12 (\OML/cmm/m/it/12
+ Henriquesetal:\OT1/cmr/m/n/12 2011)\OML/cmm/m/it/12 ; andthehigherthesizethehi
+gherthereproductivepotential\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 Boaventuraetal:\O
+T1/cmr/m/n/12 2002; \OML/cmm/m/it/12 Martinsetal:\OT1/cmr/m/n/12 2017)\OML/cmm/
+m/it/12 :Severalsubmodelswereconductedtointegratethehuman \OMS/cmsy/m/n/12 ^^@ 
+
  []
 
 
-Overfull \hbox (73.99812pt too wide) in paragraph at lines 189--192
-\OML/cmm/m/it/10.95 drivenconsequencesonthestudiedspecies:Managementmeasureswer
-eintegrated; i:e:closedseason\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 December \
-OMS/cmsy/m/n/10.95 ^^@ 
+Overfull \hbox (111.19495pt too wide) in paragraph at lines 195--216
+\OML/cmm/m/it/12 drivenconsequencesonthestudiedspecies:Managementmeasureswerein
+tegrated; i:e:closedseason\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 December \OMS/cmsy/
+m/n/12 ^^@ 
  []
 
 
-Overfull \hbox (1654.93669pt too wide) in paragraph at lines 189--192
-\OML/cmm/m/it/10.95 MarchinMadeira\OT1/cmr/m/n/10.95 ); \OML/cmm/m/it/10.95 min
-imalharvestingsize\OT1/cmr/m/n/10.95 (40\OML/cmm/m/it/10.95 mminMadeiraand\OT1/
-cmr/m/n/10.95 45\OML/cmm/m/it/10.95 mminCanariesforbothspecies\OT1/cmr/m/n/10.9
-5 )\OML/cmm/m/it/10.95 ; harvestinglimitationsperfishermen\OT1/cmr/m/n/10.95 (1
-5\OML/cmm/m/it/10.95 kgperdayforprofessionalfishermeninMadeira\OT1/cmr/m/n/10.9
-5 ; 10\OML/cmm/m/it/10.95 kgperdayforprofessionalfishermenand\OT1/cmr/m/n/10.95
- 3\OML/cmm/m/it/10.95 kgperdayforrecreativefishermen\OT1/cmr/m/n/10.95 )\OML/cm
-m/m/it/10.95 :Asubmodelcomprisesthedependenceofextractiononlimpetsize; i:e:that
-largerlimpetsaresubjectedtomoreintenseharvestingpressurethanshorterindividuals:
-Nohuman \OMS/cmsy/m/n/10.95 ^^@ 
+Overfull \hbox (1803.36012pt too wide) in paragraph at lines 195--216
+\OML/cmm/m/it/12 MarchinMadeira\OT1/cmr/m/n/12 ); \OML/cmm/m/it/12 minimalharve
+stingsize\OT1/cmr/m/n/12 (40\OML/cmm/m/it/12 mminMadeiraand\OT1/cmr/m/n/12 45\O
+ML/cmm/m/it/12 mminCanariesforbothspecies\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 ; ha
+rvestinglimitationsperfishermen\OT1/cmr/m/n/12 (15\OML/cmm/m/it/12 kgperdayforp
+rofessionalfishermeninMadeira\OT1/cmr/m/n/12 ; 10\OML/cmm/m/it/12 kgperdayforpr
+ofessionalfishermenand\OT1/cmr/m/n/12 3\OML/cmm/m/it/12 kgperdayforrecreativefi
+shermen\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 :Asubmodelcomprisesthedependenceofextr
+actiononlimpetsize; i:e:thatlargerlimpetsaresubjectedtomoreintenseharvestingpre
+ssurethanshorterindividuals:Nohuman \OMS/cmsy/m/n/12 ^^@ 
  []
 
 
-Overfull \hbox (211.76144pt too wide) in paragraph at lines 189--192
-\OML/cmm/m/it/10.95 drivenfactorswerealsohereinincludedinthismodeltrait; sinced
-eathprobabilityregardlesstheindividualsizewasalsointegratedinasubmodel:[]$  
+Overfull \hbox (258.41847pt too wide) in paragraph at lines 195--216
+\OML/cmm/m/it/12 drivenfactorswerealsohereinincludedinthismodeltrait; sincedeat
+hprobabilityregardlesstheindividualsizewasalsointegratedinasubmodel:[]$  
  []
 
-[6]
-./Metacommunity_limpets.tex:218: Undefined control sequence.
-l.218 adults, since 50\percent
-                               of individuals are reproductive (Henriques et
+
+Package natbib Warning: Citation `davidson2004quantifying' on page 7 undefined 
+on input line 235.
+
+
+Package natbib Warning: Citation `gaines2007connecting' on page 7 undefined on 
+input line 235.
+
+[7]
+
+./Metacommunity_limpets.tex:237: Package inputenc Error: Unicode char ´ (U+B4)
+
+(inputenc)                not set up for use with LaTeX.
+
+See the inputenc package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.237 ...2014anthropogenic, jones2018one}. Earth´
+                                                  s ecosystems are becoming ...
+
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+Package natbib Warning: Citation `Rybicki and Hanksi' on page 8 undefined on in
+put line 240.
+
+
+Package natbib Warning: Citation `2013' on page 8 undefined on input line 240.
+
+
+Package natbib Warning: Citation `metzger2009time' on page 8 undefined on input
+ line 240.
+
+
+Package natbib Warning: Citation `volkov2007pattern' on page 8 undefined on inp
+ut line 240.
+
+
+Package natbib Warning: Citation `an2016predicting' on page 8 undefined on inpu
+t line 240.
+
+
+Package natbib Warning: Citation `martin2013predicting' on page 8 undefined on 
+input line 240.
+
+[8]
+
+Package natbib Warning: Citation `sousa2019long' on page 9 undefined on input l
+ine 243.
+
+
+Package natbib Warning: Citation `sousa2019long' on page 9 undefined on input l
+ine 243.
+
+./Metacommunity_limpets.tex:245: Missing $ inserted.
+<inserted text> 
+                $
+l.245 ...opulated oceanic islands (> 500 inhab km^
+                                                  {-2}) with a high harvesti...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+./Metacommunity_limpets.tex:245: LaTeX Error: Command \bfseries invalid in math
+ mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.245 ...ure \citep{riera2016clear, sousa2019long}
+                                                   for details). Former stud...
+
+Please use the math alphabet \mathbf instead of the \bfseries command. 
+
+
+Package natbib Warning: Citation `sousa2019long' on page 9 undefined on input l
+ine 245.
+
+
+./Metacommunity_limpets.tex:245: LaTeX Error: Command \bfseries invalid in math
+ mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.245 ...6clear} and Madeira \citep{sousa2019long}
+                                                  . We herein develop a seri...
+
+Please use the math alphabet \mathbf instead of the \bfseries command. 
+
+
+Package natbib Warning: Citation `sousa2019long' on page 9 undefined on input l
+ine 245.
+
+
+./Metacommunity_limpets.tex:245: LaTeX Error: Command \bfseries invalid in math
+ mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.245 ...{travis2013dispersal, urban2001landscape}
+                                                  . Trait evolution is a piv...
+
+Please use the math alphabet \mathbf instead of the \bfseries command. 
+
+
+Package natbib Warning: Citation `travis2013dispersal' on page 9 undefined on i
+nput line 245.
+
+
+./Metacommunity_limpets.tex:245: LaTeX Error: Command \bfseries invalid in math
+ mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.245 ...{travis2013dispersal, urban2001landscape}
+                                                  . Trait evolution is a piv...
+
+Please use the math alphabet \mathbf instead of the \bfseries command. 
+
+
+Package natbib Warning: Citation `urban2001landscape' on page 9 undefined on in
+put line 245.
+
+./Metacommunity_limpets.tex:247: Missing $ inserted.
+<inserted text> 
+                $
+l.247 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./Metacommunity_limpets.tex:247: Missing } inserted.
+<inserted text> 
+                }
+l.247 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+
+Overfull \hbox (2412.69981pt too wide) in paragraph at lines 245--247
+\OT1/cmr/m/n/12 km$[])\OML/cmm/m/it/12 withahighharvestingpressure\OT1/cmr/m/n/
+12 ([]\OML/cmm/m/it/12 ;  \OT1/cmr/m/n/12 2016;  [])\OML/cmm/m/it/12 fordetails
+\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 :Formerstudieshighlightedthesharpdecreaseofsi
+zesofbothlimpets; asymptonofoverexploitationandhence; amajordriverforfutureloca
+lextinctionofthesespeciesinTenerife\OT1/cmr/m/n/12 ([]\OML/cmm/m/it/12 ;  \OT1/
+cmr/m/n/12 2016)\OML/cmm/m/it/12 andMadeira\OT1/cmr/m/n/12 ([])\OML/cmm/m/it/12
+ :Wehereindevelopaseriesofmodelsofmetapopulationdynamicstopredictfuturetrendson
+thelimpetpopulationsofbothislands:Thepredictivepowerofthesemodelsispivotaltoart
+iculateanintegrativemanagementplantoguidefutureconservationactions:Adeepunderst
+andingoftheeco \OMS/cmsy/m/n/12 ^^@ 
+ []
+
+
+Overfull \hbox (1350.11638pt too wide) in paragraph at lines 245--247
+\OML/cmm/m/it/12 evolutionaryeffectsofconnectivitylossisessentialtoguidefuturec
+onservationactions\OT1/cmr/m/n/12 (([][])\OML/cmm/m/it/12 :Traitevolutionisapiv
+otaltopicinmetapopulationdynamics; andwehereinparticularlyfocusedontraitsrelate
+dtomating; dispersalandbiologicalandenvironmentaltraits:Thesetraitsgreatlyinflu
+encethedispersalpotentialofspecies; specificallyimportantinhighly \OMS/cmsy/m/n
+/12 ^^@ 
+ []
+
+
+Overfull \hbox (418.7306pt too wide) in paragraph at lines 245--247
+\OML/cmm/m/it/12 structuredpopulationswithagoodrepresentationofadults:Also; the
+orypredictsthatpopulationsfrommorefragmentedhabitatsaresubjectedtoalowerpropens
+ityofdispersal:[]$  
+ []
+
+[9]
+
+Package natbib Warning: Citation `sousa2019long' on page 10 undefined on input 
+line 262.
+
+./Metacommunity_limpets.tex:262: Missing $ inserted.
+<inserted text> 
+                $
+l.262 ...are considered adults, since \dfrac{50} o
+                                                  f individuals are reproduc...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./Metacommunity_limpets.tex:262: Extra }, or forgotten $.
+\@genfrac ...egingroup #4\endgroup #2#3\relax #5}}
+                                                  
+l.262 ...are considered adults, since \dfrac{50} o
+                                                  f individuals are reproduc...
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./Metacommunity_limpets.tex:264: Missing $ inserted.
+<inserted text> 
+                $
+l.264 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./Metacommunity_limpets.tex:264: Missing } inserted.
+<inserted text> 
+                }
+l.264 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+
+Overfull \hbox (661.36975pt too wide) in paragraph at lines 261--264
+[]\OML/cmm/m/it/12 findividualsarereproductive\OT1/cmr/m/n/12 ([]\OML/cmm/m/it/
+12 ;  \OT1/cmr/m/n/12 2012)\OML/cmm/m/it/12 ; andthehigherthesizethehigherthere
+productivepotential\OT1/cmr/m/n/12 ([]\OML/cmm/m/it/12 ;  \OT1/cmr/m/n/12 2002;
+  []\OML/cmm/m/it/12 ;  \OT1/cmr/m/n/12 2017)\OML/cmm/m/it/12 :Severalsubmodels
+wereconductedtointegratethehuman \OMS/cmsy/m/n/12 ^^@ 
+ []
+
+
+Overfull \hbox (111.19495pt too wide) in paragraph at lines 261--264
+\OML/cmm/m/it/12 drivenconsequencesonthestudiedspecies:Managementmeasureswerein
+tegrated; i:e:closedseason\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 December \OMS/cmsy/
+m/n/12 ^^@ 
+ []
+
+
+Overfull \hbox (1803.36012pt too wide) in paragraph at lines 261--264
+\OML/cmm/m/it/12 MarchinMadeira\OT1/cmr/m/n/12 ); \OML/cmm/m/it/12 minimalharve
+stingsize\OT1/cmr/m/n/12 (40\OML/cmm/m/it/12 mminMadeiraand\OT1/cmr/m/n/12 45\O
+ML/cmm/m/it/12 mminCanariesforbothspecies\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 ; ha
+rvestinglimitationsperfishermen\OT1/cmr/m/n/12 (15\OML/cmm/m/it/12 kgperdayforp
+rofessionalfishermeninMadeira\OT1/cmr/m/n/12 ; 10\OML/cmm/m/it/12 kgperdayforpr
+ofessionalfishermenand\OT1/cmr/m/n/12 3\OML/cmm/m/it/12 kgperdayforrecreativefi
+shermen\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 :Asubmodelcomprisesthedependenceofextr
+actiononlimpetsize; i:e:thatlargerlimpetsaresubjectedtomoreintenseharvestingpre
+ssurethanshorterindividuals:Nohuman \OMS/cmsy/m/n/12 ^^@ 
+ []
+
+
+Overfull \hbox (258.41847pt too wide) in paragraph at lines 261--264
+\OML/cmm/m/it/12 drivenfactorswerealsohereinincludedinthismodeltrait; sincedeat
+hprobabilityregardlesstheindividualsizewasalsointegratedinasubmodel:[]$  
+ []
+
+[10]
+./Metacommunity_limpets.tex:269: Undefined control sequence.
+l.269 ...r 35 mm considered adults since 0\percent
+                                                   of individuals are reprod...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-[7] (./Metacommunity_limpets.bbl [8])
+
+Package natbib Warning: Citation `hanski2000metapopulation' on page 11 undefine
+d on input line 272.
+
+
+Package natbib Warning: Citation `ovaskainen2001spatially' on page 11 undefined
+ on input line 272.
+
+
+Package natbib Warning: Citation `hanski2002extinction' on page 11 undefined on
+ input line 272.
+
+
+Package natbib Warning: Citation `sousa2019long' on page 11 undefined on input 
+line 272.
+
+[11]
+
+Package natbib Warning: Citation `chesson1981environmental' on page 12 undefine
+d on input line 274.
+
+[12] (./Metacommunity_limpets.bbl [13] [14] [15] [16])
 
 Package natbib Warning: There were undefined citations.
 
 
-./Metacommunity_limpets.tex:274: LaTeX Error: \begin{flushleft} on input line 3
-1 ended by \end{document}.
+./Metacommunity_limpets.tex:322: LaTeX Error: \begin{flushleft} on input line 1
+7 ended by \end{document}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.274 \end{document}
+l.322 \end{document}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-[9] (./Metacommunity_limpets.aux) )
+[17] (./Metacommunity_limpets.aux) )
 (\end occurred inside a group at level 1)
 
-### semi simple group (level 1) entered at line 31 (\begingroup)
+### semi simple group (level 1) entered at line 17 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 4030 strings out of 492982
- 52213 string characters out of 6134895
- 142096 words of memory out of 5000000
- 7513 multiletter control sequences out of 15000+600000
- 13051 words of font info for 50 fonts, out of 8000000 for 9000
+ 4191 strings out of 492982
+ 56246 string characters out of 6134895
+ 146923 words of memory out of 5000000
+ 7673 multiletter control sequences out of 15000+600000
+ 14952 words of font info for 57 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
- 41i,6n,25p,1794b,335s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,6n,25p,3391b,379s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.
 pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
-usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmti10.pfb>
-Output written on Metacommunity_limpets.pdf (9 pages, 147277 bytes).
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/sh
+are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmti12.pfb>
+Output written on Metacommunity_limpets.pdf (17 pages, 201709 bytes).
 PDF statistics:
- 74 PDF objects out of 1000 (max. 8388607)
- 52 compressed objects within 1 object stream
+ 107 PDF objects out of 1000 (max. 8388607)
+ 75 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

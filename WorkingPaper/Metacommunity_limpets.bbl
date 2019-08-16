@@ -1,13 +1,124 @@
-\begin{thebibliography}{4}
+\begin{thebibliography}{48}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
+
+\bibitem[{Achard et~al.(2002)Achard, Eva, Stibig, Mayaux, Gallego, Richards,
+  and Malingreau}]{achard2002determination}
+Achard, F., H.~D. Eva, H.-J. Stibig, P.~Mayaux, J.~Gallego, T.~Richards, and
+  J.-P. Malingreau, 2002.
+\newblock Determination of deforestation rates of the world's humid tropical
+  forests.
+\newblock Science 297:999--1002.
 
 \bibitem[{Ak{\c{c}}akaya et~al.(2007)Ak{\c{c}}akaya, Mills, and
   Doncaster}]{akccakaya2007role}
 Ak{\c{c}}akaya, H.~R., G.~Mills, and C.~P. Doncaster, 2007.
 \newblock The role of metapopulations in conservation.
 \newblock Key topics in conservation biology Pp. 64--84.
+
+\bibitem[{Barton et~al.(1998)Barton, Ar{\i}stegui, Tett, Cant{\'o}n,
+  Garc{\i}a-Braun, Hern{\'a}ndez-Le{\'o}n, Nykjaer, Almeida, Almunia,
+  Ballesteros et~al.}]{barton1998transition}
+Barton, E., J.~Ar{\i}stegui, P.~Tett, M.~Cant{\'o}n, J.~Garc{\i}a-Braun,
+  S.~Hern{\'a}ndez-Le{\'o}n, L.~Nykjaer, C.~Almeida, J.~Almunia,
+  S.~Ballesteros, et~al., 1998.
+\newblock The transition zone of the canary current upwelling region.
+\newblock Progress in Oceanography 41:455--504.
+
+\bibitem[{Bertuzzo et~al.(2015)Bertuzzo, Rodriguez-Iturbe, and
+  Rinaldo}]{bertuzzo2015metapopulation}
+Bertuzzo, E., I.~Rodriguez-Iturbe, and A.~Rinaldo, 2015.
+\newblock Metapopulation capacity of evolving fluvial landscapes.
+\newblock Water Resources Research 51:2696--2706.
+
+\bibitem[{Boaventura et~al.(2002)Boaventura, da~Fonseca, and
+  Hawkins}]{boaventura2002analysis}
+Boaventura, D., L.~C. da~Fonseca, and S.~J. Hawkins, 2002.
+\newblock Analysis of competitive interactions between the limpets patella
+  depressa pennant and patella vulgata l. on the northern coast of portugal.
+\newblock Journal of Experimental Marine Biology and Ecology 271:171--188.
+
+\bibitem[{Bowler and Benton(2005)}]{bowler2005causes}
+Bowler, D.~E. and T.~G. Benton, 2005.
+\newblock Causes and consequences of animal dispersal strategies: relating
+  individual behaviour to spatial dynamics.
+\newblock Biological Reviews 80:205--225.
+
+\bibitem[{Chapuis et~al.(2011)Chapuis, Popple, Berthier, Simpson, Deveson,
+  Spurgin, Steinbauer, and Sword}]{chapuis2011challenges}
+Chapuis, M.-P., J.-A.~M. Popple, K.~Berthier, S.~J. Simpson, E.~Deveson,
+  P.~Spurgin, M.~J. Steinbauer, and G.~A. Sword, 2011.
+\newblock Challenges to assessing connectivity between massive populations of
+  the australian plague locust.
+\newblock Proceedings of the Royal Society B: Biological Sciences
+  278:3152--3160.
+
+\bibitem[{C{\^o}rte-Real et~al.(1996)C{\^o}rte-Real, Hawkins, and
+  Thorpe}]{corte1996population}
+C{\^o}rte-Real, H., S.~Hawkins, and J.~Thorpe, 1996.
+\newblock Population differentiation and taxonomic status of the exploited
+  limpet patella candei in the macaronesian islands (azores, madeira,
+  canaries).
+\newblock Marine Biology 125:141--152.
+
+\bibitem[{Cowen et~al.(2000)Cowen, Lwiza, Sponaugle, Paris, and
+  Olson}]{cowen2000connectivity}
+Cowen, R.~K., K.~M. Lwiza, S.~Sponaugle, C.~B. Paris, and D.~B. Olson, 2000.
+\newblock Connectivity of marine populations: open or closed?
+\newblock Science 287:857--859.
+
+\bibitem[{Cowen and Sponaugle(2009)}]{cowen2009larval}
+Cowen, R.~K. and S.~Sponaugle, 2009.
+\newblock Larval dispersal and marine population connectivity.
+\newblock Annual review of marine science 1:443--466.
+
+\bibitem[{DeAngelis and Grimm(2014)}]{deangelis2014individual}
+DeAngelis, D.~L. and V.~Grimm, 2014.
+\newblock Individual-based models in ecology after four decades.
+\newblock F1000prime reports 6.
+
+\bibitem[{DeAngelis and Mooij(2005)}]{deangelis2005individual}
+DeAngelis, D.~L. and W.~M. Mooij, 2005.
+\newblock Individual-based modeling of ecological and evolutionary processes.
+\newblock Annu. Rev. Ecol. Evol. Syst. 36:147--168.
+
+\bibitem[{Dornelas(2010)}]{dornelas2010disturbance}
+Dornelas, M., 2010.
+\newblock Disturbance and change in biodiversity.
+\newblock Philosophical Transactions of the Royal Society B: Biological
+  Sciences 365:3719--3727.
+
+\bibitem[{Eriksson et~al.(2014)Eriksson, El{\'\i}as-Wolff, Mehlig, and
+  Manica}]{eriksson2014emergence}
+Eriksson, A., F.~El{\'\i}as-Wolff, B.~Mehlig, and A.~Manica, 2014.
+\newblock The emergence of the rescue effect from explicit within-and
+  between-patch dynamics in a metapopulation.
+\newblock Proceedings of the royal society B: biological sciences 281:20133127.
+
+\bibitem[{Faria et~al.(2017)Faria, Martins, Pita, Ribeiro, Hawkins, Presa, and
+  Neto}]{faria2017disentangling}
+Faria, J., G.~M. Martins, A.~Pita, P.~A. Ribeiro, S.~J. Hawkins, P.~Presa, and
+  A.~I. Neto, 2017.
+\newblock Disentangling the genetic and morphological structure of patella
+  candei complex in macaronesia (ne atlantic).
+\newblock Ecology and evolution 7:6125--6140.
+
+\bibitem[{Fath(2018)}]{fath2018encyclopedia}
+Fath, B.~D., 2018.
+\newblock Encyclopedia of ecology.
+\newblock Elsevier.
+
+\bibitem[{Gaggiotti(2017)}]{gaggiotti2017metapopulations}
+Gaggiotti, O.~E., 2017.
+\newblock Metapopulations of marine species with larval dispersal: A
+  counterpoint to ilkka's glanville fritillary metapopulations.
+\newblock \emph{in} Annales Zoologici Fennici, vol.~54, Pp. 97--113. BioOne.
+
+\bibitem[{Gardner and Engelhardt(2008)}]{gardner2008spatial}
+Gardner, R.~H. and K.~A. Engelhardt, 2008.
+\newblock Spatial processes that maintain biodiversity in plant communities.
+\newblock Perspectives in Plant Ecology, Evolution and Systematics 9:211--228.
 
 \bibitem[{Haddad et~al.(2015)Haddad, Brudvig, Clobert, Davies, Gonzalez, Holt,
   Lovejoy, Sexton, Austin, Collins et~al.}]{haddad2015habitat}
@@ -22,10 +133,185 @@ Hanski, I., 1999.
   dynamic landscapes.
 \newblock Oikos Pp. 209--219.
 
+\bibitem[{Hanski and Gaggiotti(2004)}]{hanski2004ecology}
+Hanski, I.~A. and O.~E. Gaggiotti, 2004.
+\newblock Ecology, genetics and evolution of metapopulations.
+\newblock Academic Press.
+
+\bibitem[{Harrison et~al.(1995)Harrison, Thomas, and
+  Lewinsohn}]{harrison1995testing}
+Harrison, S., C.~D. Thomas, and T.~M. Lewinsohn, 1995.
+\newblock Testing a metapopulation model of coexistence in the insect community
+  on ragwort (senecio jacobaea).
+\newblock The American Naturalist 145:546--562.
+
+\bibitem[{Hawkins et~al.(2016)Hawkins, Bohn, Sims, Ribeiro, Faria, Presa, Pita,
+  Martins, Neto, Burrows et~al.}]{hawkins2016fisheries}
+Hawkins, S., K.~Bohn, D.~Sims, P.~Ribeiro, J.~Faria, P.~Presa, A.~Pita,
+  G.~Martins, A.~Neto, M.~Burrows, et~al., 2016.
+\newblock Fisheries stocks from an ecological perspective: Disentangling
+  ecological connectivity from genetic interchange.
+\newblock Fisheries Research 179:333--341.
+
+\bibitem[{Hendriks and Mulder(2008)}]{hendriks2008scaling}
+Hendriks, A.~J. and C.~Mulder, 2008.
+\newblock Scaling of offspring number and mass to plant and animal size: model
+  and meta-analysis.
+\newblock Oecologia 155:705--716.
+
+\bibitem[{Henriques et~al.(2012)Henriques, Sousa, Pinto, Delgado, Faria, Alves,
+  and Khadem}]{henriques2012life}
+Henriques, P., R.~Sousa, A.~Pinto, J.~Delgado, G.~Faria, A.~Alves, and
+  M.~Khadem, 2012.
+\newblock Life history traits of the exploited limpet patella candei (mollusca:
+  Patellogastropoda) of the north-eastern atlantic.
+\newblock Journal of the Marine Biological Association of the United Kingdom
+  92:1379--1387.
+
+\bibitem[{Hilker et~al.(2006)Hilker, Hinsch, and
+  Poethke}]{hilker2006parameterizing}
+Hilker, F.~M., M.~Hinsch, and H.~J. Poethke, 2006.
+\newblock Parameterizing, evaluating and comparing metapopulation models with
+  data from individual-based simulations.
+\newblock ecological modelling 199:476--485.
+
+\bibitem[{Jones et~al.(2018)Jones, Venter, Fuller, Allan, Maxwell, Negret, and
+  Watson}]{jones2018one}
+Jones, K.~R., O.~Venter, R.~A. Fuller, J.~R. Allan, S.~L. Maxwell, P.~J.
+  Negret, and J.~E. Watson, 2018.
+\newblock One-third of global protected land is under intense human pressure.
+\newblock Science 360:788--791.
+
+\bibitem[{Krohne(1997)}]{krohne1997dynamics}
+Krohne, D.~T., 1997.
+\newblock Dynamics of metapopulations of small mammals.
+\newblock Journal of Mammalogy 78:1014--1026.
+
+\bibitem[{Lawes et~al.(2000)Lawes, Mealin, and Piper}]{lawes2000patch}
+Lawes, M.~J., P.~E. Mealin, and S.~E. Piper, 2000.
+\newblock Patch occupancy and potential metapopulation dynamics of three forest
+  mammals in fragmented afromontane forest in south africa.
+\newblock Conservation Biology 14:1088--1098.
+
+\bibitem[{Levin et~al.(2003)Levin, Muller-Landau, Nathan, and
+  Chave}]{levin2003ecology}
+Levin, S.~A., .~H.~C. Muller-Landau, .~R. Nathan, and .~J. Chave, 2003.
+\newblock The ecology and evolution of seed dispersal: a theoretical
+  perspective.
+\newblock Annual Review of Ecology, Evolution, and Systematics 34:575--604.
+
+\bibitem[{Martins et~al.(2017)Martins, Borges, Vale, Ribeiro, Ferraz, Martins,
+  Santos, and Hawkins}]{martins2017exploitation}
+Martins, G.~M., C.~D. Borges, M.~Vale, P.~A. Ribeiro, R.~R. Ferraz, H.~R.
+  Martins, R.~S. Santos, and S.~J. Hawkins, 2017.
+\newblock Exploitation promotes earlier sex change in a protandrous patellid
+  limpet, patella aspera r{\"o}ding, 1798.
+\newblock Ecology and evolution 7:3616--3622.
+
+\bibitem[{McCallum et~al.(2001)McCallum, Barlow, and Hone}]{mccallum2001should}
+McCallum, H., N.~Barlow, and J.~Hone, 2001.
+\newblock How should pathogen transmission be modelled?
+\newblock Trends in ecology \& evolution 16:295--300.
+
 \bibitem[{Montoya(2008)}]{montoya2008habitat}
 Montoya, D., 2008.
 \newblock Habitat loss, dispersal, and the probability of extinction of tree
   species.
 \newblock Communicative \& integrative biology 1:146--147.
+
+\bibitem[{Mouquet et~al.(2011)Mouquet, Matthiessen, Miller, and
+  Gonzalez}]{mouquet2011extinction}
+Mouquet, N., B.~Matthiessen, T.~Miller, and A.~Gonzalez, 2011.
+\newblock Extinction debt in source-sink metacommunities.
+\newblock PLoS One 6:e17567.
+
+\bibitem[{Nabe-Nielsen et~al.(2014)Nabe-Nielsen, Sibly, Tougaard, Teilmann, and
+  Sveegaard}]{nabe2014effects}
+Nabe-Nielsen, J., R.~M. Sibly, J.~Tougaard, J.~Teilmann, and S.~Sveegaard,
+  2014.
+\newblock Effects of noise and by-catch on a danish harbour porpoise
+  population.
+\newblock Ecological Modelling 272:242--251.
+
+\bibitem[{Nathan et~al.(2003)Nathan, Perry, Cronin, Strand, and
+  Cain}]{nathan2003methods}
+Nathan, R., G.~Perry, J.~T. Cronin, A.~E. Strand, and M.~L. Cain, 2003.
+\newblock Methods for estimating long-distance dispersal.
+\newblock Oikos 103:261--273.
+
+\bibitem[{Niebuhr et~al.(2015)Niebuhr, Wosniack, Santos, Raposo, Viswanathan,
+  Da~Luz, and Pie}]{niebuhr2015survival}
+Niebuhr, B.~B., M.~E. Wosniack, M.~C. Santos, E.~P. Raposo, G.~M. Viswanathan,
+  M.~G. Da~Luz, and M.~R. Pie, 2015.
+\newblock Survival in patchy landscapes: the interplay between dispersal,
+  habitat loss and fragmentation.
+\newblock Scientific reports 5:11898.
+
+\bibitem[{Palumbi(1994)}]{palumbi1994genetic}
+Palumbi, S.~R., 1994.
+\newblock Genetic divergence, reproductive isolation, and marine speciation.
+\newblock Annual review of ecology and systematics 25:547--572.
+
+\bibitem[{Provan et~al.(2008)Provan, Beatty, Keating, Maggs, and
+  Savidge}]{provan2008high}
+Provan, J., G.~E. Beatty, S.~L. Keating, C.~A. Maggs, and G.~Savidge, 2008.
+\newblock High dispersal potential has maintained long-term population
+  stability in the north atlantic copepod calanus finmarchicus.
+\newblock Proceedings of the Royal Society B: Biological Sciences 276:301--307.
+
+\bibitem[{Punt et~al.(2013)Punt, Huang, and Maunder}]{punt2013review}
+Punt, A.~E., T.~Huang, and M.~N. Maunder, 2013.
+\newblock Review of integrated size-structured models for stock assessment of
+  hard-to-age crustacean and mollusc species.
+\newblock ICES Journal of Marine Science 70:16--33.
+
+\bibitem[{Riera et~al.(2016)Riera, P{\'e}rez, {\'A}lvarez, Sim{\'o}n,
+  D{\'\i}az, Monterroso, and N{\'u}{\~n}ez}]{riera2016clear}
+Riera, R., {\'O}.~P{\'e}rez, O.~{\'A}lvarez, D.~Sim{\'o}n, D.~D{\'\i}az,
+  {\'O}.~Monterroso, and J.~N{\'u}{\~n}ez, 2016.
+\newblock Clear regression of harvested intertidal mollusks. a 20-year
+  (1994--2014) comparative study.
+\newblock Marine Environmental Research 113:56--61.
+
+\bibitem[{SALE et~al.(2006)SALE, HANSKI, and KRITZER}]{sale2006merging}
+SALE, P.~F., I.~HANSKI, and J.~P. KRITZER, 2006.
+\newblock The merging of metapopulation theory and marine ecology: establishing
+  the historical context.
+\newblock Pp. 3--28, \emph{in} Marine metapopulations. Elsevier.
+
+\bibitem[{Tilman(1988)}]{tilman1988plant}
+Tilman, D., 1988.
+\newblock Plant strategies and the dynamics and structure of plant communities.
+\newblock Princeton University Press.
+
+\bibitem[{Tournadre(2014)}]{tournadre2014anthropogenic}
+Tournadre, J., 2014.
+\newblock Anthropogenic pressure on the open ocean: The growth of ship traffic
+  revealed by altimeter data analysis.
+\newblock Geophysical Research Letters 41:7924--7932.
+
+\bibitem[{Turner et~al.(2002)Turner, Wares, and Gold}]{turner2002genetic}
+Turner, T.~F., J.~P. Wares, and J.~R. Gold, 2002.
+\newblock Genetic effective size is three orders of magnitude smaller than
+  adult census size in an abundant, estuarine-dependent marine fish (sciaenops
+  ocellatus).
+\newblock Genetics 162:1329--1339.
+
+\bibitem[{Werner and Griebeler(2011)}]{werner2011reproductive}
+Werner, J. and E.~M. Griebeler, 2011.
+\newblock Reproductive biology and its impact on body size: comparative
+  analysis of mammalian, avian and dinosaurian reproduction.
+\newblock PLoS One 6:e28442.
+
+\bibitem[{Whittaker and Fern{\'a}ndez-Palacios(2007)}]{whittaker2007island}
+Whittaker, R.~J. and J.~M. Fern{\'a}ndez-Palacios, 2007.
+\newblock Island biogeography: ecology, evolution, and conservation.
+\newblock Oxford University Press.
+
+\bibitem[{Young et~al.(1996)Young, Boyle, and Brown}]{young1996population}
+Young, A., T.~Boyle, and T.~Brown, 1996.
+\newblock The population genetic consequences of habitat fragmentation for
+  plants.
+\newblock Trends in ecology \& evolution 11:413--418.
 
 \end{thebibliography}
