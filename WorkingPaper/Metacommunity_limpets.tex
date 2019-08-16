@@ -53,7 +53,7 @@ and Tenerife (Canary Islands), two Atlantic volcanic islands distant
 to the continent.
 
 \section{Keywords}
-Metacommunities, dispersal dynamics, individual-based model, Approximate Bayesian Computational
+Metacommunities, Dispersal dynamics, Trait-based model, Approximate Bayesian computation
 
 \section{Introduction}
 <<<<<<< HEAD
@@ -176,22 +176,71 @@ Given the importance of trait evolution for metapopulation dynamics, persistence
 
 \section{Material and Methods}
 \subsection{Model framework}
-A metapopulation model was developed to explore the probability of occupancy of the two studied species in each oceanic island, i.e. Madeira and Tenerife, based on previous spatially-explicit metapopulation models (Hanski, 1999; Hanski and Ovaskainen, 2000; Ovaskainen and Hanski, 2001, 2002; Bertuzzo et al. 2015). Spatial structure of the model is static, and the site matrix comprises 3 vectors, i.e. size, exposition to environment and extraction by humans. Because of dispersal phase, individuals are dynamic spatial and temporally, varying through their 5-phased life-cycle, i.e. egg, trocophore larva, veliger larva, juvenile and adult. The transition among stages are driven by post-fertilization hours.
+A metapopulation model was developed to explore the probability of
+occupancy of the two studied species in each oceanic island,
+i.e. Madeira and Tenerife, based on previous spatially-explicit
+metapopulation models (Hanski, 1999; Hanski and Ovaskainen, 2000;
+Ovaskainen and Hanski, 2001, 2002; Bertuzzo et al. 2015). Spatial
+structure of the model is static, and the site matrix comprises 3
+vectors, i.e. size, exposition to environment and extraction by
+humans. Because of dispersal phase, individuals are dynamic spatial
+and temporally, varying through their 5-phased life-cycle, i.e. egg,
+trocophore larva, veliger larva, juvenile and adult. The transition
+among stages are driven by post-fertilization hours.
 \subsection {Model traits}
 Four main traits were included in the present metapopulation model, comprising the pivotal ecological, evolutionary and environmental factors concerning the studied metapopulations.
 
-(i) \textit{MATING}
-The studied species have external fecundation, with random encounter between gametes in the water column. Thus, a lottery model was assumed. A third submodel was conducted to integrate the exponential decay of gametes after their release and the subsequent decrease of fertilized eggs per time.
+(i) \textit{MATING} The studied species have external fecundation,
+with random encounter between gametes in the water column. Thus, a
+lottery model was assumed. A third submodel was conducted to integrate
+the exponential decay of gametes after their release and the
+subsequent decrease of fertilized eggs per time.
 
-(ii) \textit{ABIOTIC}
-We assumed that the study species are constrained to disperse passively by the large-scale (the Canary Current, Barton et al. 1998) and meso-scale (eddies) oceanographic conditions. Current data were integrated in a submodel to calculate distances between sites. We also assumed that exposed sites are less affected by harvesting pressure that sites easily-accesible all over the year; thus, a submodel integrating exposition and extraction as trade-off was herein carried out.
+(ii) \textit{ABIOTIC} We assumed that the study species are
+constrained to disperse passively by the large-scale (the Canary
+Current, Barton et al. 1998) and meso-scale (eddies) oceanographic
+conditions. Current data were integrated in a submodel to calculate
+distances between sites. We also assumed that exposed sites are less
+affected by harvesting pressure that sites easily-accesible all over
+the year; thus, a submodel integrating exposition and extraction as
+trade-off was herein carried out.
 
-(iii) \textit{BIOTIC}
-Harvesting pressure is the main responsible of the high-fragmented limpet populations in both studied islands (Riera et al. 2016; Sousa et al. 2018). We assumed that this anthropogenic driver remains constant throughout the last 20 years, and with no seasonal variations within a year. We herein used the limpet size as a reproductive proxy, since individuals over 3.5 mm are considered adults, since \dfrac{50} of individuals are reproductive (Henriques et al. 2011), and the higher the size the higher the reproductive potential (Boaventura et al. 2002; Martins et al. 2017). Several submodels were conducted to integrate the human-driven consequences on the studied species. Management measures were integrated, i.e. closed season (December-March in Madeira); minimal harvesting size (40 mm in Madeira and 45 mm in Canaries for both species), harvesting limitations per fishermen (15 kg per day for professional fishermen in Madeira; 10 kg per day for professional fishermen and 3 kg per day for recreative fishermen). A submodel comprises the dependence of extraction on limpet size, i.e. that larger limpets are subjected to more intense harvesting pressure than shorter individuals.
-No human-driven factors were also herein included in this model trait, since death probability regardless the individual size was also integrated in a submodel.
+(iii) \textit{BIOTIC} Harvesting pressure is the main responsible of
+the high-fragmented limpet populations in both studied islands (Riera
+et al. 2016; Sousa et al. 2018). We assumed that this anthropogenic
+driver remains constant throughout the last 20 years, and with no
+seasonal variations within a year. We herein used the limpet size as a
+reproductive proxy, since individuals over 3.5 mm are considered
+adults, since \dfrac{50} of individuals are reproductive (Henriques et
+al. 2011), and the higher the size the higher the reproductive
+potential (Boaventura et al. 2002; Martins et al. 2017). Several
+submodels were conducted to integrate the human-driven consequences on
+the studied species. Management measures were integrated, i.e. closed
+season (December-March in Madeira); minimal harvesting size (40 mm in
+Madeira and 45 mm in Canaries for both species), harvesting
+limitations per fishermen (15 kg per day for professional fishermen in
+Madeira; 10 kg per day for professional fishermen and 3 kg per day for
+recreative fishermen). A submodel comprises the dependence of
+extraction on limpet size, i.e. that larger limpets are subjected to
+more intense harvesting pressure than shorter individuals.  No
+human-driven factors were also herein included in this model trait,
+since death probability regardless the individual size was also
+integrated in a submodel.
 
-(iv) \textit{DISPERSAL}
-The 5-stage life-cycle of the studied species greatly determines the dispersal potential of \textit{Patella candei} and \textit{P. aspera}. The limpet size is a proxy of reproductive potential, i.e. the larger the specimen the higher the number of gametes released by the individual. Because of the different dispersal potential of first stages, i.e. egg, trocophore and veliger larvae, three kinds of dispersal were considered in the submodel. Namely, global dispersion was considered for large distances (> 100 kms), belonging to eggs and trocophores , regional dispersion for distances ranging from 1 to 100 km, belonging to trocophores and veligers, and local dispersion for shorter distance (< 1 km), belonging to late-stage veligers. No dispersion was also included in the submodel to represent juveniles and adults, considered sessile organisms with homing behaviour.
+(iv) \textit{DISPERSAL} The 5-stage life-cycle of the studied species
+greatly determines the dispersal potential of \textit{Patella candei}
+and \textit{P. aspera}. The limpet size is a proxy of reproductive
+potential, i.e. the larger the specimen the higher the number of
+gametes released by the individual. Because of the different dispersal
+potential of first stages, i.e. egg, trocophore and veliger larvae,
+three kinds of dispersal were considered in the submodel. Namely,
+global dispersion was considered for large distances (> 100 kms),
+belonging to eggs and trocophores , regional dispersion for distances
+ranging from 1 to 100 km, belonging to trocophores and veligers, and
+local dispersion for shorter distance (< 1 km), belonging to
+late-stage veligers. No dispersion was also included in the submodel
+to represent juveniles and adults, considered sessile organisms with
+homing behaviour.
 
 <<<<<<< HEAD
 \subsection{Metapopulation model}
@@ -266,8 +315,6 @@ This strategy is extensively used in most of reduced-mobility marine species, wi
 
 
 
-
-\section{References}
 \bibliographystyle{evolution}
 \bibliography{BiblioLimpets}
 %\insertbibliography

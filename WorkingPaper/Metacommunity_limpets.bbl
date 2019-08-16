@@ -1,4 +1,4 @@
-\begin{thebibliography}{3}
+\begin{thebibliography}{4}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -8,6 +8,13 @@
 Ak{\c{c}}akaya, H.~R., G.~Mills, and C.~P. Doncaster, 2007.
 \newblock The role of metapopulations in conservation.
 \newblock Key topics in conservation biology Pp. 64--84.
+
+\bibitem[{Haddad et~al.(2015)Haddad, Brudvig, Clobert, Davies, Gonzalez, Holt,
+  Lovejoy, Sexton, Austin, Collins et~al.}]{haddad2015habitat}
+Haddad, N.~M., L.~A. Brudvig, J.~Clobert, K.~F. Davies, A.~Gonzalez, R.~D.
+  Holt, T.~E. Lovejoy, J.~O. Sexton, M.~P. Austin, C.~D. Collins, et~al., 2015.
+\newblock Habitat fragmentation and its lasting impact on earth’s ecosystems.
+\newblock Science advances 1:e1500052.
 
 \bibitem[{Hanski(1999)}]{hanski1999habitat}
 Hanski, I., 1999.
