@@ -10,6 +10,8 @@ Canarias(Fuerteventura) Patella candei candei Time(No) Space(long-lat):Yes Trait
 
 Canarias(Todas Islas) Phorcus 1sp Time(No) Space(long-lat):X sites Traits X X Protective-regime(yes)
 
+West Coast of America, several mollusk species (>20), Space(long-lat): X sites, abundances per quadrat
+
 California -- waiting for details
 
 UK -- Patella 1sp Time(yes:40 years) Space(long-lat):X Traits Millions! X X
