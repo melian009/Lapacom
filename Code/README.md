@@ -67,7 +67,3 @@ Pseudocode core ----------------------------------------------------------------
 
 4. ABC :: Determine priors y epsilon(posteriors) for the different parameters 
 
-
-
-
-
