@@ -2,6 +2,7 @@ module Lapacom
 
 using Agents
 using DrWatson
+using StatsBase: sample, Weights
 include("objects.jl")
 include("functions.jl")
 
