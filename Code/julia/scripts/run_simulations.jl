@@ -52,3 +52,6 @@ model = instantiate_model(distMat=distMat, exposure=exposure, K=K, tprob=tprob, 
 
 # run the model
 data = step!(dummystep, model_step!, model, nsteps, propagg, steps_to_collect_data)
+
+expand_tuples!(data)
+visualize_data(data)

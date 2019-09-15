@@ -140,3 +140,18 @@ function model_step!(model::AbstractModel)
   disperse!(model)
   kill!(model)
 end
+
+"""
+If there are columns whose elements are tuples, this function creates a separate column for each of the elements of the tuples. The size of the tuples within a column should be fixed.
+"""
+function expand_tuples!(data::DataFrame)
+  dfnames = names(data)
+  for col in dfnames
+    if eltype(data[!, col]) <: Tuple 
+      tuple_size = length(data[1, col])
+      for el in 1:tuple_size
+        data[!, Symbol(String(col) * "_$el")] = [i[el] for i in data[!, col]]
+      end
+    end
+  end
+end
