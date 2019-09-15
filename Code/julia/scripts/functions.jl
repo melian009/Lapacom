@@ -1,7 +1,7 @@
 "Function to instantiate the model."
 function instantiate_model(;distMat, exposure, K, tprob, death_probability, r, numagents=30, nsites=7, nspecies=2)
   # An array of arrays for each node of the space.
-  agent_positions = [Int32[] for i in 1:nsites]
+  agent_positions = [UInt32[] for i in 1:nsites]
   # Instantiate the grid structure.
   mygrid = World((1, nsites), grid((1, nsites)), agent_positions)
   # Create a list of agents, each with position (1,1) and one unit of
@@ -105,7 +105,12 @@ end
 function disperse!(agent::AbstractAgent, model::AbstractModel)
   if agent.stage < 4  # no dispersal in the last two life stages
     new_loc = sample(1:model.nsites, Weights(model.distMat[agent.pos, :]))  # choose a random site given dispersal probabilities.
-    move_agent!(agent, new_loc, model)
+    if new_loc != agent.pos
+      # move_agent!(agent, new_loc, model)
+      push!(model.space.agent_positions[new_loc], agent.id)
+      splice!(model.space.agent_positions[agent.pos], findfirst(a->a==agent.id, model.space.agent_positions[agent.pos]))
+      agent.pos = new_loc
+    end
   end
 end
 
@@ -127,7 +132,6 @@ function kill!(model::AbstractModel)
   for index in dies_inds[end:-1:1]
     kill_agent!(model.agents[index], model)
   end
-  # FIXME: there are mismatches between agent.pos and model.space.agent_positions
 end
 
 
