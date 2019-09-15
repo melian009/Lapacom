@@ -12,7 +12,7 @@ function instantiate_model(;distMat, exposure, K, tprob, death_probability, r, n
   end
 
   # Instantiate and return the model.
-  model = Model(mygrid, typeof(agents[1])[], distMat, exposure, K, tprob, numagents, nsites, death_probability, r, nspecies)
+  model = Model(mygrid, typeof(agents[1])[], random_activation, distMat, exposure, K, tprob, numagents, nsites, death_probability, r, nspecies)
 
   # Use the `add_agent!` function to add agents to the model.
   for agent in agents

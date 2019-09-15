@@ -19,6 +19,7 @@ end
 mutable struct Model{T<:AbstractArray, U<:AbstractSpace, V<:AbstractArray, W<:AbstractArray, X<:AbstractArray, Y<:AbstractArray, Z<:Integer, A<:Integer, B<:AbstractFloat} <: AbstractModel
   space::U
   agents::V
+  scheduler::Function
   distMat::T  # distance between each pair of patches. ordered as from row to column
   exposure::Y  # an array of amount of exposure for each site
   K::W  # carrying capacity at each site
