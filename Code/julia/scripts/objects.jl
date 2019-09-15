@@ -26,4 +26,6 @@ mutable struct Model{T<:AbstractArray, U<:AbstractSpace, V<:AbstractArray, W<:Ab
   lastId::Z  # last agent ID used in the model.
   nsites::A  # number of sites
   deathp::B  # global death probability of agents, which is irrespective of age/size and location
+  r::B  # reproduction rate 1.0 < r < 0
+  nspecies::A  # number of species
 end

@@ -6,6 +6,6 @@ using StatsBase: sample, Weights
 include("objects.jl")
 include("functions.jl")
 
-export Agents, Agent, World, Model, instantiate_model
+export Agents, Agent, World, Model, instantiate_model, model_step!
 
 end  # module
