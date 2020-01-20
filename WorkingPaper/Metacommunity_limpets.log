@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.8.13)  17 JAN 2020 12:46
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.8.13)  20 JAN 2020 16:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -316,11 +316,25 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
+
+! LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.23 \author
+            {{Rodrigo Riera${{^1}{^,}{^*}$, Joana Vasconcelos${{^1}{^,}{^2}{...
+
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
 ! Missing } inserted.
 <inserted text> 
                 }
-l.22 \author{{Rodrigo Riera${{^1}$
-                                  ,${^{*}}$, Joana Vasconcelos${{^1}{^2}{^3}...
+l.23 \author{{Rodrigo Riera${{^1}{^,}{^*}$
+                                          , Joana Vasconcelos${{^1}{^,}{^2}{...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
 With luck, this will get me unwedged. But if you
@@ -330,7 +344,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.22 ...ousa ${{^2}{^4}}$,Carlos J. Melían${{^5}$
+l.23 ...a${{^2}{^,}{^4}}$,Carlos J. Melían${{^5}$
                                                   
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -338,8 +352,13 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 23--25
+
+ []
+
 ! Undefined control sequence.
-l.24 ...idad Católica de la Santísima Concepci\�
+l.26 ...idad Católica de la Santísima Concepci\�
                                                   �on, Concepción, Chile\\$...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -354,7 +373,7 @@ See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.24 ...dad Católica de la Santísima Concepci\´
+l.26 ...dad Católica de la Santísima Concepci\´
                                                   on, Concepción, Chile\\$^...
 
 The document does not appear to be in UTF-8 encoding.
@@ -363,18 +382,10 @@ or specify an encoding such as \usepackage [latin1]{inputenc}
 in the document preamble.
 Alternatively, save the file in UTF-8 using your editor or another tool
 
-! Missing $ inserted.
-<inserted text> 
-                $
-l.24 ...044 Caniçal, Madeira, Portugal\\$^{4}\\$^
-                                                  {5}$Department of Fish Eco...
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
 ! Undefined control sequence.
 <recently read> \doublespacing 
                                
-l.26 \doublespacing
+l.28 \doublespacing
                    
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -383,27 +394,25 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-Overfull \hbox (1.19406pt too wide) in paragraph at lines 22--27
+Overfull \hbox (1.19406pt too wide) in paragraph at lines 26--29
 []$\OT1/cmr/m/n/10.95 Marine and En-vi-ron-men-tal Sci-ences Cen-tre (MARE), Qu
 inta do Lorde Ma-rina, S^^S^^Ptio da Piedade,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 22--27
+Overfull \hbox (1.24974pt too wide) in paragraph at lines 26--29
+\OT1/cmr/m/n/10.95 Tec-nolo-gia e In-ova^^Xc~ao (OOM/ARDITI), Edif^^S^^Pcio Mad
+eira Tec-nopolo, 9020-105 Fun-chal, Madeira,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 26--29
 
  []
 
 [1
 
 {/usr/local/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-
-Package natbib Warning: Citation `davidson2004quantifying' on page 2 undefined 
-on input line 35.
-
-
-Package natbib Warning: Citation `gaines2007connecting' on page 2 undefined on 
-input line 35.
-
 [2]
 
 ! Package inputenc Error: Unicode character ´ (U+00B4)
@@ -413,95 +422,25 @@ See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.37 ...e2014anthropogenic, jones2018one}. Earth´
+l.39 ...e2014anthropogenic, jones2018one}. Earth´
                                                   s ecosystems are becoming ...
 
 You may provide a definition with
 \DeclareUnicodeCharacter 
 
-
-Package natbib Warning: Citation `laurance1998effects' on page 3 undefined on i
-nput line 37.
-
-
-Package natbib Warning: Citation `short2011extinction' on page 3 undefined on i
-nput line 37.
-
-
-Package natbib Warning: Citation `pimm2000biodiversity' on page 3 undefined on 
-input line 37.
-
-[3]
-
-Package natbib Warning: Citation `Rybicki and Hanksi' on page 4 undefined on in
-put line 40.
-
-
-Package natbib Warning: Citation `2013' on page 4 undefined on input line 40.
-
-
-Package natbib Warning: Citation `metzger2009time' on page 4 undefined on input
- line 40.
-
-
-Package natbib Warning: Citation `volkov2007pattern' on page 4 undefined on inp
-ut line 40.
-
-
-Package natbib Warning: Citation `supp2014species' on page 4 undefined on input
- line 40.
-
-
-Package natbib Warning: Citation `an2016predicting' on page 4 undefined on inpu
-t line 40.
-
-
-Package natbib Warning: Citation `martin2013predicting' on page 4 undefined on 
-input line 40.
-
-[4]
-
-Package natbib Warning: Citation `sousa2019long' on page 5 undefined on input l
-ine 42.
-
-
-Package natbib Warning: Citation `sousa2019long' on page 5 undefined on input l
-ine 42.
-
-
-Package natbib Warning: Citation `travis2013dispersal' on page 5 undefined on i
-nput line 42.
-
+[3] [4]
 
 Package natbib Warning: Citation `urban2001landscape' on page 5 undefined on in
-put line 42.
+put line 43.
 
 [5]
-
-Package natbib Warning: Citation `hanhanski1994practical' on page 6 undefined o
-n input line 47.
-
-
-Package natbib Warning: Citation `moilanen2004spomsim' on page 6 undefined on i
-nput line 47.
-
-
-Package natbib Warning: Citation `ovaskainen2004individual' on page 6 undefined
- on input line 47.
-
-
-Overfull \hbox (78.47763pt too wide) in paragraph at lines 47--48
+Overfull \hbox (78.47763pt too wide) in paragraph at lines 48--49
 \OT1/cmr/m/n/10.95 and metapop-u-la-tion mod-els ($[]$
  []
 
-[6]
-
-Package natbib Warning: Citation `sousa2019long' on page 7 undefined on input l
-ine 59.
-
-[7] [8]
+[6] [7] [8]
 ! Undefined control sequence.
-l.66 ...er 35 mm considered adults since 0\percent
+l.67 ...er 35 mm considered adults since 0\percent
                                                    of individuals are reprod...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -509,61 +448,43 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-
-Package natbib Warning: Citation `hanski2000metapopulation' on page 9 undefined
- on input line 69.
-
-
-Package natbib Warning: Citation `ovaskainen2001spatially' on page 9 undefined 
-on input line 69.
-
-
-Package natbib Warning: Citation `hanski2002extinction' on page 9 undefined on 
-input line 69.
-
-
-Package natbib Warning: Citation `sousa2019long' on page 9 undefined on input l
-ine 69.
-
-[9]
-
-Package natbib Warning: Citation `chesson1981environmental' on page 10 undefine
-d on input line 71.
-
-[10] [11] (./Metacommunity_limpets.bbl [12] [13] [14] [15] [16] [17])
+[9] [10] [11] (./Metacommunity_limpets.bbl [12] [13] [14] [15] [16] [17]
+[18] [19])
 
 Package natbib Warning: There were undefined citations.
 
-[18] (./Metacommunity_limpets.aux) )
+[20] (./Metacommunity_limpets.aux) )
 (\end occurred inside a group at level 4)
 
-### simple group (level 4) entered at line 24 ({)
-### simple group (level 3) entered at line 22 ({)
-### simple group (level 2) entered at line 22 ({)
+### simple group (level 4) entered at line 26 ({)
+### simple group (level 3) entered at line 23 ({)
+### simple group (level 2) entered at line 23 ({)
 ### semi simple group (level 1) entered at line 17 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 3929 strings out of 492616
- 54910 string characters out of 6129481
- 141940 words of memory out of 5000000
- 7778 multiletter control sequences out of 15000+600000
- 14298 words of font info for 55 fonts, out of 8000000 for 9000
+ 3994 strings out of 492616
+ 56605 string characters out of 6129481
+ 144320 words of memory out of 5000000
+ 7842 multiletter control sequences out of 15000+600000
+ 14466 words of font info for 56 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
- 41i,6n,25p,3385b,422s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,6n,25p,3684b,464s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmmi10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmr10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mr12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
-17.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.
-pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pf
-b></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb
->
-Output written on Metacommunity_limpets.pdf (18 pages, 142477 bytes).
+/cmmi8.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mr10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
+12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17
+.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pf
+b></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><
+/usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></
+usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on Metacommunity_limpets.pdf (20 pages, 172130 bytes).
 PDF statistics:
- 98 PDF objects out of 1000 (max. 8388607)
- 68 compressed objects within 1 object stream
+ 117 PDF objects out of 1000 (max. 8388607)
+ 82 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

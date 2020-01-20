@@ -1,69 +1,49 @@
-This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2019)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: Metacommunity_limpets.aux
-White space in argument---line 6 of file Metacommunity_limpets.aux
- : \citation{montoya2008habitat,Rybicki
- :                                      and Hanksi,2013,haddad2015habitat}
-I'm skipping whatever remains of this command
-White space in argument---line 33 of file Metacommunity_limpets.aux
- : \citation{montoya2008habitat,Rybicki
- :                                      and Hanksi,2013,haddad2015habitat}
-I'm skipping whatever remains of this command
 The style file: evolution.bst
 Database file #1: BiblioLimpets.bib
-Warning--I didn't find a database entry for "davidson2004quantifying"
-Warning--I didn't find a database entry for "gaines2007connecting"
-Warning--I didn't find a database entry for "metzger2009time"
-Warning--I didn't find a database entry for "volkov2007pattern"
-Warning--I didn't find a database entry for "an2016predicting"
-Warning--I didn't find a database entry for "martin2013predicting"
-Warning--I didn't find a database entry for "sousa2019long"
-Warning--I didn't find a database entry for "travis2013dispersal"
 Warning--I didn't find a database entry for "urban2001landscape"
-Warning--I didn't find a database entry for "hanski2000metapopulation"
-Warning--I didn't find a database entry for "ovaskainen2001spatially"
-Warning--I didn't find a database entry for "hanski2002extinction"
-Warning--I didn't find a database entry for "chesson1981environmental"
 Warning--can't use both volume and number fields in gaggiotti2017metapopulations
-You've used 48 entries,
+You've used 68 entries,
             2892 wiz_defined-function locations,
-            922 strings with 15123 characters,
-and the built_in function-call counts, 32291 in all, are:
-= -- 2605
-> -- 1845
-< -- 23
-+ -- 618
-- -- 558
-* -- 2377
-:= -- 5162
-add.period$ -- 146
-call.type$ -- 48
-change.case$ -- 419
-chr.to.int$ -- 48
-cite$ -- 49
-duplicate$ -- 2239
-empty$ -- 2225
-format.name$ -- 702
-if$ -- 6425
+            1023 strings with 19215 characters,
+and the built_in function-call counts, 45266 in all, are:
+= -- 3540
+> -- 2634
+< -- 33
++ -- 863
+- -- 795
+* -- 3350
+:= -- 7261
+add.period$ -- 207
+call.type$ -- 68
+change.case$ -- 600
+chr.to.int$ -- 68
+cite$ -- 69
+duplicate$ -- 3172
+empty$ -- 3135
+format.name$ -- 1011
+if$ -- 9103
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 469
-newline$ -- 246
-num.names$ -- 192
-pop$ -- 902
+missing$ -- 668
+newline$ -- 347
+num.names$ -- 272
+pop$ -- 1281
 preamble$ -- 1
-purify$ -- 375
+purify$ -- 536
 quote$ -- 0
-skip$ -- 658
+skip$ -- 914
 stack$ -- 0
-substring$ -- 1642
-swap$ -- 1032
+substring$ -- 2091
+swap$ -- 1478
 text.length$ -- 5
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 420
+type$ -- 600
 warning$ -- 1
-while$ -- 229
+while$ -- 271
 width$ -- 0
-write$ -- 628
-(There were 2 error messages)
+write$ -- 890
+(There were 2 warnings)
