@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.8.13)  20 JAN 2020 16:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.8.13)  27 JAN 2020 15:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -345,7 +345,7 @@ my insertion and my current dilemma will both disappear.
 <inserted text> 
                 }
 l.23 ...a${{^2}{^,}{^4}}$,Carlos J. Melían${{^5}$
-                                                  
+                                                  \\
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
 With luck, this will get me unwedged. But if you
@@ -353,12 +353,12 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 23--25
+Underfull \hbox (badness 10000) in paragraph at lines 23--24
 
  []
 
 ! Undefined control sequence.
-l.26 ...idad Católica de la Santísima Concepci\�
+l.25 ...idad Católica de la Santísima Concepci\�
                                                   �on, Concepción, Chile\\$...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -373,7 +373,7 @@ See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.26 ...dad Católica de la Santísima Concepci\´
+l.25 ...dad Católica de la Santísima Concepci\´
                                                   on, Concepción, Chile\\$^...
 
 The document does not appear to be in UTF-8 encoding.
@@ -385,7 +385,7 @@ Alternatively, save the file in UTF-8 using your editor or another tool
 ! Undefined control sequence.
 <recently read> \doublespacing 
                                
-l.28 \doublespacing
+l.27 \doublespacing
                    
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -394,19 +394,19 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-Overfull \hbox (1.19406pt too wide) in paragraph at lines 26--29
+Overfull \hbox (1.19406pt too wide) in paragraph at lines 25--28
 []$\OT1/cmr/m/n/10.95 Marine and En-vi-ron-men-tal Sci-ences Cen-tre (MARE), Qu
 inta do Lorde Ma-rina, S^^S^^Ptio da Piedade,
  []
 
 
-Overfull \hbox (1.24974pt too wide) in paragraph at lines 26--29
+Overfull \hbox (1.24974pt too wide) in paragraph at lines 25--28
 \OT1/cmr/m/n/10.95 Tec-nolo-gia e In-ova^^Xc~ao (OOM/ARDITI), Edif^^S^^Pcio Mad
 eira Tec-nopolo, 9020-105 Fun-chal, Madeira,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 26--29
+Underfull \hbox (badness 10000) in paragraph at lines 25--28
 
  []
 
@@ -422,7 +422,7 @@ See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.39 ...e2014anthropogenic, jones2018one}. Earth´
+l.38 ...e2014anthropogenic, jones2018one}. Earth´
                                                   s ecosystems are becoming ...
 
 You may provide a definition with
@@ -431,44 +431,34 @@ You may provide a definition with
 [3] [4]
 
 Package natbib Warning: Citation `urban2001landscape' on page 5 undefined on in
-put line 43.
+put line 42.
 
 [5]
-Overfull \hbox (78.47763pt too wide) in paragraph at lines 48--49
+Overfull \hbox (78.47763pt too wide) in paragraph at lines 47--48
 \OT1/cmr/m/n/10.95 and metapop-u-la-tion mod-els ($[]$
  []
 
-[6] [7] [8]
-! Undefined control sequence.
-l.67 ...er 35 mm considered adults since 0\percent
-                                                   of individuals are reprod...
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-[9] [10] [11] (./Metacommunity_limpets.bbl [12] [13] [14] [15] [16] [17]
-[18] [19])
+[6] [7] [8] [9] [10] [11] (./Metacommunity_limpets.bbl [12] [13] [14] [15]
+[16] [17] [18] [19])
 
 Package natbib Warning: There were undefined citations.
 
 [20] (./Metacommunity_limpets.aux) )
 (\end occurred inside a group at level 4)
 
-### simple group (level 4) entered at line 26 ({)
+### simple group (level 4) entered at line 25 ({)
 ### simple group (level 3) entered at line 23 ({)
 ### simple group (level 2) entered at line 23 ({)
 ### semi simple group (level 1) entered at line 17 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 3994 strings out of 492616
- 56605 string characters out of 6129481
- 144320 words of memory out of 5000000
- 7842 multiletter control sequences out of 15000+600000
+ 3995 strings out of 492616
+ 56625 string characters out of 6129481
+ 144260 words of memory out of 5000000
+ 7843 multiletter control sequences out of 15000+600000
  14466 words of font info for 56 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
- 41i,6n,25p,3684b,464s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,6n,25p,3679b,466s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/c
@@ -477,14 +467,13 @@ m/cmmi10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm
 mr10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
 12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17
 .pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pf
-b></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
-></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><
-/usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></
-usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on Metacommunity_limpets.pdf (20 pages, 172130 bytes).
+b></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+</usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><
+/usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on Metacommunity_limpets.pdf (20 pages, 167034 bytes).
 PDF statistics:
- 117 PDF objects out of 1000 (max. 8388607)
- 82 compressed objects within 1 object stream
+ 113 PDF objects out of 1000 (max. 8388607)
+ 79 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
