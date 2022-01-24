@@ -1,33 +1,35 @@
-# Lapacom
-Complex life cycle metacommunities in disturbed landscapes
+## Lapacom
+Metacommunity dynamics of complex life-cycles in exploited seascapes
 
+## Questions
 
-Questions
+* Predicting extinction probabilities in two metapopulations with and without interactions across a disturbance gradient (Leslie matrix in space)
 
-Predicting extinction probabilities in two metapopulations with and without interactions across a disturbance gradient (Leslie matrix in space)
+* Spatiotemporal synchrony promoted by humans?
 
-Spatiotemporal synchrony promoted by humans?
+* Do control sites exhibit higher asyncrhony? (Madeira)
 
-Do control sites exhibit higher asyncrhony? (Madeira)
+* Richness peaks in the sites with intermediate connections? (Lower richness in the more isolated (connected) sites?) :: Richness here can be a trait
 
-Richness peaks in the sites with intermediate connections? (Lower richness in the more isolated (connected) sites?) :: Richness here can be a trait
+## Data
 
-
-
-Data -- Canary Islands and Madeira 
-
-        Main features of the data -- pros/cons
-
-        Distance matrix 
+* Canary Islands and Madeira 
+* Main features of the data -- pros/cons
+* Distance matrix 
         
+## Code 
 
-Code -- Octave version of Leslie matrix in space 
+* Github: https://github.com/melian009/Lapacom
 
-        Check references extending Leslie in space (add to .bib file)
-        
+* Preliminary Octave version of Leslie matrix in space 
+* Julia updated version
 
+## WorkingPaper
 
-WorkingPaper -- Draft outlining the intro 
+* Overleaf: https://www.overleaf.com/4457345492bddrnnxtdpqs
+* Draft outlining the intro 
+* Check format for references
 
-                Check format for references
+## References
 
+* Mendeley: https://www.mendeley.com/reference-manager/library/groups/private/3d5a2b3a-4020-30bc-a6fb-d5b9a2386c3a/all-references/
