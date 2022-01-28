@@ -1,3 +1,10 @@
+#Running the code with Pluto julia
+
+julia> using Pluto
+
+julia> Pluto.run()
+
+
 Four main scenarios -------------------------------------------------------------------------
 
 Model 1: Infinite sites in homogeneous landscapes
