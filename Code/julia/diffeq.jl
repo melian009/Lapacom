@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.7
+# v0.17.5
 
 using Markdown
 using InteractiveUtils
@@ -24,18 +24,17 @@ siz(20, 0.2)
 
 # ╔═╡ e4960764-319d-4eae-a5c3-6cf666607014
 function lapacom!(du,u,p,t)
-  Nⱼ, Nₐ, Sⱼ, Sₐ = u
-  r, mᵢₙ, mₒᵤₜ, g, dⱼ, dₐ, E, K, sizeratio = p
+  Nⱼ, Nₐ, Sₐ = u
+  r, mᵢₙ, mₒᵤₜ, g, dⱼ, dₐ, E, K, sizeratio, size_growth_rate, sizeₘₐₓ = p
   du[1] = dNⱼ = (r*Nₐ*((K-Nₐ)/K)) + mᵢₙ - (mₒᵤₜ*Nⱼ) - (dⱼ*Nⱼ) - (g*Nⱼ)
   du[2] = dNₐ = (g*Nⱼ) - (dₐ*Nₐ) - (E*Nₐ)
-  du[3] = dSⱼ = Sₐ * sizeratio
-  du[4] = dSₐ = (Sⱼ/sizeratio) - (E*Sₐ)
+  du[3] = dSₐ = size_growth_rate*Sₐ * (1 - Sₐ/(sizeₘₐₓ - (sizeₘₐₓ*E)))
 end
 
 # ╔═╡ 227da7b9-4880-4f57-b25a-5fd2be481a95
 begin
-	p = [0.6, 10.0, 0.15, 0.6, 0.05, 0.08, 0.2, 1e4, 0.5]
-	u0 = [1e3, 1e3, 20.0, 40.0]
+	p = [0.6, 10.0, 0.15, 0.6, 0.05, 0.08, 0.2, 1e4, 0.5, 0.2, 40.0]
+	u0 = [1e3, 1e3, 40.0]
 	tspan = (0.0,50.0)
 	prob = ODEProblem(lapacom!,u0,tspan,p)
 	sol = solve(prob)
@@ -51,33 +50,24 @@ begin
 end
 
 # ╔═╡ 42c47444-d3e1-409e-81fa-2161f94fd681
-begin
-	plot(sol, vars=(0,3), label="Sⱼ")
-	plot!(sol, vars=(0,4), label="Sₐ")
-end
+plot(sol, vars=(0,3), label="Sₐ")
 
 # ╔═╡ 3a78f6fa-f035-4dfa-a587-38eb4425355e
 md"## Test"
 
-# ╔═╡ 4dc17b7b-e179-433b-b749-96bc771e3e26
-function test!(du,u,p,t)
-  Sⱼ, Sₐ = u
-  E, sizeratio = p
-  du[1] = dSⱼ = Sₐ * sizeratio
-  du[2] = dSₐ = Sₐ - (E*Sₐ)
-end
+# ╔═╡ ae02407f-528c-4d31-b6c9-70ce167ed5c5
+md"-----"
 
-# ╔═╡ a9067771-8243-49df-9526-b5fd75b1b26b
+# ╔═╡ 2a41eeec-a937-4481-bbe4-61586c8f5292
 begin
-	pt = [0.2, 0.5]
-	u0t = [20.0, 40.0]
-	tspant = (0.0,5.0)
-	probt = ODEProblem(test!,u0t,tspant,pt)
-	solt = solve(probt)
-end;
-
-# ╔═╡ c4887f2a-dfc6-41f5-ae9c-4e370a13d6e7
-plot(solt, label=["Sⱼ" "Sₐ"])
+x = 0:0.005:1
+y1(x) = x*(1-x)
+y2(x) = x^(2/3)-x
+y3(x) = -x*log(x)
+plot(x, y1.(x), label="Logistic", xlabel="Size", ylabel="Growth rate")
+plot!(x, y2.(x), label="von Bertalanffy")
+plot!(x, y3.(x), label="Gompertz")
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1530,9 +1520,8 @@ version = "0.9.1+5"
 # ╠═da31935b-f914-49dc-b884-87fede72a727
 # ╠═73f03106-b794-4aaf-b3cc-fc9ffa6617a7
 # ╠═42c47444-d3e1-409e-81fa-2161f94fd681
-# ╠═3a78f6fa-f035-4dfa-a587-38eb4425355e
-# ╠═4dc17b7b-e179-433b-b749-96bc771e3e26
-# ╠═a9067771-8243-49df-9526-b5fd75b1b26b
-# ╠═c4887f2a-dfc6-41f5-ae9c-4e370a13d6e7
+# ╟─3a78f6fa-f035-4dfa-a587-38eb4425355e
+# ╟─ae02407f-528c-4d31-b6c9-70ce167ed5c5
+# ╠═2a41eeec-a937-4481-bbe4-61586c8f5292
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
