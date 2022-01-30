@@ -16,41 +16,88 @@ md"""
 # Lapacom
 """
 
-# ╔═╡ eabf8259-ba53-4ed9-a58d-a7cc5bca1aaf
-siz(S, E) = S - (E*S)
+# ╔═╡ 59163ea0-5116-4038-8b14-9d2295a6b4fd
+md"## Single site"
 
-# ╔═╡ 2ceb6a02-fccb-4152-bc37-c0c60068435c
-siz(20, 0.2)
-
-# ╔═╡ e4960764-319d-4eae-a5c3-6cf666607014
-function lapacom!(du,u,p,t)
+# ╔═╡ 4d33e19b-3e37-4555-abf5-cf3b80c3d0e3
+function single_site!(du,u,p,t)
   Nⱼ, Nₐ, Sₐ = u
-  r, mᵢₙ, mₒᵤₜ, g, dⱼ, dₐ, E, K, sizeratio, size_growth_rate, sizeₘₐₓ = p
-  du[1] = dNⱼ = (r*Nₐ*((K-Nₐ)/K)) + mᵢₙ - (mₒᵤₜ*Nⱼ) - (dⱼ*Nⱼ) - (g*Nⱼ)
+  r, g, dⱼ, dₐ, E, K, sizeratio, size_growth_rate, sizeₘₐₓ = p
+  du[1] = dNⱼ = (r*Nₐ*((K-Nₐ)/K)) - (dⱼ*Nⱼ) - (g*Nⱼ)
   du[2] = dNₐ = (g*Nⱼ) - (dₐ*Nₐ) - (E*Nₐ)
   du[3] = dSₐ = size_growth_rate*Sₐ * (1 - Sₐ/(sizeₘₐₓ - (sizeₘₐₓ*E)))
 end
 
-# ╔═╡ 227da7b9-4880-4f57-b25a-5fd2be481a95
+# ╔═╡ bf13b5fa-2f6e-4def-8e34-84f84f9cee23
 begin
-	p = [0.6, 10.0, 0.15, 0.6, 0.05, 0.08, 0.2, 1e4, 0.5, 0.2, 40.0]
-	u0 = [1e3, 1e3, 40.0]
-	tspan = (0.0,50.0)
-	prob = ODEProblem(lapacom!,u0,tspan,p)
-	sol = solve(prob)
+	p_1 = [0.6, 0.6, 0.05, 0.08, 0.2, 1e4, 0.5, 0.2, 40.0]
+	u0_1 = [1e3, 1e3, 40.0]
+	tspan_1 = (0.0,50.0)
+	prob_1 = ODEProblem(single_site!,u0_1,tspan_1,p_1)
+	sol_1 = solve(prob_1)
 end;
 
-# ╔═╡ da31935b-f914-49dc-b884-87fede72a727
-plot(sol, labels=["Nⱼ" "Nₐ" "Sⱼ" "Sₐ"]);
-
-# ╔═╡ 73f03106-b794-4aaf-b3cc-fc9ffa6617a7
+# ╔═╡ d73d5979-af23-4a1f-bea3-dfdb2de1dab7
 begin
-	plot(sol, vars=(0,1), label="Nⱼ")
-	plot!(sol, vars=(0,2), label="Nₐ")
+	plot(sol_1, vars=(0,1), label="Nⱼ")
+	plot!(sol_1, vars=(0,2), label="Nₐ")
 end
 
-# ╔═╡ 42c47444-d3e1-409e-81fa-2161f94fd681
-plot(sol, vars=(0,3), label="Sₐ")
+# ╔═╡ 8a19d04a-7bc8-4297-b2d6-cf4525ffeb69
+md"## Two sites"
+
+# ╔═╡ ade6f18d-ce86-4ff7-8f00-590665b06cfa
+function two_sites!(du,u,p,t)
+  Nⱼ₁, Nₐ₁, S₁,
+  Nⱼ₂, Nₐ₂, S₂= u
+	
+  r, g, dⱼ, dₐ, size_growth_rate,
+  	mₒᵤₜ₁, mₒᵤₜ₂,
+  	E₁, E₂,
+  	K₁, K₂,
+  	sizeₘₐₓ₁, sizeₘₐₓ₂, = p
+	
+  du[1] = dNⱼ₁ = (r*Nₐ₁*((K₁-Nₐ₁)/K₁)) + (mₒᵤₜ₂*Nⱼ₂) - (mₒᵤₜ₁*Nⱼ₁) - (dⱼ*Nⱼ₁) - (g*Nⱼ₁)
+  du[2] = dNₐ₁ = (g*Nⱼ₁) - (dₐ*Nₐ₁) - (E₁*Nₐ₁)
+  du[3] = dS₁ = size_growth_rate*S₁ * (1 - S₁/(sizeₘₐₓ₁ - (sizeₘₐₓ₁*E₁)))
+	
+  du[4] = dNⱼ₂ = (r*Nₐ₂*((K₂-Nₐ₂)/K₂)) + (mₒᵤₜ₁*Nⱼ₁) - (mₒᵤₜ₂*Nⱼ₂) - (dⱼ*Nⱼ₂) - (g*Nⱼ₂)
+  du[5] = dNₐ₂ = (g*Nⱼ₂) - (dₐ*Nₐ₂) - (E₂*Nₐ₂)
+  du[6] = dS₂ = size_growth_rate*S₂ * (1 - S₂/(sizeₘₐₓ₂ - (sizeₘₐₓ₂*E₂)))
+end
+
+# ╔═╡ 1ee8e45c-3369-46e9-b19c-3dacc884ba32
+begin
+	p_2 = [0.6, 0.1, 0.05, 0.08, 0.1,
+			0.1, 0.02,
+			0.0, 0.4,
+			1e4, 1e4,
+			55.0, 55.0
+	]
+	u0_2 = [1e3, 1e3, 40.0,
+			1e3, 1e3, 40.0
+	]
+	tspan_2 = (0.0,50.0)
+	prob_2 = ODEProblem(two_sites!,u0_2,tspan_2,p_2)
+	sol_2 = solve(prob_2)
+end;
+
+# ╔═╡ 6e3d1858-1143-40cb-b7be-1ea181185dd8
+begin
+	plot(sol_2, vars=(0,1), label="Nⱼ₁")
+	plot!(sol_2, vars=(0,2), label="Nₐ₁")
+	plot!(sol_2, vars=(0,4), label="Nⱼ₂")
+	plot!(sol_2, vars=(0,5), label="Nₐ₂")
+end
+
+# ╔═╡ 5c250dec-ba94-465f-9559-ec5f36a3af7a
+begin
+	plot(sol_2, vars=(0,3), label="S₁")
+	plot!(sol_2, vars=(0,6), label="S₂")
+end
+
+# ╔═╡ ebad176c-8c17-4a92-aa25-44672b33fb6e
+md"-----"
 
 # ╔═╡ 3a78f6fa-f035-4dfa-a587-38eb4425355e
 md"## Test"
@@ -1510,16 +1557,19 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
+# ╟─a858a3de-942c-40c7-b80d-e2651a8013ad
 # ╠═b99acfd0-7f98-11ec-109a-8908866528a6
 # ╠═483dc61b-2925-49c5-a59b-2b9f68cbf839
-# ╟─a858a3de-942c-40c7-b80d-e2651a8013ad
-# ╠═eabf8259-ba53-4ed9-a58d-a7cc5bca1aaf
-# ╠═2ceb6a02-fccb-4152-bc37-c0c60068435c
-# ╠═e4960764-319d-4eae-a5c3-6cf666607014
-# ╠═227da7b9-4880-4f57-b25a-5fd2be481a95
-# ╠═da31935b-f914-49dc-b884-87fede72a727
-# ╠═73f03106-b794-4aaf-b3cc-fc9ffa6617a7
-# ╠═42c47444-d3e1-409e-81fa-2161f94fd681
+# ╟─59163ea0-5116-4038-8b14-9d2295a6b4fd
+# ╠═4d33e19b-3e37-4555-abf5-cf3b80c3d0e3
+# ╠═bf13b5fa-2f6e-4def-8e34-84f84f9cee23
+# ╠═d73d5979-af23-4a1f-bea3-dfdb2de1dab7
+# ╟─8a19d04a-7bc8-4297-b2d6-cf4525ffeb69
+# ╠═ade6f18d-ce86-4ff7-8f00-590665b06cfa
+# ╠═1ee8e45c-3369-46e9-b19c-3dacc884ba32
+# ╠═6e3d1858-1143-40cb-b7be-1ea181185dd8
+# ╠═5c250dec-ba94-465f-9559-ec5f36a3af7a
+# ╟─ebad176c-8c17-4a92-aa25-44672b33fb6e
 # ╟─3a78f6fa-f035-4dfa-a587-38eb4425355e
 # ╟─ae02407f-528c-4d31-b6c9-70ce167ed5c5
 # ╠═2a41eeec-a937-4481-bbe4-61586c8f5292
