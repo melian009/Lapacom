@@ -28,22 +28,22 @@ Convert geographic coordinates from DMS (degrees, minutes, seconds) to decimal c
 
 ## Formula:
 
-* DEC = (DEG + (MIN * 1/60) + (SEC * 1/60 * 1/60))
+* decimal = degrees + (minutes * 1/60) + (seconds * 1/3600)
 * Assumes S/W are negative. 
 
 ## Source
 
-https://gist.github.com/jeteon/89c41e4081d87b798d8006b16a52c695
+https://www.rapidtables.com/convert/number/degrees-minutes-seconds-to-degrees.html
 """
 function dms2decimal(degrees::Int, minutes::AbstractFloat, seconds::AbstractFloat, direction::AbstractString)
   dsign = direction in ["S", "s", "W", "w"] ? -1 : 1
-  DEC = dsign * (degrees + (minutes * 1 / 60) + (seconds * 1 / 60 * 1 / 60))
+  DEC = dsign * (degrees + (minutes * 1 / 60) + (seconds * 1 / 3600))
 end
 
 dms2decimal(x::Tuple) = dms2decimal(x[1], x[2], x[3], x[4])
 
 """
-This function is written specifically for the DMS format in the `df`.
+Split a string containing the coordinates in DMS to separate numbers.
 """
 function split_dms_str(dms_str::AbstractString)
   o = eachmatch(r"[\d|\.|(W|w|S|s|N|n|E|e)]+", dms_str)
