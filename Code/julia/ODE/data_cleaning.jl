@@ -3,6 +3,7 @@ Pkg.activate(".")
 using DataFrames
 using CSV
 using Dates
+include("distancematrix.jl")
 
 uncleaned_file = "../../../Data/ToAnalyze/Madeira/BD_LIMPETS_MAD_1996-2018.csv"
 
@@ -57,3 +58,8 @@ df.lon = dms2decimal.(split_dms_str.(df.lon))
 CSV.write("data.csv", df)
 
 df = CSV.read("data.csv", DataFrame)
+
+
+## Create distance matrix
+distance_matrix = create_distance_matrix("data.csv"; loc_colname = :sampling_site, lat_colname = :lat, lon_colname = :lon)
+CSV.write("distance_matrix.csv", distance_matrix)
