@@ -5,6 +5,8 @@ using OrdinaryDiffEq
 using GlobalSensitivity
 using Plots
 using Statistics
+using DataFrames
+using CSV
 
 ### ----------------------------------------------------------------
 ### 1. Single site
@@ -139,6 +141,33 @@ plot(p1, p3, p2, p4) # Pop 1, juvenile and adult
 plot(p5, p7, p6, p8) # Pop 2, juvenile and adult
 plot(p1, p2, p5, p6) # Pop 1 vs pop 2, juvenile
 plot(p3, p4, p7, p8) # Pop 1 vs pop 2, adults
+
+### -------------------------------
+### 4. Data fitting
+### --------------------------------
+
+df = CSV.read("data.csv", DataFrame)
+
+sitedfs = groupby(df, "sampling_site")
+sitedfs.keymap
+
+size_by_year_all_sites = DataFrame[]
+for site in 1:length(sitedfs)
+  site1year = groupby(sitedfs[site], [:year, :species]);
+  # select(site1year, :total_length_mm)
+  cc = combine(site1year, :total_length_mm .=> [mean,std, median])
+  push!(size_by_year_all_sites, cc)
+end
+
+size.(size_by_year_all_sites, 1)
+# Many sites are sampled at one or a few years only.
+
+function sizeonly!(du, u, p, t)
+  Sₐ = u
+  size_growth_rate, sizeₘₐₓ, E = p
+  du[1] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E)))
+end
+
 
 ### -------------------------------
 ### 0. Testing functions
