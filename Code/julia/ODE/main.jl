@@ -7,6 +7,8 @@ using Plots
 using Statistics
 using DataFrames
 using CSV
+using DiffEqParamEstim
+using Optim
 
 ### ----------------------------------------------------------------
 ### 1. Single site
@@ -149,7 +151,7 @@ plot(p3, p4, p7, p8) # Pop 1 vs pop 2, adults
 df = CSV.read("data.csv", DataFrame)
 
 sitedfs = groupby(df, "sampling_site")
-sitedfs.keymap
+# sitedfs.keymap
 
 size_by_year_all_sites = DataFrame[]
 for site in 1:length(sitedfs)
@@ -161,13 +163,40 @@ end
 
 size.(size_by_year_all_sites, 1)
 # Many sites are sampled at one or a few years only.
+# Estimate exploitation E for each site only according to one time point.
 
-function sizeonly!(du, u, p, t)
-  Sₐ = u
-  size_growth_rate, sizeₘₐₓ, E = p
-  du[1] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E)))
+dfy = groupby(df, [:sampling_site])
+species_size_range = combine(dfy, :total_length_mm .=> [maximum, minimum, mean, median, std])
+sizeₘₐₓ = maximum(species_size_range.total_length_mm_maximum)
+sizeₘᵢₙ = minimum(species_size_range.total_length_mm_minimum)
+initial_size = species_size_range.total_length_mm_median
+size_growth_rate = 0.2  # It has minimal effect
+
+function estimate_E_across_sites(initial_sizes, sizeₘₐₓ, size_growth_rate)
+  sizeonly!(size, E, t) = size_growth_rate * size * (1 - size / (sizeₘₐₓ - (sizeₘₐₓ * E)))
+  estimated_Es = zeros(length(initial_sizes))
+  for site in 1:length(initial_sizes)
+    u0 = initial_sizes[site]
+    tspan = (0.0, 60.0)
+    p = 0.4872
+    prob = ODEProblem(sizeonly!, u0, tspan, p)
+
+    # sol = solve(prob,Tsit5())
+
+    # data = fill(initial_size[1], 60)
+    # t = 1:60
+    # cost_function = build_loss_objective(prob,Tsit5(),L2Loss(t,data), maxiters=10000,verbose=false)
+    # result = optimize(cost_function, 0.0, 1.0)
+
+    loss_func(sol) = (initial_sizes[site] - sol[end])^2
+    cost_function = build_loss_objective(prob, Tsit5(), loss_func, maxiters=10000, verbose=false)
+    result = optimize(cost_function, 0.0, 1.0)
+    estimated_Es[site] = result.minimizer
+  end
+  return estimated_Es
 end
 
+estimated_E = estimate_E_across_sites(initial_size, sizeₘₐₓ, size_growth_rate)
 
 ### -------------------------------
 ### 0. Testing functions
