@@ -198,6 +198,9 @@ end
 
 estimated_E = estimate_E_across_sites(initial_size, sizeₘₐₓ, size_growth_rate)
 
+histogram(estimated_E, bins=30, legend=false, color="black", xlabel="Exploitation", ylabel="Number of Sites")
+Plots.savefig("dist_E.pdf")
+
 ### -------------------------------
 ### 0. Testing functions
 ### --------------------------------
