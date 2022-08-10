@@ -35,8 +35,9 @@ Metacommunity dynamics of complex life-cycles in exploited seascapes
 * Language: julia
 * Package: Flux.jl
 
-
-# Modeling scenarios: ODE system with SLC (linear dispersal capacity decay with life cycle (DCLC)) and with CLC (non-linear DCLC). There are four scenarios for each life-cycle:
+'''
+Modeling scenarios: ODE system with SLC (linear dispersal capacity decay with life cycle (DCLC)) and with CLC (non-linear DCLC). There are four scenarios for each life-cycle:
+'''
 
 ## Model 1: Infinite sites in homogeneous landscapes
 * Model a large number of sites with no differentiation between North and South of the island, along connectivity-exploitation gradient and symmetry-asymmetry dispersal matrix. 
