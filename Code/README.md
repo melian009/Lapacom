@@ -1,7 +1,11 @@
-#Pseudocode Metacommunity dynamics of complex life cycle in disturbed landscapes
+#Running the code with Pluto julia
+
+julia> using Pluto
+
+julia> Pluto.run()
 
 
-Four main scenarios --------------------------------------------------------------------------
+Four main scenarios -------------------------------------------------------------------------
 
 Model 1: Infinite sites in homogeneous landscapes
 This scenario represents a large number of sites with no differentiation between North and South, different rates of human-driven disturbance or asymmetry in dispersal probabilities. Details of the biotic (weak competition), abiotic, mating and dispersal traits
