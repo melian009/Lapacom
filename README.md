@@ -3,9 +3,9 @@ Metacommunity dynamics of complex life-cycles in exploited seascapes
 
 ## Questions
 
-* Predicting extinction probabilities in two metapopulations with and without interactions along a exploitation-connectivity gradient 
+* Does complex life-cycle predit exploitation response compared to simple life-cycle?
 
-* Spatiotemporal synchrony promoted by humans?
+* How do complex life-cycle alter extinction probabilities in two metapopulations with and without interactions along a exploitation-connectivity gradient?
 
 * Do control sites exhibit higher asyncrhony? (Madeira)
 
@@ -21,37 +21,22 @@ Metacommunity dynamics of complex life-cycles in exploited seascapes
 * Github: https://github.com/melian009/Lapacom
 
 * Preliminary Octave version of Leslie matrix in space 
-* Julia updated version
+* Julia updated version -- TODO: extension to explore "Dispersal capacity decay with life-cycle (DCLC)" as a way to distinguish SLC from CLC.                                                                                                                                                    
 
 ## Modeling
 
 # Theory
-* ODEs system to explore the extinction probability in a exploitation-connectivity gradient in two scenarios: One random and the second heterogenous both with a fixed number of source-sinks ratios. 
+* ODEs system to explore the extinction probability in a exploitation-connectivity gradient in two scenarios accounting for complex life-cycle: One spatially random and the second heterogenous both with a fixed number of source-sinks ratios. 
 * Language: julia
 * Package: DifferentialEquation.jl
 
 # Theory-empirical
-* Fit the following scenarios to the empirical data for the case of Madeira:
+* Fit distance to human vs number of reproductives and extinction probability under the SLC and CLC scenarios for the case of Madeira:
 * Language: julia
 * Package: Flux.jl
 
-#===========================================================================================================
-# Open position for 5-6 months master student to bridge ecological data and modeling in exploited ecosystems
 
-A 5-6 months master student position is open for the project Lapacom, 
-Metacommunity dynamics of complex life-cycles in exploited seascapes, 
-funded by the Fundacao para a Ciencia e a Tecnologia, Portugal. Lapacom aims at
-connecting empirical data for intertidal species to extinction dynamics in exploited metacommunities. 
-The candidate should have a burning interest in computing programming, i.e., mostly julia but also R and other
-open-source programming languages. Main task involves building codes around empirical data under different
-exploitation scenarios to predict extinction probabilities in two Limpet species living in the intertidal 
-habitats of Madeira island. You will work with a theoretical and computational team lead by 
-Dr. Ali Vahdati and Dr. Carlos Melian. The overall vision is to understand the impact of 
-overexploitation on metacommunities composed by complex life-cycles species. 
-Please contact X and/ or Y if you need further information about the position. 
-Deadline for applications is on X. 
-#============================================================================================================
-
+# Modeling scenarios: ODE system with SLC (linear dispersal capacity decay with life cycle (DCLC)) and with CLC (non-linear DCLC). There are four scenarios for each life-cycle:
 
 ## Model 1: Infinite sites in homogeneous landscapes
 * Model a large number of sites with no differentiation between North and South of the island, along connectivity-exploitation gradient and symmetry-asymmetry dispersal matrix. 
