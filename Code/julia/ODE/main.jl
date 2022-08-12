@@ -10,6 +10,12 @@ using CSV
 using DiffEqParamEstim
 using Optim
 
+## TODO: exploitation stops during certain months of the year. Implement time varying E.
+## TODO: From topography, set distance between two sites to infinite, if there is land/another site between them
+## TODO: Empirically estimate the rate at which individuals from one stage turn into another one
+## TODO: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
+## TODO: Check how to add all equations in a loop instead of writing by hand.
+
 ### ----------------------------------------------------------------
 ### 1. Single site
 ### ----------------------------------------------------------------
