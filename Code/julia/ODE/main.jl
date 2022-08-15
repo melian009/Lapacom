@@ -14,7 +14,7 @@ using Optim
 ## TODO: From topography, set distance between two sites to infinite, if there is land/another site between them
 ## TODO: Empirically estimate the rate at which individuals from one stage turn into another one
 ## TODO: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
-## TODO: Check how to add all equations in a loop instead of writing by hand.
+## [x]: Check how to add all equations in a loop instead of writing by hand.
 
 ### ----------------------------------------------------------------
 ### 1. Single site
@@ -94,6 +94,33 @@ plot!(sol_2, vars=(0, 5), label="Nₐ₂")
 
 plot(sol_2, vars=(0, 3), label="S₁")
 plot!(sol_2, vars=(0, 6), label="S₂")
+
+
+### ----------------------------------------------------------------
+### 2.1 N-sites in a loop TODO
+### ----------------------------------------------------------------
+
+
+# dummy ode to test (It works!)
+function nsites!(du, u, p, t)
+  for site in 1:5
+    du[site] = p[site] * u[site]
+  end
+end
+
+pn = [0.1, 0.2, 0.3, 0.4, 0.5]
+u0n = [0.15, 0.14, 0.13, 0.12, 0.11]
+tspann = (0.0, 10.0)
+probn = ODEProblem(nsites!, u0n, tspann, pn)
+soln = solve(probn, Tsit5())
+
+plot(soln)
+
+# Real ODE
+function nsites!(du, u, p, t)
+
+end
+
 
 ### --------------------------------------------------
 ### 3. Sensitivity analysis
