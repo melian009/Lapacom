@@ -12,7 +12,14 @@ using Optim
 
 ## [x]: exploitation stops during certain months of the year. Implement time varying E.
 ## TODO: From topography, set distance between two sites to infinite, if there is land/another site between them
-## TODO: Empirically estimate the rate at which individuals from one stage turn into another one
+## [x]: Empirically estimate the rate at which individuals from one stage turn into another one:
+## Conversion rates for the given number of days is as follows:
+# 730: 0.00629
+# 3: 0.784557
+# 0.7: 0.998611
+# 1.3: 0.971057
+# 4: 0.683772
+# In the ODEs, the unit of right hand side is individuals per day. This means that each time step is one day. The rate of the left-hand side are calculated such that after after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
 ## TODO: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
 ## [x]: Check how to add all equations in a loop instead of writing by hand.
 
@@ -35,7 +42,7 @@ function single_site!(du, u, p, t)
   du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
 end
 
-Et(t) = (sin(t)^2)/2  # time varying exploitation
+Et(t) = (sin(t)^2) / 2  # time varying exploitation
 p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
 u0_1 = [1e3, 1e3, 40.0]
 tspan_1 = (0.0, 50.0)
