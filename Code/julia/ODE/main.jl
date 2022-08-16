@@ -1,7 +1,7 @@
 using Pkg
 Pkg.activate(".")
 using OrdinaryDiffEq
-# using DifferentialEquations
+using DifferentialEquations
 using GlobalSensitivity
 using Plots
 using Statistics
@@ -171,6 +171,9 @@ for i in 1:nsites
   push!(u0_general[i], rand(45:0.1:51))
 end
 
+# u0 cannot be a nested vector.
+u0_general = reduce(vcat, u0_general)
+
 ## defining model parameters
 # conversion rates between stages
 # average oocytes per year per adult
@@ -184,7 +187,8 @@ migration_matrix = rand(nsites, nsites)
 exploitation_rates = [t -> ((t % 365) / 365) < 0.5 ? 0.0 : x for (s, x) in zip(1:nsites, rand(0.001:0.001:0.003, nsites))]
 size_max = 56.0
 K = 1e5
-p_general = [r, d, size_growth_rate, migration_matrix, exploitation_rates, size_max, K]
+# p_general = [r, d, size_growth_rate, migration_matrix, exploitation_rates, size_max, K]
+p_general = [r, d, size_growth_rate, exploitation_rates, size_max, K]
 
 
 function nsites!(du, u, p, t)
@@ -193,23 +197,23 @@ function nsites!(du, u, p, t)
   counter = 1
   for site in 1:nsites
     # All non-adult stages. dNⱼ = (r * Nⱼ₋₁ * ((K - Nⱼ₋₁) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-    adult_eq = counter + nlifestages - 1
+    site_index = ((site * (nlifestages + 1)) - nlifestages - 1)
     for stage in 1:(nlifestages-1)
       prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
-      d[counter] = (p[1][stage] * u[site][prev_stage] * ((p[7] - u[site][prev_stage]) / p[7])) -
-                   (p[2][stage] * u[site][stage]) -
-                   (p[1][stage] * u[site][stage])
+      d[counter] = (p[1][stage] * u[site_index + prev_stage] * ((p[6] - u[site_index + prev_stage]) / p[6])) -
+                   (p[2][stage] * u[site_index + stage]) -
+                   (p[1][stage] * u[site_index + stage])
       counter += 1
     end
 
     # adult N. dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
-    d[counter] = (p[1][nlifestages] * u[site][nlifestages-1]) -
-                 (p[2][nlifestages] * u[site][nlifestages]) -
-                 (p[5][site] * u[site][nlifestages])
+    d[counter] = (p[1][nlifestages] * u[site_index + nlifestages-1]) -
+                 (p[2][nlifestages] * u[site_index + nlifestages]) -
+                 (p[4][site](t) * u[site_index +nlifestages])
     counter += 1
 
     # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    d[counter] = p[3] * u[site][end] * (1 - u[site][end] / (p[6] - (p[6] * p[5][site](t))))
+    d[counter] = p[3] * u[site_index + nlifestages + 1] * (1 - u[site_index + nlifestages + 1] / (p[5] - (p[5] * p[4][site](t))))
 
   end
 end
