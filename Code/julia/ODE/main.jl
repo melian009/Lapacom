@@ -19,9 +19,33 @@ using Optim
 # 0.7: 0.998611
 # 1.3: 0.971057
 # 4: 0.683772
-# In the ODEs, the unit of right hand side is individuals per day. This means that each time step is one day. The rate of the left-hand side are calculated such that after after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
+# In the ODEs, the unit of right hand side is individuals per day. This means that each time step is one day. The rate of the left-hand side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
 ## TODO: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
 ## [x]: Check how to add all equations in a loop instead of writing by hand.
+# [x]: Modify the equations according to the following facts:
+# 1. adults live 7 to 10 years, depending on their size. 
+#   Age in days ranges between 2555 to 3650.
+#   Actual age is (size * max age) / max size. If actual age < min age, actual age = min age. This is difficult to include in the ODE. We can ignore it and use an average age: 3102 days.
+#   death probability of adults da =  1 / age. 1/3102 = 0.000322.
+# 2. adults spawn 92,098 to 804,183 oocytes per year during the spawning season. TODO: Do they reproduce sexually? if so, number of oocytes should be divided by 2.
+#   Appearance rate of eggs: #oocytes/365 in a sin function (to account for spawning season). Note that adults do not turn into eggs (they live many steps.)
+## TODO: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days.
+## TODO: What is the death rate of other life stages? 
+
+#=
+Example of adding if statements in the ODE system
+
+function fun(du,u,p,t)
+  if u[1] <30
+      du[1] = (0.04*u[1] + 5)*u[1] + 150 - u[2] - p[5]
+      du[2] = p[1]*(p[2]*u[1]-u[2])
+  else
+      u[1] = p[3]
+      u[2] = u[2] + p[4]
+  end
+end
+=#
+
 
 ### ----------------------------------------------------------------
 ### 1. Single site
@@ -43,6 +67,15 @@ function single_site!(du, u, p, t)
 end
 
 Et(t) = (sin(t)^2) / 2  # time varying exploitation
+# To adjust the sin function horizonally (stretch/shrink the wave length), multiply t by a factor c.
+# You may also use a function with if statements.
+function Et(t)
+  if modf(t)[1] < 0.5
+    return 0.0
+  else
+    return 0.5
+  end
+end
 p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
 u0_1 = [1e3, 1e3, 40.0]
 tspan_1 = (0.0, 50.0)
@@ -104,18 +137,18 @@ plot!(sol_2, vars=(0, 6), label="S₂")
 
 
 ### ----------------------------------------------------------------
-### 2.1 N-sites in a loop TODO
+### 2.1 General model TODO: Does not run yet.
 ### ----------------------------------------------------------------
 
 
 # dummy ode to test (It works!)
 function nsites!(du, u, p, t)
   for site in 1:5
-    du[site] = p[site] * u[site]
+    du[site] = p[1][site] * u[site] + p[2][site] * 0.001
   end
 end
 
-pn = [0.1, 0.2, 0.3, 0.4, 0.5]
+pn = [[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]
 u0n = [0.15, 0.14, 0.13, 0.12, 0.11]
 tspann = (0.0, 10.0)
 probn = ODEProblem(nsites!, u0n, tspann, pn)
@@ -124,10 +157,68 @@ soln = solve(probn, Tsit5())
 plot(soln)
 
 # Real ODE
-function nsites!(du, u, p, t)
 
+## Starting the model
+#---------------------------
+nsites = 10
+nlifestages = 5
+
+## initial state of the system
+# Initial population sizes at each life stage per site
+u0_general = [[rand(1000.0:5000.0) for j in 1:nlifestages] for i in 1:nsites]
+# Initial average sizes per site 
+for i in 1:nsites
+  push!(u0_general[i], rand(45:0.1:51))
 end
 
+## defining model parameters
+# conversion rates between stages
+# average oocytes per year per adult
+avg_oocytes = mean([92098, 804183])
+reggs = avg_oocytes / 365  # conversion rate of adults to eggs
+r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
+# natural death rates per life stage. TODO: What are the first four values?
+d = [0.1, 0.01, 0.01, 0.01, 0.000322]
+size_growth_rate = 0.1
+migration_matrix = rand(nsites, nsites)
+exploitation_rates = [t -> ((t % 365) / 365) < 0.5 ? 0.0 : x for (s, x) in zip(1:nsites, rand(0.001:0.001:0.003, nsites))]
+size_max = 56.0
+K = 1e5
+p_general = [r, d, size_growth_rate, migration_matrix, exploitation_rates, size_max, K]
+
+
+function nsites!(du, u, p, t)
+  nsites = 10
+  nlifestages = 5
+  counter = 1
+  for site in 1:nsites
+    # All non-adult stages. dNⱼ = (r * Nⱼ₋₁ * ((K - Nⱼ₋₁) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
+    adult_eq = counter + nlifestages - 1
+    for stage in 1:(nlifestages-1)
+      prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
+      d[counter] = (p[1][stage] * u[site][prev_stage] * ((p[7] - u[site][prev_stage]) / p[7])) -
+                   (p[2][stage] * u[site][stage]) -
+                   (p[1][stage] * u[site][stage])
+      counter += 1
+    end
+
+    # adult N. dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
+    d[counter] = (p[1][nlifestages] * u[site][nlifestages-1]) -
+                 (p[2][nlifestages] * u[site][nlifestages]) -
+                 (p[5][site] * u[site][nlifestages])
+    counter += 1
+
+    # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
+    d[counter] = p[3] * u[site][end] * (1 - u[site][end] / (p[6] - (p[6] * p[5][site](t))))
+
+  end
+end
+
+tspan_general = (0.0, 100.0)
+prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
+sol_general = solve(prob_general, Tsit5())
+
+plot(sol_general)
 
 ### --------------------------------------------------
 ### 3. Sensitivity analysis
