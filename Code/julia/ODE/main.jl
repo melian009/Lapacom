@@ -20,18 +20,17 @@ using Optim
 # 1.3: 0.971057
 # 4: 0.683772
 # In the ODEs, the unit of right hand side is individuals per day. This means that each time step is one day. The rate of the left-hand side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
-## TODO: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
+## [ ]: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
 ## [x]: Check how to add all equations in a loop instead of writing by hand.
 # [x]: Modify the equations according to the following facts:
 # 1. adults live 7 to 10 years, depending on their size. 
 #   Age in days ranges between 2555 to 3650.
 #   Actual age is (size * max age) / max size. If actual age < min age, actual age = min age. This is difficult to include in the ODE. We can ignore it and use an average age: 3102 days.
 #   death probability of adults da =  1 / age. 1/3102 = 0.000322.
-# 2. adults spawn 92,098 to 804,183 oocytes per year during the spawning season. TODO: Do they reproduce sexually? if so, number of oocytes should be divided by 2.
+# 2. adults spawn 92,098 to 804,183 oocytes per year during the spawning season.
 #   Appearance rate of eggs: #oocytes/365 in a sin function (to account for spawning season). Note that adults do not turn into eggs (they live many steps.)
 ## TODO: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days.
-## TODO: What is the death rate of other life stages? 
-
+## [ ] TODO: Estimate exploitation rates given average sizes and a single pool model.
 #=
 Example of adding if statements in the ODE system
 
@@ -46,6 +45,17 @@ function fun(du,u,p,t)
 end
 =#
 
+
+#=
+Five simplifying assumptions:
+
+1. Transition times. Some short transition times can be aggregated.
+2. The number of oocytes. We use the mean number of oocytes laid per adult per year.
+3. Dispersal potential of trochophore and veliger. Eggs disperse passively, T and V can disperse actively.
+4. Juveniles homing. Eggs have a global pool. Once they are released, they travel with the currents to the ocean. In the ocean they develop and actively migrate back to different sites. This is like the "lottery model".
+5. Exploitation. Five months of exploitation, seven months rest. There is no reproduction during the exploitation time. NOTE that adults continueously keep growing.
+
+=#
 
 ### ----------------------------------------------------------------
 ### 1. Single site
@@ -200,25 +210,25 @@ function nsites!(du, u, p, t)
     site_index = ((site * (nlifestages + 1)) - nlifestages - 1)
     for stage in 1:(nlifestages-1)
       prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
-      d[counter] = (p[1][stage] * u[site_index + prev_stage] * ((p[6] - u[site_index + prev_stage]) / p[6])) -
+      du[counter] = (p[1][stage] * u[site_index + prev_stage] * ((p[6] - u[site_index + prev_stage]) / p[6])) -
                    (p[2][stage] * u[site_index + stage]) -
                    (p[1][stage] * u[site_index + stage])
       counter += 1
     end
 
     # adult N. dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
-    d[counter] = (p[1][nlifestages] * u[site_index + nlifestages-1]) -
+    du[counter] = (p[1][nlifestages] * u[site_index + nlifestages-1]) -
                  (p[2][nlifestages] * u[site_index + nlifestages]) -
-                 (p[4][site](t) * u[site_index +nlifestages])
+                 (p[4][site](t) * u[site_index + nlifestages])
     counter += 1
 
     # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    d[counter] = p[3] * u[site_index + nlifestages + 1] * (1 - u[site_index + nlifestages + 1] / (p[5] - (p[5] * p[4][site](t))))
+    du[counter] = p[3] * u[site_index + nlifestages + 1] * (1 - u[site_index + nlifestages + 1] / (p[5] - (p[5] * p[4][site](t))))
 
   end
 end
 
-tspan_general = (0.0, 100.0)
+tspan_general = (0.0, 10.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
 sol_general = solve(prob_general, Tsit5())
 
