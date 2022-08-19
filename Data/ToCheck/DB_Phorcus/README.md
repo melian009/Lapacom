@@ -7,7 +7,8 @@ Common database fixes:
 -	Converting .xlsx files to .csv
 The non-modified databases were not in the same format as the reference file. These files are not included in this folder.
 Files in “Lapacom/Data/ToCheck/”:
-Folder Canaries: Non-modified
+
+Folder "Canaries": Non-modified
 
 BD_Phorcus_Azores_2018:
 
