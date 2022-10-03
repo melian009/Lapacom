@@ -1,7 +1,8 @@
 using Pkg
 Pkg.activate(".")
+using LinearAlgebra
 using OrdinaryDiffEq
-using DifferentialEquations
+# using DifferentialEquations
 using GlobalSensitivity
 using Plots
 using Statistics
@@ -19,8 +20,8 @@ using Optim
 # 0.7: 0.998611
 # 1.3: 0.971057
 # 4: 0.683772
-# In the ODEs, the unit of right hand side is individuals per day. This means that each time step is one day. The rate of the left-hand side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
-## [ ]: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
+# In the ODEs, the unit of left side is individuals per day. This means that each time step is one day. The rate of the right side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
+## [x]: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
 ## [x]: Check how to add all equations in a loop instead of writing by hand.
 # [x]: Modify the equations according to the following facts:
 # 1. adults live 7 to 10 years, depending on their size. 
@@ -29,7 +30,7 @@ using Optim
 #   death probability of adults da =  1 / age. 1/3102 = 0.000322.
 # 2. adults spawn 92,098 to 804,183 oocytes per year during the spawning season.
 #   Appearance rate of eggs: #oocytes/365 in a sin function (to account for spawning season). Note that adults do not turn into eggs (they live many steps.)
-## TODO: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days.
+## [x]: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days. Growth rate is 0.32 per year, which is 0.32/365 per day.
 ## [ ] TODO: Estimate exploitation rates given average sizes and a single pool model.
 #=
 Example of adding if statements in the ODE system
@@ -147,26 +148,8 @@ plot!(sol_2, vars=(0, 6), label="S₂")
 
 
 ### ----------------------------------------------------------------
-### 2.1 General model TODO: Does not run yet.
+### 2.1 General model
 ### ----------------------------------------------------------------
-
-
-# dummy ode to test (It works!)
-function nsites!(du, u, p, t)
-  for site in 1:5
-    du[site] = p[1][site] * u[site] + p[2][site] * 0.001
-  end
-end
-
-pn = [[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]
-u0n = [0.15, 0.14, 0.13, 0.12, 0.11]
-tspann = (0.0, 10.0)
-probn = ODEProblem(nsites!, u0n, tspann, pn)
-soln = solve(probn, Tsit5())
-
-plot(soln)
-
-# Real ODE
 
 ## Starting the model
 #---------------------------
@@ -175,64 +158,112 @@ nlifestages = 5
 
 ## initial state of the system
 # Initial population sizes at each life stage per site
-u0_general = [[rand(1000.0:5000.0) for j in 1:nlifestages] for i in 1:nsites]
-# Initial average sizes per site 
+# There are 100 individuals per m2. We assume 2 km2 per site -> 20k individuals per site.
+u0_general = [[18_000.0 for j in 1:nlifestages] for i in 1:nsites]
+# Initial average sizes per site. Avg. size is between 45 to 51.
 for i in 1:nsites
-  push!(u0_general[i], rand(45:0.1:51))
+  push!(u0_general[i], 48.0)
 end
 
 # u0 cannot be a nested vector.
 u0_general = reduce(vcat, u0_general)
 
 ## defining model parameters
+function exploit(t, rate)
+  if (t % 365) / 365 < 0.42
+    return rate
+  else
+    return 0.0
+  end
+end
+
+"""
+captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce
+"""
+function reproductive_cycle(t)
+  if (t % 365) / 365 > 0.42
+    return 1.0
+  else
+    return 0.0
+  end
+end
+
 # conversion rates between stages
 # average oocytes per year per adult
 avg_oocytes = mean([92098, 804183])
 reggs = avg_oocytes / 365  # conversion rate of adults to eggs
 r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
-# natural death rates per life stage. TODO: What are the first four values?
-d = [0.1, 0.01, 0.01, 0.01, 0.000322]
-size_growth_rate = 0.1
-migration_matrix = rand(nsites, nsites)
-exploitation_rates = [t -> ((t % 365) / 365) < 0.5 ? 0.0 : x for (s, x) in zip(1:nsites, rand(0.001:0.001:0.003, nsites))]
+# natural death rates per life stage.
+d = [0.005, 0.005, 0.005, 0.005, 0.000322]
+size_growth_rate = 0.32/365
+distance_matrix = rand(0.01:0.01:0.1, nsites, nsites)  # TODO use empirical values
+distance_matrix[diagind(distance_matrix)] .= 0.0
+exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use empirical values
 size_max = 56.0
-K = 1e5
-# p_general = [r, d, size_growth_rate, migration_matrix, exploitation_rates, size_max, K]
-p_general = [r, d, size_growth_rate, exploitation_rates, size_max, K]
-
+K = 24_000  # for 2.4 km2 per site. NB: we use K only for the Juveniles.
+p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K]
 
 function nsites!(du, u, p, t)
+  # Change these parameters if you change the model
   nsites = 10
   nlifestages = 5
+  site_indices = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54]
+
   counter = 1
   for site in 1:nsites
-    # All non-adult stages. dNⱼ = (r * Nⱼ₋₁ * ((K - Nⱼ₋₁) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-    site_index = ((site * (nlifestages + 1)) - nlifestages - 1)
-    for stage in 1:(nlifestages-1)
+    # site_index = (site * (nlifestages + 1)) - (nlifestages + 1)
+    site_index = site_indices[site]
+
+    # Stages Egg, Trochophore (1, 2)
+    for stage in 1:2
       prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
-      du[counter] = (p[1][stage] * u[site_index + prev_stage] * ((p[6] - u[site_index + prev_stage]) / p[6])) -
-                   (p[2][stage] * u[site_index + stage]) -
-                   (p[1][stage] * u[site_index + stage])
+      du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
+                    (p[1][stage+1] * u[site_index+stage]) -
+                    (p[2][stage] * u[site_index+stage]) +
+                    (sum(p[4][:, site] .* u[site_indices.+stage])) -
+                    (u[site_index+stage]*sum(p[4][site, :]))
       counter += 1
     end
 
-    # adult N. dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
-    du[counter] = (p[1][nlifestages] * u[site_index + nlifestages-1]) -
-                 (p[2][nlifestages] * u[site_index + nlifestages]) -
-                 (p[4][site](t) * u[site_index + nlifestages])
+    #stage 3 Veliger
+    stage = 3
+    prev_stage = 2
+    du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
+              (p[1][stage+1] * u[site_index+stage]) -
+              (p[2][stage] * u[site_index+stage]) +
+              (sum(p[4][:, site] .* u[site_indices.+stage])) -
+              (u[site_index+stage]*sum(p[4][site, :]))
+      counter += 1
+      
+    # stage 4 Juvenile
+    stage = 4
+    prev_stage = 3
+    du[counter] = (p[1][stage] * u[site_index+prev_stage] * ((p[7] - u[site_index+prev_stage]) / p[7])) -
+                (p[1][stage+1] * u[site_index+stage]) - 
+                (p[2][stage] * u[site_index+stage]) 
     counter += 1
 
+    # stage 5 adult
+    stage = 5
+    prev_stage = 4
+    du[counter] = (p[1][stage] * u[site_index+prev_stage]) - 
+                (exploit(t, p[5][site]) * u[site_index+stage]) -
+                (p[2][stage] * u[site_index+stage])
+    counter += 1
+
+    # adult sizes
     # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    du[counter] = p[3] * u[site_index + nlifestages + 1] * (1 - u[site_index + nlifestages + 1] / (p[5] - (p[5] * p[4][site](t))))
+    du[counter] = p[3] * u[site_index+nlifestages+1] * (1 - u[site_index+nlifestages+1] / (p[6] - (p[6] * exploit(t, p[4][site]))))
+    counter += 1
 
   end
 end
 
-tspan_general = (0.0, 10.0)
+tspan_general = (0.0, 250)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
 sol_general = solve(prob_general, Tsit5())
 
-plot(sol_general)
+plot(sol_general, legend=false)
 
 ### --------------------------------------------------
 ### 3. Sensitivity analysis
