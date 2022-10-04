@@ -4,7 +4,7 @@ using LinearAlgebra
 using OrdinaryDiffEq
 # using DifferentialEquations
 using GlobalSensitivity
-using Plots
+using CairoMakie
 using Statistics
 using DataFrames
 using CSV
@@ -153,7 +153,7 @@ plot!(sol_2, vars=(0, 6), label="S₂")
 
 ## Starting the model
 #---------------------------
-nsites = 10
+nsites = 8
 nlifestages = 5
 
 ## initial state of the system
@@ -170,7 +170,7 @@ u0_general = reduce(vcat, u0_general)
 
 ## defining model parameters
 function exploit(t, rate)
-  if (t % 365) / 365 < 0.42
+  if (t % 365) / 365 > 0.42
     return rate
   else
     return 0.0
@@ -181,7 +181,7 @@ end
 captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce
 """
 function reproductive_cycle(t)
-  if (t % 365) / 365 > 0.42
+  if (t % 365) / 365 <= 0.42
     return 1.0
   else
     return 0.0
@@ -192,22 +192,25 @@ end
 # average oocytes per year per adult
 avg_oocytes = mean([92098, 804183])
 reggs = avg_oocytes / 365  # conversion rate of adults to eggs
+reggs = reggs / 1000 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
 # natural death rates per life stage.
-d = [0.005, 0.005, 0.005, 0.005, 0.000322]
+d = [0.001, 0.001, 0.001, 0.001, 0.000322]
 size_growth_rate = 0.32/365
-distance_matrix = rand(0.01:0.01:0.1, nsites, nsites)  # TODO use empirical values
-distance_matrix[diagind(distance_matrix)] .= 0.0
+distance_df = CSV.read("distance_matrix.csv", DataFrame)
+distance_matrix = Matrix(distance_df)[:, 1:end-1]
 exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use empirical values
 size_max = 56.0
-K = 24_000  # for 2.4 km2 per site. NB: we use K only for the Juveniles.
-p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K]
+K = 64_000  # for 2.4 km2 per site. NB: we use K only for the Juveniles.
+α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
+# Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
+p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
 
 function nsites!(du, u, p, t)
   # Change these parameters if you change the model
-  nsites = 10
+  nsites = 8
   nlifestages = 5
-  site_indices = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54]
+  site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
 
   counter = 1
   for site in 1:nsites
@@ -217,22 +220,30 @@ function nsites!(du, u, p, t)
     # Stages Egg, Trochophore (1, 2)
     for stage in 1:2
       prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
+      dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+      dispersal_probs1[site] = 0.0
+      dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+      dispersal_probs2[site] = 0.0
       du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
                     (p[1][stage+1] * u[site_index+stage]) -
                     (p[2][stage] * u[site_index+stage]) +
-                    (sum(p[4][:, site] .* u[site_indices.+stage])) -
-                    (u[site_index+stage]*sum(p[4][site, :]))
+                    (sum(dispersal_probs1 .* u[site_indices.+stage])) -
+                    (u[site_index+stage] * sum(dispersal_probs2))
       counter += 1
     end
 
     #stage 3 Veliger
     stage = 3
     prev_stage = 2
+    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    dispersal_probs1[site] = 0.0
+    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    dispersal_probs2[site] = 0.0
     du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
               (p[1][stage+1] * u[site_index+stage]) -
               (p[2][stage] * u[site_index+stage]) +
-              (sum(p[4][:, site] .* u[site_indices.+stage])) -
-              (u[site_index+stage]*sum(p[4][site, :]))
+              (sum(dispersal_probs1 .* u[site_indices.+stage])) -
+              (u[site_index+stage] * sum(dispersal_probs2))
       counter += 1
       
     # stage 4 Juvenile
@@ -253,17 +264,41 @@ function nsites!(du, u, p, t)
 
     # adult sizes
     # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    du[counter] = p[3] * u[site_index+nlifestages+1] * (1 - u[site_index+nlifestages+1] / (p[6] - (p[6] * exploit(t, p[4][site]))))
+    du[counter] = p[3] * u[site_index+nlifestages+1] * (1 - u[site_index+nlifestages+1] / (p[6] - (p[6] * exploit(t, p[5][site]))))
     counter += 1
 
   end
 end
 
-tspan_general = (0.0, 250)
+tspan_general = (0.0, 200)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
 sol_general = solve(prob_general, Tsit5())
 
-plot(sol_general, legend=false)
+# Plot
+# site_names = distance_df.site
+site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
+for stage in 1:5
+  fig = Figure()
+  ax1 = Axis(fig[1, 1])
+  lines!(ax1, sol_general.t, [sol_general.u[i][site_indices[1]+stage] for i in 1:length(sol_general.t)], yscale=:log10, label=site_names[1])
+  ax1.title = "N for stage: $(stage)"
+  for site in 2:8
+    lines!(ax1, sol_general.t, [sol_general.u[i][site_indices[site]+stage] for i in 1:length(sol_general.t)], label=site_names[site])
+  end
+  fig[1,2] = Legend(fig, ax1, "Site")
+  save("figs/stage=$stage.pdf", fig)
+end
+
+# Changes in body size
+stage = 6
+fig, ax, plt = lines(sol_general.t, [sol_general.u[i][site_indices[1]+stage] for i in 1:length(sol_general.t)], yscale=:log10, label=site_names[1])
+ax.title = "Body size"
+for site in 2:8
+  lines!(ax, sol_general.t, [sol_general.u[i][site_indices[site]+stage] for i in 1:length(sol_general.t)], label=site_names[site])
+end
+fig[1, 2] = Legend(fig, ax, "Site")
+save("figs/body_sizes.pdf", fig)
 
 ### --------------------------------------------------
 ### 3. Sensitivity analysis
