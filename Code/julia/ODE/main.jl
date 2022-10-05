@@ -287,7 +287,7 @@ end
 
 tspan_general = (0.0, 365*2)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
-sol_general = solve(prob_general, Tsit5(), adaptive=false, dt=0.01, progress=false)
+sol_general = solve(prob_general, Rosenbrock23())
 
 # Plot
 # site_names = distance_df.site
