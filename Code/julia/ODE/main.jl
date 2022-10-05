@@ -159,7 +159,7 @@ nlifestages = 5
 ## initial state of the system
 # Initial population sizes at each life stage per site
 # There are 100 individuals per m2. We assume 2 km2 per site -> 20k individuals per site.
-u0_general = [[18_000.0 for j in 1:nlifestages] for i in 1:nsites]
+u0_general = [[1_800.0 for j in 1:nlifestages] for i in 1:nsites]
 # Initial average sizes per site. Avg. size is between 45 to 51.
 for i in 1:nsites
   push!(u0_general[i], 48.0)
@@ -170,7 +170,7 @@ u0_general = reduce(vcat, u0_general)
 
 ## defining model parameters
 function exploit(t, rate)
-  if (t % 365) / 365 > 0.42
+  if (t % 365) / 365 < 0.42
     return rate
   else
     return 0.0
@@ -181,7 +181,7 @@ end
 captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce
 """
 function reproductive_cycle(t)
-  if (t % 365) / 365 <= 0.42
+  if (t % 365) / 365 >= 0.42
     return 1.0
   else
     return 0.0
@@ -191,7 +191,7 @@ end
 # conversion rates between stages
 # average oocytes per year per adult
 avg_oocytes = mean([92098, 804183])
-reggs = avg_oocytes / 365  # conversion rate of adults to eggs
+reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 reggs = reggs / 1000 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
 # natural death rates per life stage.
@@ -212,67 +212,82 @@ function nsites!(du, u, p, t)
   nlifestages = 5
   site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
 
-  counter = 1
+  counter = 0
   for site in 1:nsites
     # site_index = (site * (nlifestages + 1)) - (nlifestages + 1)
     site_index = site_indices[site]
 
-    # Stages Egg, Trochophore (1, 2)
-    for stage in 1:2
-      prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
-      dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-      dispersal_probs1[site] = 0.0
-      dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-      dispersal_probs2[site] = 0.0
-      du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
-                    (p[1][stage+1] * u[site_index+stage]) -
-                    (p[2][stage] * u[site_index+stage]) +
-                    (sum(dispersal_probs1 .* u[site_indices.+stage])) -
-                    (u[site_index+stage] * sum(dispersal_probs2))
-      counter += 1
-    end
+    # Stages 1 Egg
+    counter += 1
+    stage = 1
+    prev_stage = 5
+    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    dispersal_probs1[site] = 0.0
+    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    dispersal_probs2[site] = 0.0
+    du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
+                  (p[1][stage+1] * u[site_index+stage]) -
+                  (p[2][stage] * u[site_index+stage]) +
+                  (sum(dispersal_probs1 .* u[site_indices.+stage])) -
+                  (u[site_index+stage] * sum(dispersal_probs2))
+
+    # Stage 2 Trochophore
+    counter += 1
+    stage = 2
+    prev_stage = 1
+    prev_stage = stage - 1 > 0 ? stage - 1 : nlifestages
+    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    dispersal_probs1[site] = 0.0
+    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    dispersal_probs2[site] = 0.0
+    du[counter] = (p[1][stage] * u[site_index+prev_stage]) -
+                  (p[1][stage+1] * u[site_index+stage]) -
+                  (p[2][stage] * u[site_index+stage]) +
+                  (sum(dispersal_probs1 .* u[site_indices.+stage])) -
+                  (u[site_index+stage] * sum(dispersal_probs2))
 
     #stage 3 Veliger
+    counter += 1
     stage = 3
     prev_stage = 2
     dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
     dispersal_probs1[site] = 0.0
     dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
     dispersal_probs2[site] = 0.0
-    du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site_index+prev_stage]) -
-              (p[1][stage+1] * u[site_index+stage]) -
+    du[counter] = (p[1][stage] * u[site_index+prev_stage]) -
+              (p[1][stage+1] * u[site_index+stage] * (p[7] - u[site_index+4] - u[site_index+5])) -
               (p[2][stage] * u[site_index+stage]) +
               (sum(dispersal_probs1 .* u[site_indices.+stage])) -
               (u[site_index+stage] * sum(dispersal_probs2))
-      counter += 1
       
     # stage 4 Juvenile
+    counter += 1  
     stage = 4
     prev_stage = 3
-    du[counter] = (p[1][stage] * u[site_index+prev_stage] * ((p[7] - u[site_index+prev_stage]) / p[7])) -
+    # du[counter] = (p[1][stage] * u[site_index+prev_stage] * ((p[7] - u[site_index+prev_stage]) / p[7])) -
+    du[counter] = (p[1][stage] * u[site_index+prev_stage]) -
                 (p[1][stage+1] * u[site_index+stage]) - 
                 (p[2][stage] * u[site_index+stage]) 
-    counter += 1
 
     # stage 5 adult
+    counter += 1
     stage = 5
     prev_stage = 4
     du[counter] = (p[1][stage] * u[site_index+prev_stage]) - 
                 (exploit(t, p[5][site]) * u[site_index+stage]) -
                 (p[2][stage] * u[site_index+stage])
-    counter += 1
-
+                
     # adult sizes
     # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    du[counter] = p[3] * u[site_index+nlifestages+1] * (1 - u[site_index+nlifestages+1] / (p[6] - (p[6] * exploit(t, p[5][site]))))
     counter += 1
+    du[counter] = p[3] * u[site_index+nlifestages+1] * (1 - u[site_index+nlifestages+1] / (p[6] - (p[6] * exploit(t, p[5][site]))))
 
   end
 end
 
-tspan_general = (0.0, 200)
+tspan_general = (0.0, 365*2)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
-sol_general = solve(prob_general, Tsit5())
+sol_general = solve(prob_general, Tsit5(), adaptive=false, dt=0.01, progress=false)
 
 # Plot
 # site_names = distance_df.site
