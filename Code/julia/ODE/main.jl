@@ -192,7 +192,7 @@ end
 # average oocytes per year per adult
 avg_oocytes = mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-reggs = reggs / 1000 # because the rate is too high to be handled
+reggs = reggs / 500 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
 # natural death rates per life stage.
 d = [0.001, 0.001, 0.001, 0.001, 0.000322]
@@ -201,7 +201,7 @@ distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Matrix(distance_df)[:, 1:end-1]
 exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use empirical values
 size_max = 56.0
-K = 64_000  # for 2.4 km2 per site. NB: we use K only for the Juveniles.
+K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
@@ -221,7 +221,7 @@ function nsites!(du, u, p, t)
     counter += 1
     stage = 1
     prev_stage = 5
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site]  * ((p[7] - u[site_index+prev_stage]) / p[7]))
     dispersal_probs1[site] = 0.0
     dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
     dispersal_probs2[site] = 0.0
@@ -255,7 +255,7 @@ function nsites!(du, u, p, t)
     dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
     dispersal_probs2[site] = 0.0
     du[counter] = (p[1][stage] * u[site_index+prev_stage]) -
-              (p[1][stage+1] * u[site_index+stage] * (p[7] - u[site_index+4] - u[site_index+5])) -
+              (p[1][stage+1] * u[site_index+stage]) -
               (p[2][stage] * u[site_index+stage]) +
               (sum(dispersal_probs1 .* u[site_indices.+stage])) -
               (u[site_index+stage] * sum(dispersal_probs2))
@@ -285,9 +285,9 @@ function nsites!(du, u, p, t)
   end
 end
 
-tspan_general = (0.0, 365*2)
+tspan_general = (100.0, 200.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
-sol_general = solve(prob_general, Rosenbrock23())
+sol_general = solve(prob_general, Rosenbrock23(), dt=0.001, adaptive=false)
 
 # Plot
 # site_names = distance_df.site
