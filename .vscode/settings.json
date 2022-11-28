@@ -1,3 +1,4 @@
 {
-  "workbench.colorTheme": "Default Light+"
+  "workbench.colorTheme": "Default Light+",
+  "julia.environmentPath": "c:\\Users\\miste\\Documents\\GitHub\\Lapacom\\Code\\julia\\ODE\\Numerical_approximation"
 }
