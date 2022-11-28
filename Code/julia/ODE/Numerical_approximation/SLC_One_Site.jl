@@ -5,7 +5,7 @@ using LinearAlgebra
 #using OrdinaryDiffEq
 using DifferentialEquations
 using GlobalSensitivity
-using CairoMakie
+#using CairoMakie
 using Statistics
 using DataFrames
 using CSV
@@ -35,6 +35,7 @@ end
 Et(t) = (sin(t)^2) / 2  # time varying exploitation
 # To adjust the sin function horizonally (stretch/shrink the wave length), multiply t by a factor c.
 # You may also use a function with if statements.
+#=
 function Et(t)
   if modf(t)[1] < 0.5
     return 0.0
@@ -42,9 +43,9 @@ function Et(t)
     return 0.5
   end
 end
-
+=#
 p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
-u0_1 = [1e3, 1e3, 40.0]
+u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ_0,Nₐ_0, Sₐ_0
 tspan_1 = (0.0, 200.0)
 prob_1 = ODEProblem(single_site!, u0_1, tspan_1, p_1)
 sol_1 = solve(prob_1, Tsit5())
@@ -54,4 +55,32 @@ plot!(sol_1,vars=(0, 2), label="Nₐ")
 
 ### ----------------------------------------------------------------
 ### Numerical aproximation
-### ----------------------------------------------------------------
+### ---------------------------------------------------------------- 
+N_et = zeros(Float64, 21)
+N_at = zeros(Float64, 21)
+Expl= 0:0.05:1
+
+c = 0
+for n = 0:0.05:1
+ function Et(t)
+  if modf(t)[1] < 0.5
+    return 0.0
+  else
+    return n
+  end
+ end
+ p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
+ u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ_0,Nₐ_0, Sₐ_0
+ tspan_1 = (0.0, 200.0)
+ prob_1 = ODEProblem(single_site!, u0_1, tspan_1, p_1)
+ sol_1 = solve(prob_1, Tsit5())
+ c=c+1
+
+ N_et[c,] = sol_1[1,end]
+ N_at[c,] = sol_1[2,end]
+
+end
+
+
+plot(Expl,N_et)
+plot!(Expl,N_at)
