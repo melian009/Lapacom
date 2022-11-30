@@ -107,13 +107,13 @@ end
 
 plot(Expl,N_et,label="Nⱼ")
 plot!(Expl,N_at,label="Nₐ")
-xlims!(0.0,0.6)
+xlims!(0.0,1)
 xlabel!("E")
-ylabel!("N (nº individuals")
+ylabel!("N (nº individuals)")
 
 plot(Expl,S_at)
 xlabel!("E")
-ylabel!("Sₐ (nº individuals")
+ylabel!("Sₐ (nº individuals)")
 
 
 
