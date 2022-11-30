@@ -23,7 +23,8 @@ d: death rate
 E: exploitation rate
 K: carrying capacity
 """
-#= The first two equatons arent linked with the third one
+#= In the first definition of the equations, the abundances equatons arent linked with the size one.
+
 function single_site!(du, u, p, t)
   Nⱼ, Nₐ, Sₐ = u
   r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ = p
@@ -32,8 +33,8 @@ function single_site!(du, u, p, t)
   du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
 end
 
-The three equations are defined in such a way that the number of eggs (N_e)
-depends on the size of the adults (S_a) which depends on the exploitation rate (Et).
+In the new definition, the three equations are defined in such a way that the number of eggs (N_e)
+depends on the size of the adults (S_a) and and the adult abundance which depends on the exploitation rate (Et).
 This means that the three ODE are linked between each other.
 =#
 function single_site_SLC!(du, u, p, t)
