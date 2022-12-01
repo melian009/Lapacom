@@ -268,8 +268,8 @@ ylabel!("Sₐ (nº individuals)")
 """ ------------------------------------------------------------------------------
 -                                    2nd definition                              -
 ---------------------------------------------------------------------------------- """
-Exp_lim = 0.99999                # Exploitation max limit 
-m=0.00001                        # Interval of exploitation values 
+Exp_lim = 0.99                   # Exploitation max limit 
+m=0.01                           # Interval of exploitation values 
 Expl= 0:m:Exp_lim                # Expoitation values for plotting
 tspan = (0.0,365*2)              # Time range 
 u0 = [1e3,1e3,40]                # Initial conditions of N_e, N_a, S_a
