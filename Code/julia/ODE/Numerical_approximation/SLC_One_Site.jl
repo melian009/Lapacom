@@ -85,11 +85,11 @@ that change during the year (0 for explitation period and 1 for resproduction pe
 
 # The model definition is:
 
-function SLC_single_site_S_X!(du, u, p, t)
+function single_site_S_X!(du, u, p, t)
   Nⱼ, Nₐ, Sₐ = u
-  r, g, dⱼ, dₐ, Exp, K, size_growth_rate, sizeₘₐₓ, X = p
+  r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X = p
   du[1] = dNⱼ = (X(t) * r * Nₐ * (Sₐ/sizeₘₐₓ)*((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - ((1 - X(t)) * Exp(t,rate) * Nₐ)
+  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - ((1 - X(t)) * (1 - X(t)) * Nₐ)
   du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - E * (1 - X(t)))))
 end
 #=
@@ -185,7 +185,7 @@ sol_3 = solve(prob_3, Tsit5())
 plot(sol_3,vars=(0, 1), label="Nⱼ", color="blue", ylabel="N (Nº individuals)",xlabel="(days)")
 plot!(sol_3,vars=(0, 2), label="Nₐ", color="red",  ylabel="N (Nº individuals)",xlabel="(days)")
 plot!(twinx(),sol_3,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)", xlabel="t")
-title!("1st definition: 1y")
+title!("SLC One Site 1")
 
 # Abundances plot in time 
 
@@ -237,17 +237,18 @@ ylabel!("S (mm)")
  Posible issue : over-exploitation?
  Posible solution: reduce more the proportion of exploited adult population. 
 =#
+
 function Et1(t)
   if modf(t)[1] < 0.5  
     return 0.0
   else
-    return 0.42        # Proportion of the adult population that is exploited: 37%
+    return 0.37        # Proportion of the adult population that is exploited: 37%
     
   end
 end
 
 # Parameters and initial conditions for the diferent proportion of adult exploited: E= 0.37 
-p_2 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ 
+p_2 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.37, K, size_growth_rate, sizeₘₐₓ 
 u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ,Nₐ, Sₐ
 
 # Calculate the numerical ODE solution for 2 years (730 days) time range 
@@ -259,7 +260,7 @@ plot(sol_2,vars=(0, 1), label="Nⱼ:E=0.5")
 plot!(sol_2,vars=(0, 2), label="Nₐ:E=0.5")
 plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.42")
 plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.42")
-title!("1st definition: 2y")
+title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
@@ -290,13 +291,19 @@ Abundances ODE and Size ODE are linked, but no reproductive cicle consideration:
 """
 
 #Parameters and initial conditions for this simulations will 
+# p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.50, K, size_growth_rate, sizeₘₐₓ 
+p_2 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.37, K, size_growth_rate, sizeₘₐₓ 
+# u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ,Nₐ, Sₐ
+# tspan_1 = (0.0, 50.0) 
+tspan_2 = (0.0, 365.0*1) ## One Year
+tspan_3 = (0.0, 365.0*2) ## Two years
 
 # Calculate the numerical ODE solution for a 365 days (a year) time range
-prob_4 = ODEProblem(SLC_single_site_S!, u0_1, tspan_2, p_1) 
+prob_4 = ODEProblem(single_site_S!, u0_1, tspan_2, p_2) 
 sol_4 = solve(prob_4, Tsit5())
 
 # Calculate the numerical ODE solution for a 365 days (a year) time range
-prob_5 = ODEProblem(SLC_single_site_S!, u0_1, tspan_3, p_1) 
+prob_5 = ODEProblem(single_site_S!, u0_1, tspan_3, p_2) 
 sol_5 = solve(prob_5, Tsit5())
 
 #Abundances plot in time 
@@ -336,6 +343,15 @@ ylabel!("N (Nº individuals)")
  Sizes decrease from 40mm until 30mm aproximately and have more variability in the sizes over time.
 =#
 
+plot1=plot(sol_5,vars=(0, 1), label="Nⱼ", color="blue", ylabel="N (Nº individuals)",xlabel="t(days)")
+plot1=plot!(sol_5,vars=(0, 2), label="Nₐ", color="red",  ylabel="N (Nº individuals)",xlabel="t(days)")
+#plot!(sol_5,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)",xlabel= " ")
+title!("SLC One Site 2")
+
+plot(sol_5,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)",xlabel= "t")
+title!("SLC One Site 2")
+
+
 """
 The third definition: 
 Abundances ODE and Size ODE are linked and have the reproductive cicle consideration:
@@ -349,13 +365,21 @@ Abundances ODE and Size ODE are linked and have the reproductive cicle considera
  in the single site.
 =#
 
+function single_site_S_X!(du, u, p, t)
+  Nⱼ, Nₐ, Sₐ = u
+  r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X = p
+  du[1] = dNⱼ = (X(t) * r * Nₐ * (Sₐ/sizeₘₐₓ)*((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
+  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - ((1 - X(t)) * (1 - X(t)) * Nₐ)
+  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - E * (1 - X(t)))))
+end
+
 # Parameters and initial conditions for the third simulation
-p_3 = [0.6, 0.06, 0.05, 0.08, Exp, 1e4, 0.2, 40.0, X_rc, 0.001] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X, Exp_rate 
+p_3 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0, X_rc] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X 
 u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ,Nₐ, Sₐ
 
 
 # Calculate the numerical ODE solution for a 365 days (1 year) time range
-prob_6 = ODEProblem(SLC_single_site_S_X!, u0_1, tspan_2, p_3) 
+prob_6 = ODEProblem(single_site_S_X!, u0_1, tspan_2, p_3) 
 sol_6 = solve(prob_6, Tsit5())
 
 # Calculate the numerical ODE solution for a 730 days (2 year) time range
@@ -429,16 +453,16 @@ end
 
 # Parameters and initial conditions for this SLC model formulation:
 
-p_3 = [0.6, 0.06, 0.05, 0.08, Exp, 1e4, 0.2, 52.0, X_rc, 0.001] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X, Exp_rate 
+p_3 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 52.0, X_rc, 0.001] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X, Exp_rate 
 u0_2 = [1e4, 1e4, 40.0]  ## Nⱼ,Nₐ, Sₐ
 
 
 # Calculate the numerical ODE solution for a 365 days (1 year) time range
-prob_8 = ODEProblem(SLC_single_site_S_X!, u0_2, tspan_2, p_3) 
+prob_8 = ODEProblem(single_site_S_X!, u0_2, tspan_2, p_3) 
 sol_8 = solve(prob_8, Tsit5())
 
 # Calculate the numerical ODE solution for a 730 days (2 year) time range
-prob_9 = ODEProblem(SLC_single_site_S_X!, u0_2, tspan_3, p_3) 
+prob_9 = ODEProblem(single_site_S_X!, u0_2, tspan_3, p_3) 
 sol_9 = solve(prob_9, Tsit5())
 
 #Abundances plot in time
