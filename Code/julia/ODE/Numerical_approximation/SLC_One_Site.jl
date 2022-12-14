@@ -87,33 +87,16 @@ that change during the year (0 for explitation period and 1 for resproduction pe
 
 function single_site_S_X!(du, u, p, t)
   Nⱼ, Nₐ, Sₐ = u
-  r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X = p
+  r, g, dⱼ, dₐ, Exp, K, size_growth_rate, sizeₘₐₓ, X, rate = p
   du[1] = dNⱼ = (X(t) * r * Nₐ * (Sₐ/sizeₘₐₓ)*((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - ((1 - X(t)) * (1 - X(t)) * Nₐ)
-  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - E * (1 - X(t)))))
+  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (Exp(t,rate) * Nₐ)
+  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - Exp(t,rate))))
 end
 #=
 In this formulation eggs abundances and adult size now have the component of the 
 reproductiveX)/exploitation(1-X) cicle. This condition de model to give egg 
 inputs when theres no exploitation, and adutls are exploited when are not producing eggs. 
 =#
-
-
-# -----------------------------------------------------------------------------------------
-
-""" 
-Exploitation (E) and Reproductive cycle (X)
-"""
-
-# The reproductive cycle is defined as:
-
-function X_rc(t)
-  if (t % 365) / 365 >= 0.5
-    return 1.0
-  else
-    return 0.0
-  end
-end
 
 # The time varing exploitation is:
 
@@ -162,11 +145,14 @@ title!("1st definition: 50d")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
+
+
 # Calculate the numerical ODE solution for a 365 days (one years) time range
 tspan_2 = (0.0, 365.0*1) 
 prob_2 = ODEProblem(single_site!, u0_1, tspan_2, p_1)
 sol_2 = solve(prob_2, Tsit5())
 
+
 """Abundances plot in time for 365 days (One Year)"""
 plot(sol_2,vars=(0, 1), label="Nⱼ")
 plot!(sol_2,vars=(0, 2), label="Nₐ")
@@ -174,35 +160,24 @@ title!("1st definition: 1y")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
-# Calculate the numerical ODE solution for a 730 days (two years) time range
 
+# Calculate the numerical ODE solution for a 730 days (two years) time range
 tspan_3 = (0.0, 365.0*2) 
 prob_3 = ODEProblem(single_site!, u0_1, tspan_3, p_1)
 sol_3 = solve(prob_3, Tsit5())
 
-"""Abundances plot in time for 365 days (One Year)"""
 
-plot(sol_3,vars=(0, 1), label="Nⱼ", color="blue", ylabel="N (Nº individuals)",xlabel="(days)")
-plot!(sol_3,vars=(0, 2), label="Nₐ", color="red",  ylabel="N (Nº individuals)",xlabel="(days)")
-plot!(twinx(),sol_3,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)", xlabel="t")
+"""Abundances plot in time for 370 days"""
+
+plot(sol_3,vars=(0, 1), label="Nⱼ", color="blue", ylabel="N (Nº individuals)",xlabel="t (days)")
+plot!(sol_3,vars=(0, 2), label="Nₐ", color="red",  ylabel="N (Nº individuals)",xlabel="t (days)")
 title!("SLC One Site 1")
 
-# Abundances plot in time 
-
-# For 50 days
-plot(sol_1,vars=(0, 1), label="Nⱼ")
-plot!(sol_1,vars=(0, 2), label="Nₐ")
-title!("1st definition: 50d")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
+plot(sol_3,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)", xlabel="t (days)")
+title!("SLC Once Site 1")
 
 
-# For 1 year
-plot(sol_2,vars=(0, 1), label="Nⱼ")
-plot!(sol_2,vars=(0, 2), label="Nₐ")
-title!("1st definition: 1y")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
+#Fist def final plots: Exploitation rate and Two years simulation:
 
 # For 2 years
 plot(sol_3,vars=(0, 1), label="Nⱼ")
@@ -212,17 +187,6 @@ xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
 # Adult size plot by time
-
-# For 50 days
-plot(sol_1,vars=(0,3), label="Sₐ") 
-title!("1st definition: 50d")
-xlabel!("t (days)")
-ylabel!("S (mm)")
-# For 1 year
-plot(sol_2,vars=(0,3), label="Sₐ") 
-title!("1st definition: 1y")
-xlabel!("t (days)")
-ylabel!("S (mm)")
 # For 2 years
 plot(sol_3,vars=(0,3), label="Sₐ") 
 title!("1st definition: 2y")
@@ -252,29 +216,32 @@ p_2 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.37, K
 u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ,Nₐ, Sₐ
 
 # Calculate the numerical ODE solution for 2 years (730 days) time range 
-prob_3_1 = ODEProblem(single_site!, u0_1, tspan_2, p_2)
+prob_3_1 = ODEProblem(single_site!, u0_1, tspan_3, p_2)
 sol_3_1 = solve(prob_3_1, Tsit5())
 
-#Contrast plot of different adult populations exploited (E=0.5 vs E= 0.37)
-plot(sol_2,vars=(0, 1), label="Nⱼ:E=0.5")
-plot!(sol_2,vars=(0, 2), label="Nₐ:E=0.5")
-plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.42")
-plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.42")
+
+
+"""Contrast plot of different adult populations exploited (E=0.5 vs E= 0.37)"""
+
+plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5",legned=:right, palette = :darktest)
+plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5",palette = :darktest)
+plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",palette = :darktest)
+plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",palette = :darktest)
 title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
-
 #=
  - Exploitation of 37% of the adult population:
  Now the populations of eggs and adults stabilized with time, number of eggs increase until 7000 individuals aproximately, and
  adults individuals increase until 1500 individuals aproximately.
 =#
-
+using RDatasets
 # Adult size plot by time
 # For 50 days
-plot(sol_3,vars=(0,3), label="Sₐ:E=0.5") 
-plot!(sol_3_1,vars=(0,3), label="Sₐ:E=0.37") 
-title!("1st definition: 1y")
+
+plot(sol_3,vars=(0,3), label="Sₐ:E=0.5",palette = :darktest) 
+plot!(sol_3_1,vars=(0,3), label="Sₐ:E=0.37",palette = :darktest) 
+title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("S (mm)")
 
@@ -291,66 +258,47 @@ Abundances ODE and Size ODE are linked, but no reproductive cicle consideration:
 """
 
 #Parameters and initial conditions for this simulations will 
-# p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.50, K, size_growth_rate, sizeₘₐₓ 
+p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.50, K, size_growth_rate, sizeₘₐₓ 
 p_2 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0] # r, g, dⱼ, dₐ, E=0.37, K, size_growth_rate, sizeₘₐₓ 
-# u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ,Nₐ, Sₐ
-# tspan_1 = (0.0, 50.0) 
-tspan_2 = (0.0, 365.0*1) ## One Year
+
 tspan_3 = (0.0, 365.0*2) ## Two years
 
-# Calculate the numerical ODE solution for a 365 days (a year) time range
-prob_4 = ODEProblem(single_site_S!, u0_1, tspan_2, p_2) 
+# Calculate the numerical ODE solution for a 730 days E:0.5
+prob_4 = ODEProblem(single_site_S!, u0_1, tspan_3, p_1) 
 sol_4 = solve(prob_4, Tsit5())
 
-# Calculate the numerical ODE solution for a 365 days (a year) time range
+# Calculate the numerical ODE solution for a 730 days E:0.37
 prob_5 = ODEProblem(single_site_S!, u0_1, tspan_3, p_2) 
 sol_5 = solve(prob_5, Tsit5())
 
 #Abundances plot in time 
-#For 1 year
-plot(sol_4,vars=(0, 1), label="Nⱼ")
-plot!(sol_4,vars=(0, 2), label="Nₐ")
-title!("2nd definition: 1y")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
 
 #For 2 year
-plot(sol_5,vars=(0, 1), label="Nⱼ")
-plot!(sol_5,vars=(0, 2), label="Nₐ")
-title!("2nd definition: 2y")
+plot(sol_4,vars=(0, 1), label = "Nⱼ E:0.5", palette = :darktest)
+plot!(sol_4,vars=(0, 2), label= "Nₐ E:0.5", palette = :darktest)
+plot!(sol_5,vars=(0, 1), label= "Nⱼ E:0.37", palette = :darktest)
+plot!(sol_5,vars=(0, 2), label= "Nₐ E:0.37", palette = :darktest)
+title!("Exploitation differencies 2")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
 #= 
  The abundances presents more fluctuations when the size is linked with eggs abundance, 
- but after 150 days abundances start to decrease until extintion.
+ but after 150 days abundances start to decrease until extintion by E:0.37 and no with E:0.5... Why❓
 =#
 
 #Adult size plot by time
-# For 1 year
-plot(sol_4,vars=(0,3), label="Sₐ:")
-title!("2nd definition: 1y")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
 
 # For 2 years
-plot!(sol_5,vars=(0,3), label="Sₐ")
-title!("2nd definition: 2y")
+plot(sol_4, vars=(0,3), label="E: 0.5")
+plot!(sol_5, vars=(0,3), label="E: 0.37")
+title!("Adult Size")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
 #= 
  Sizes decrease from 40mm until 30mm aproximately and have more variability in the sizes over time.
 =#
-
-plot1=plot(sol_5,vars=(0, 1), label="Nⱼ", color="blue", ylabel="N (Nº individuals)",xlabel="t(days)")
-plot1=plot!(sol_5,vars=(0, 2), label="Nₐ", color="red",  ylabel="N (Nº individuals)",xlabel="t(days)")
-#plot!(sol_5,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)",xlabel= " ")
-title!("SLC One Site 2")
-
-plot(sol_5,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (mm)",xlabel= "t")
-title!("SLC One Site 2")
-
 
 """
 The third definition: 
@@ -365,25 +313,42 @@ Abundances ODE and Size ODE are linked and have the reproductive cicle considera
  in the single site.
 =#
 
-function single_site_S_X!(du, u, p, t)
-  Nⱼ, Nₐ, Sₐ = u
-  r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X = p
-  du[1] = dNⱼ = (X(t) * r * Nₐ * (Sₐ/sizeₘₐₓ)*((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - ((1 - X(t)) * (1 - X(t)) * Nₐ)
-  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - E * (1 - X(t)))))
+# Reproductive cycle
+function reproductive_cycle(t)
+    if (t % 365) / 365 >= 0.42
+      return 1.0
+    else
+      return 0.0
+    end
 end
 
+#Exploitation 
+# The exploitation cycle is "X·(1-E)" in the ecuations, the exploitation max is E:42
+ 
+function exploit(t, rate)
+    if (t % 365) / 365 < 0.37
+      return rate
+    else
+      # return 0.0
+      return 0.01
+    end
+end
+
+
 # Parameters and initial conditions for the third simulation
-p_3 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40.0, X_rc] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X 
+#      r,   g,    dⱼ,   dₐ,   E,   K,   size_growth_rate, sizeₘₐₓ, X, rate
+p_3 = (0.6, 0.06, 0.05, 0.08, exploit, 1e4, 0.2, 40.0, reproductive_cycle, 0.003)
 u0_1 = [1e3, 1e3, 40.0]  ## Nⱼ,Nₐ, Sₐ
 
+tpan_2 =(0.0, 365.0*1)
+tpan_3 =(0.0, 365.0*2)
 
 # Calculate the numerical ODE solution for a 365 days (1 year) time range
 prob_6 = ODEProblem(single_site_S_X!, u0_1, tspan_2, p_3) 
 sol_6 = solve(prob_6, Tsit5())
 
 # Calculate the numerical ODE solution for a 730 days (2 year) time range
-prob_7 = ODEProblem(SLC_single_site_S_X!, u0_1, tspan_3, p_3) 
+prob_7 = ODEProblem(single_site_S_X!, u0_1, tspan_3, p_3) 
 sol_7 = solve(prob_7, Tsit5())
 
 
@@ -403,7 +368,7 @@ ylabel!("N (Nº individuals)")
 =#
 
 # For 2 years
-plot(sol_7,vars=(0, 1), label="Nⱼ:3º")
+plot!(sol_7,vars=(0, 1), label="Nⱼ:3º")
 plot!(sol_7,vars=(0, 2), label="Nₐ:3º")
 title!("3rd definition: 2y")
 xlabel!("t (days)")
@@ -415,80 +380,28 @@ ylabel!("N (Nº individuals)")
 =#
 
 #Adult size plot by time
-plot(sol_3_1,vars=(0,3), label="Sₐ:1º")
-plot!(sol_5,vars=(0,3), label="Sₐ:2º")
 plot(sol_7,vars=(0,3), label="Sₐ:3º")
-title!("Adult Size for SLS in a sigle site")
+xlabel!("t (days)")
+ylabel!("S (mm)")
+
+
+#Plot for three definition to compare.
+#Abundances
+plot(sol_3,vars=(0,1), label="Nⱼ: 1º", palette = :darktest)
+plot!(sol_3,vars=(0, 2), label="Nₐ:1º",palette = :darktest)
+plot!(sol_5,vars=(0,1), label="Nⱼ: 2º",palette = :darktest)
+plot!(sol_5,vars=(0, 2), label="Nₐ:2º",palette = :darktest)
+plot!(sol_7,vars=(0,1), label="Nⱼ: 3º",palette = :darktest)
+plot!(sol_7,vars=(0, 2), label="Nₐ:3º",palette = :darktest)
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
-
-#=
- In the extintion period, the adult and eggs anbundances decrese to 0 and
- after start to increase in the reproductive period.
-
- Posible issue: the exploitation proportion in the reproductive cylce is too high.
- Posible solution: reduce more the exploitation range (from 0.42 to 0.30).
-=#
-# The exploitation cycle is "X·E" in the ecuations, the exploitation max is E:42
-
-function Exp(t, rate)
-  if (t % 365) / 365 < 0.3
-    return rate
-  else
-    # return 0.0
-    return 0.01
-  end
-end
-
-# The reproductive cycle is "(1-X)·E" in the theorical equations:
-
-function X_rc(t)
-  if (t % 365) / 365 >= 0.3
-    return 1.0
-  else
-    return 0.00
-  end
-end
-
-# Parameters and initial conditions for this SLC model formulation:
-
-p_3 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 52.0, X_rc, 0.001] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X, Exp_rate 
-u0_2 = [1e4, 1e4, 40.0]  ## Nⱼ,Nₐ, Sₐ
-
-
-# Calculate the numerical ODE solution for a 365 days (1 year) time range
-prob_8 = ODEProblem(single_site_S_X!, u0_2, tspan_2, p_3) 
-sol_8 = solve(prob_8, Tsit5())
-
-# Calculate the numerical ODE solution for a 730 days (2 year) time range
-prob_9 = ODEProblem(single_site_S_X!, u0_2, tspan_3, p_3) 
-sol_9 = solve(prob_9, Tsit5())
-
-#Abundances plot in time
-# For 1 years
-plot(sol_8,vars=(0, 1), label="Nⱼ:3º")
-plot!(sol_8,vars=(0, 2), label="Nₐ:3º")
-title!("3rd definition: 2y")
+#Adult Size
+plot(sol_3,vars=(0, 3), label="Sₐ:1º",palette = :darktest)
+plot!(sol_5,vars=(0, 3), label="Sₐ:2º",palette = :darktest)
+plot!(sol_7,vars=(0, 3), label="sₐ:3º",palette = :darktest)
 xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
-
-# For 2 years
-plot(sol_9,vars=(0, 1), label="Nⱼ:3º")
-plot!(sol_9,vars=(0, 2), label="Nₐ:3º")
-title!("3rd definition: 2y")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
-
-
-#Adult size plot by time
-plot(sol_3,vars=(0,3), label="Sₐ: 1º Smax = 40mm")
-plot!(sol_5,vars=(0,3), label="Sₐ:2º Smax = 40mm")
-plot!(sol_7,vars=(0,3), label="Sₐ:3º Smax = 40mm")
-plot!(sol_9,vars=(0,3), label="Sₐ:3º Smax = 52mm")
-title!("Adult Size for SLS in a sigle site")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
+ylabel!("S (mm)")
 
 
 
@@ -514,14 +427,14 @@ S_at_1 = zeros(Float64,size(Expl)) # Void vector to array the size of adults for
 c = 0                              # C is the position of the vector N_et, N_at and S_at
 
 for n = 0:m:Exp_lim
-  function Et1(t)
+  function Et(t)
   if modf(t)[1] < 0.5         # 50% of the adult population is exploited
     return 0.0
   else
     return n                    #For an exploitation value equal to 1, the mathematical result is erratic because the size equation will present a denominator division equal to 0
   end
  end
- p_1 = [0.6, 0.06, 0.05, 0.08, Et1, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ
+ p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ
  prob_1 = ODEProblem(single_site!, u0, tspan, p_1)
  sol_1 = solve(prob_1, Tsit5())
  c=c+1
