@@ -151,3 +151,4 @@ prob_general = ODEProblem(Single_site_CLC!, u0_general, tspan_general, p_general
 # sol_general = solve(prob_general, Rosenbrock23());
 # sol_general = solve(prob_general, alg_hints=[:stiff]);
 sol_general = solve(prob_general, ROS34PW2(), dt=0.0000001, adaptive=false);
+
