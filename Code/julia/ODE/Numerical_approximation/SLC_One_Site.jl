@@ -5,7 +5,7 @@ using LinearAlgebra
 #using OrdinaryDiffEq
 using DifferentialEquations
 using GlobalSensitivity
-#using CairoMakie
+using CairoMakie
 using Statistics
 using DataFrames
 using CSV
@@ -230,12 +230,13 @@ plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",palette = :darktest)
 title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
+savefig("Exploitation_diferencies_N_1.png")
 #=
  - Exploitation of 37% of the adult population:
  Now the populations of eggs and adults stabilized with time, number of eggs increase until 7000 individuals aproximately, and
  adults individuals increase until 1500 individuals aproximately.
 =#
-using RDatasets
+
 # Adult size plot by time
 # For 50 days
 
@@ -244,6 +245,8 @@ plot!(sol_3_1,vars=(0,3), label="Sₐ:E=0.37",palette = :darktest)
 title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("S (mm)")
+
+savefig("Exploitation_diferencies_S_1.png")
 
 # With different exploited adult proportions de change in an inversely proportional way.
 
@@ -281,7 +284,7 @@ plot!(sol_5,vars=(0, 2), label= "Nₐ E:0.37", palette = :darktest)
 title!("Exploitation differencies 2")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
-
+savefig("Exploitation_diferencies_N_2.png")
 #= 
  The abundances presents more fluctuations when the size is linked with eggs abundance, 
  but after 150 days abundances start to decrease until extintion by E:0.37 and no with E:0.5... Why❓
@@ -295,6 +298,8 @@ plot!(sol_5, vars=(0,3), label="E: 0.37")
 title!("Adult Size")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
+
+savefig("Exploitation_diferencies_S_2.png")
 
 #= 
  Sizes decrease from 40mm until 30mm aproximately and have more variability in the sizes over time.
@@ -395,6 +400,7 @@ plot!(sol_7,vars=(0,1), label="Nⱼ: 3º",palette = :darktest)
 plot!(sol_7,vars=(0, 2), label="Nₐ:3º",palette = :darktest)
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
+savefig("Model_formulation_SLC_OS_N.png")
 
 #Adult Size
 plot(sol_3,vars=(0, 3), label="Sₐ:1º",palette = :darktest)
@@ -402,6 +408,8 @@ plot!(sol_5,vars=(0, 3), label="Sₐ:2º",palette = :darktest)
 plot!(sol_7,vars=(0, 3), label="sₐ:3º",palette = :darktest)
 xlabel!("t (days)")
 ylabel!("S (mm)")
+savefig("Model_formulation_SLC_OS_S.png")
+
 
 
 
