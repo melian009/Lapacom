@@ -2,17 +2,19 @@
 using Pkg
 Pkg.activate(".")
 using LinearAlgebra
-#using OrdinaryDiffEq
+# using OrdinaryDiffEq
 using DifferentialEquations
 using GlobalSensitivity
-using CairoMakie
+#using CairoMakie
 using Statistics
 using DataFrames
-using CSV
+# using CSV
 using DiffEqParamEstim
 using Optim
 using Plots
 using Plots.PlotMeasures
+
+
 
 ### ------------------------------------------------------------------------------------------------
 ### 1. Model formulation for Simplex Life Cycle (SLC) : 3 model formulation
@@ -223,13 +225,14 @@ sol_3_1 = solve(prob_3_1, Tsit5())
 
 """Contrast plot of different adult populations exploited (E=0.5 vs E= 0.37)"""
 
-plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5",legned=:right, palette = :darktest)
-plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5",palette = :darktest)
-plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",palette = :darktest)
-plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",palette = :darktest)
-title!("Exploitation diferencies")
+plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5", legend=:right,style=:dashed, colour="darkgreen")
+plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5",style=:solid, colour="darkgreen")
+plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",style=:dashed,colour="skyblue4")
+plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",style=:solid, colour="skyblue4")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
+
+
 savefig("Exploitation_diferencies_N_1.png")
 #=
  - Exploitation of 37% of the adult population:
