@@ -1,6 +1,6 @@
 ## Packeges
 using Pkg
-Pkg.activate(".")
+#Pkg.activate(".")
 using LinearAlgebra
 # using OrdinaryDiffEq
 using DifferentialEquations
@@ -226,15 +226,13 @@ sol_3_1 = solve(prob_3_1, Tsit5())
 
 """Contrast plot of different adult populations exploited (E=0.5 vs E= 0.37)"""
 
-plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5", legend=:right,style=:dashed, colour="red")
-plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5",style=:solid, colour="red")
-plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",style=:dashed,colour="blue")
-plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",style=:solid, colour="blue")
+plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5", colour="darkred",legend=:topright)
+plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5", colour="red")
+plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",colour="darkblue")
+plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37", colour="blue")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
-
-
-savefig("C://Code/julia/ODE/Numerical_approximation/Figures/Exploitation_diferencies_N_1.png")
+#savefig("SLC_OS_N.png")
 #=
  - Exploitation of 37% of the adult population:
  Now the populations of eggs and adults stabilized with time, number of eggs increase until 7000 individuals aproximately, and
@@ -250,7 +248,7 @@ title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("S (mm)")
 
-savefig("Exploitation_diferencies_S_1.png")
+savefig("SLC_OS1_Exp_Diff_S.png")
 
 # With different exploited adult proportions de change in an inversely proportional way.
 
@@ -288,7 +286,6 @@ plot!(sol_5,vars=(0, 2), label= "Nₐ E:0.37", palette = :darktest)
 title!("Exploitation differencies 2")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
-savefig("Exploitation_diferencies_N_2.png")
 #= 
  The abundances presents more fluctuations when the size is linked with eggs abundance, 
  but after 150 days abundances start to decrease until extintion by E:0.37 and no with E:0.5... Why❓
@@ -396,24 +393,24 @@ ylabel!("S (mm)")
 
 #Plot for three definition to compare.
 #Abundances
-plot(sol_3,vars=(0, 1), label="Nⱼ SLC-OS1", style=:dashed, color="red")
-plot!(sol_3,vars=(0, 2), label="Nₐ SLC-OS1",style=:solid, color="red")
-plot!(sol_5,vars=(0, 1), label="Nⱼ SLC-OS2",style=:dashed, color="blue")
-plot!(sol_5,vars=(0, 2), label="Nₐ SLC-OS2",style=:solid, color="blue")
-plot!(sol_7,vars=(0, 1), label="Nⱼ SLC-OS3",style=:dashed , color="green")
-plot!(sol_7,vars=(0, 2), label="Nₐ SLC-OS3",style=:solid, color="green")
+plot(sol_3,vars=(0, 1), label="Nⱼ SLC-OS1", color="red", legend=:topleft)
+plot!(sol_3,vars=(0, 2), label="Nₐ SLC-OS1", color="darkred")
+plot!(sol_5,vars=(0, 1), label="Nⱼ SLC-OS2", color="blue")
+plot!(sol_5,vars=(0, 2), label="Nₐ SLC-OS2", color="darkblue")
+plot!(sol_7,vars=(0, 1), label="Nⱼ SLC-OS3" , color="green")
+plot!(sol_7,vars=(0, 2), label="Nₐ SLC-OS3", color="darkgreen")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
-# savefig("Model_formulation_SLC_OS_N.png")
+savefig("SLC_OS_N.png")
 
 #Adult Size
-plot(sol_3,vars=(0, 3), label="SLC-OS1",  color="red")
+plot(sol_3,vars=(0, 3), label="SLC-OS1",  color="red", legend=:topright)
 plot!(sol_5,vars=(0, 3), label="SLC-OS2", color="blue")
 plot!(sol_7,vars=(0, 3), label="SLC-OS3", color="green")
 xlabel!("t (days)")
 ylabel!("Sₐ (mm)")
-savefig("Model_formulation_SLC_OS_S.png")
+savefig("SLC_OS_S.png")
 
 
 
@@ -459,15 +456,16 @@ for n = 0:m:Exp_lim
 end
 
 #Adult size plot by exploitation
-plot(Expl,N_et_1,label="Nⱼ")
-plot!(Expl,N_at_1,label="Nₐ")
+plot(Expl,N_et_1,label="Nⱼ",colour="blue")
+plot!(Expl,N_at_1,label="Nₐ",colour="red")
 xlims!(0.0,1)
-xlabel!("E")
+xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)")
-
-plot(Expl,S_at_1)
-xlabel!("E")
+savefig("SLC_OS_N_Numerical_approach.png")
+plot(Expl,S_at_1, colour="green")
+xlabel!("Exploitation rate")
 ylabel!("Sₐ (nº individuals)")
+savefig("SLC_OS_S_Numerical_approach.png")
 
 
 """ ------------------------------------------------------------------------------
@@ -495,7 +493,7 @@ for n = 0:m:Exp_lim
   end
  end
  p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
- prob_2 = ODEProblem(SLC_single_site_S!, u0, tspan, p_1)
+ prob_2 = ODEProblem(single_site_S!, u0, tspan, p_1)
  sol_2 = solve(prob_2, Tsit5())
  c=c+1
 
@@ -522,7 +520,7 @@ ylabel!("N (nº individuals)")
 Exp_lim = 0.9999                 # Exploitation max limit 
 m = 0.0559                       # Interval of exploitation values 
 Expl = 0:m:Exp_lim               # Expoitation values for plotting
-tspan = (0.0,365*2)              # Time range two years
+tspan = (0.0,365)              # Time range two years
 u0 = [1e3,1e3,40]                # Initial conditions of N_e, N_a, S_a
 
 
@@ -538,14 +536,13 @@ for n = 0:m:Exp_lim
   if (t % 365) / 365 < n
     return rate
   else
-    # return 0.0
     return 0.00
   end
  end
 
  # The reproductive cycle is "(1-X)·E" in the theorical equations:
  function X_rc(t)
-  if (t % 365) / 365 >= n
+  if (t % 365) / 365 >= 0.42
     return 1.0
   else
     return 0.00
@@ -554,7 +551,7 @@ for n = 0:m:Exp_lim
 
 
  p_1 = [0.6, 0.06, 0.05, 0.08, Exp, 1e4, 0.2, 40.0, X_rc, n] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ, X, rate
- prob_3 = ODEProblem(SLC_single_site_S_X!, u0, tspan, p_1)
+ prob_3 = ODEProblem(single_site_S_X!, u0, tspan, p_1)
  sol_3 = solve(prob_3, Tsit5())
  c=c+1
 
