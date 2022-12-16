@@ -113,7 +113,7 @@ function Et(t)
   if modf(t)[1] < 0.5
     return 0.0
   else
-    return 0.5          # Proportion of the adult population that is exploited: 50%
+    return 0.5          # Proportion of the adult population exploited: 50%
     
   end
 end 
@@ -179,6 +179,7 @@ plot(sol_3,vars=(0, 3), label="Sₐ", color="green", legend=:right, ylabel="S (m
 title!("SLC Once Site 1")
 
 
+
 #Fist def final plots: Exploitation rate and Two years simulation:
 
 # For 2 years
@@ -225,15 +226,15 @@ sol_3_1 = solve(prob_3_1, Tsit5())
 
 """Contrast plot of different adult populations exploited (E=0.5 vs E= 0.37)"""
 
-plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5", legend=:right,style=:dashed, colour="darkgreen")
-plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5",style=:solid, colour="darkgreen")
-plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",style=:dashed,colour="skyblue4")
-plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",style=:solid, colour="skyblue4")
+plot(sol_3,vars=(0, 1), label="Nⱼ:E=0.5", legend=:right,style=:dashed, colour="red")
+plot!(sol_3,vars=(0, 2), label="Nₐ:E=0.5",style=:solid, colour="red")
+plot!(sol_3_1,vars=(0, 1), label="Nⱼ:E=0.37",style=:dashed,colour="blue")
+plot!(sol_3_1,vars=(0, 2), label="Nₐ:E=0.37",style=:solid, colour="blue")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
 
 
-savefig("Exploitation_diferencies_N_1.png")
+savefig("C://Code/julia/ODE/Numerical_approximation/Figures/Exploitation_diferencies_N_1.png")
 #=
  - Exploitation of 37% of the adult population:
  Now the populations of eggs and adults stabilized with time, number of eggs increase until 7000 individuals aproximately, and
@@ -243,8 +244,8 @@ savefig("Exploitation_diferencies_N_1.png")
 # Adult size plot by time
 # For 50 days
 
-plot(sol_3,vars=(0,3), label="Sₐ:E=0.5",palette = :darktest) 
-plot!(sol_3_1,vars=(0,3), label="Sₐ:E=0.37",palette = :darktest) 
+plot(sol_3,vars=(0,3), label="Sₐ:E=0.5",colour="red") 
+plot!(sol_3_1,vars=(0,3), label="Sₐ:E=0.37",colour="blue") 
 title!("Exploitation diferencies")
 xlabel!("t (days)")
 ylabel!("S (mm)")
@@ -395,22 +396,23 @@ ylabel!("S (mm)")
 
 #Plot for three definition to compare.
 #Abundances
-plot(sol_3,vars=(0,1), label="Nⱼ: 1º", palette = :darktest)
-plot!(sol_3,vars=(0, 2), label="Nₐ:1º",palette = :darktest)
-plot!(sol_5,vars=(0,1), label="Nⱼ: 2º",palette = :darktest)
-plot!(sol_5,vars=(0, 2), label="Nₐ:2º",palette = :darktest)
-plot!(sol_7,vars=(0,1), label="Nⱼ: 3º",palette = :darktest)
-plot!(sol_7,vars=(0, 2), label="Nₐ:3º",palette = :darktest)
+plot(sol_3,vars=(0, 1), label="Nⱼ SLC-OS1", style=:dashed, color="red")
+plot!(sol_3,vars=(0, 2), label="Nₐ SLC-OS1",style=:solid, color="red")
+plot!(sol_5,vars=(0, 1), label="Nⱼ SLC-OS2",style=:dashed, color="blue")
+plot!(sol_5,vars=(0, 2), label="Nₐ SLC-OS2",style=:solid, color="blue")
+plot!(sol_7,vars=(0, 1), label="Nⱼ SLC-OS3",style=:dashed , color="green")
+plot!(sol_7,vars=(0, 2), label="Nₐ SLC-OS3",style=:solid, color="green")
 xlabel!("t (days)")
 ylabel!("N (Nº individuals)")
-savefig("Model_formulation_SLC_OS_N.png")
+
+# savefig("Model_formulation_SLC_OS_N.png")
 
 #Adult Size
-plot(sol_3,vars=(0, 3), label="Sₐ:1º",palette = :darktest)
-plot!(sol_5,vars=(0, 3), label="Sₐ:2º",palette = :darktest)
-plot!(sol_7,vars=(0, 3), label="sₐ:3º",palette = :darktest)
+plot(sol_3,vars=(0, 3), label="SLC-OS1",  color="red")
+plot!(sol_5,vars=(0, 3), label="SLC-OS2", color="blue")
+plot!(sol_7,vars=(0, 3), label="SLC-OS3", color="green")
 xlabel!("t (days)")
-ylabel!("S (mm)")
+ylabel!("Sₐ (mm)")
 savefig("Model_formulation_SLC_OS_S.png")
 
 
