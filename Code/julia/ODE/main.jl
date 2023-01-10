@@ -210,7 +210,7 @@ p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_m
 
 function nsites!(du, u, p, t)
   # Change these parameters if you change the model
-  nsites = 4
+  nsites = 1
   nlifestages = 5
   # site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
 
@@ -223,43 +223,43 @@ function nsites!(du, u, p, t)
     counter += 1
     stage = 1
     prev_stage = 5
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    dispersal_probs1[site] = 0.0
-    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    dispersal_probs2[site] = 0.0
+    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    # dispersal_probs1[site] = 0.0
+    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    # dispersal_probs2[site] = 0.0
     du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site, prev_stage] * ((p[7] - u[site, prev_stage]) / p[7])) -
                   (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) +
-                  (sum(dispersal_probs1 .* u[:, stage])) -
-                  (u[site, stage] * sum(dispersal_probs2))
+                  (p[2][stage] * u[site, stage]) #+
+                  # (sum(dispersal_probs1 .* u[:, stage])) -
+                  # (u[site, stage] * sum(dispersal_probs2))
 
     # Stage 2 Trochophore
     counter += 1
     stage = 2
     prev_stage = 1
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    dispersal_probs1[site] = 0.0
-    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    dispersal_probs2[site] = 0.0
+    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    # dispersal_probs1[site] = 0.0
+    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    # dispersal_probs2[site] = 0.0
     du[counter] = (p[1][stage] * u[site, prev_stage]) -
                   (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) +
-                  (sum(dispersal_probs1 .* u[:, stage])) -
-                  (u[site, stage] * sum(dispersal_probs2))
+                  (p[2][stage] * u[site, stage]) #+
+                  # (sum(dispersal_probs1 .* u[:, stage])) -
+                  # (u[site, stage] * sum(dispersal_probs2))
 
     #stage 3 Veliger
     counter += 1
     stage = 3
     prev_stage = 2
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    dispersal_probs1[site] = 0.0
-    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    dispersal_probs2[site] = 0.0
+    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    # dispersal_probs1[site] = 0.0
+    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    # dispersal_probs2[site] = 0.0
     du[counter] = (p[1][stage] * u[site, prev_stage]) -
               (p[1][stage+1] * u[site, stage]) -
-              (p[2][stage] * u[site, stage]) +
-              (sum(dispersal_probs1 .* u[:, stage])) -
-              (u[site, stage] * sum(dispersal_probs2))
+              (p[2][stage] * u[site, stage]) #+
+              # (sum(dispersal_probs1 .* u[:, stage])) -
+              # (u[site, stage] * sum(dispersal_probs2))
       
     # stage 4 Juvenile
     counter += 1  
@@ -289,19 +289,19 @@ end
 tspan_general = (100.0, 200.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
 # sol_general = solve(prob_general, Rosenbrock23());
-# sol_general = solve(prob_general, alg_hints=[:stiff]);
-sol_general = solve(prob_general, ROS34PW2(), dt=0.0000001, adaptive=false);
+sol_general = solve(prob_general, alg_hints=[:stiff]);
+# sol_general = solve(prob_general, ROS34PW2(), dt=0.00001, adaptive=false);
 
 # Plot
 # site_names = distance_df.site
-site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
-site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
+site_names = ["Porto Moniz"]#, "Pacl do Mar", "Funchal"]#, "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+site_indices = [0]#, 6, 12]#, 18, 24, 30, 36, 42]#, 48, 54]
 for stage in 1:5
   fig = Figure()
   ax1 = Axis(fig[1, 1])
   lines!(ax1, sol_general.t, [sol_general.u[i][1, stage] for i in 1:length(sol_general.t)], yscale=:log10, label=site_names[1])
   ax1.title = "N for stage: $(stage)"
-  for site in 2:8
+  for site in 1:1#2:8
     lines!(ax1, sol_general.t, [sol_general.u[i][site, stage] for i in 1:length(sol_general.t)], label=site_names[site])
   end
   fig[1,2] = Legend(fig, ax1, "Site")
