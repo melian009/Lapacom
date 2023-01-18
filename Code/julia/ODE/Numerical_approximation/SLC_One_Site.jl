@@ -332,7 +332,7 @@ end
 # The exploitation cycle is "X·(1-E)" in the ecuations, the exploitation max is E:42
  
 function exploit(t, rate)
-    if (t % 365) / 365 < 0.37
+    if (t % 365) / 365 < 0.42
       return rate
     else
       # return 0.0

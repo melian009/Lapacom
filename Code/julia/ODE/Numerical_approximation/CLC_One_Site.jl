@@ -15,13 +15,16 @@ using Plots
 using Plots.PlotMeasures
 
 ### ------------------------------------------------------------------------------------------------
-### 1. Model formulation for Complex Life Cycle (CLC) for a Single Site (One Site)
+### Model formulation for Complex Life Cycle (CLC) for a Single Site (One Site)
 ### ------------------------------------------------------------------------------------------------
 
 """
 Variables:
-  - Nⱼ: Egg Abundances
-  - Nₐ: Adult Abundance
+  - N_e: Egg Abundance
+  - N_t: Trochophore Abundance
+  - N_v: Veliger Abundance
+  - N_j: Juvenile Abundance
+  - N_a: Adult Abundance
   - Sₐ: Adult Size
 Parameters:
   - r: intrinsic growth rate
@@ -31,124 +34,104 @@ Parameters:
   - K: carrying capacity
   - X: Reproductive Cycle
 """
+
 ## Starting the model
-#---------------------------
-#Nº of life stages
 
-nlifestages = 5
+#=    Simple life cycle: equations for one Site
 
-## initial state of the system
-# Initial population sizes at each life stage per site
-# There are 100 individuals per m2. We assume 2 km2 -> 20k individuals.
-u0_general = [1_800.0 for j in 1:nlifestages]
+    function single_site_S_X!(du, u, p, t)
+      Nⱼ, Nₐ, Sₐ = u
+      r, g, dⱼ, dₐ, Exp, K, size_growth_rate, size_max, X, rate = p
+      du[1] = dNⱼ = (X(t) * r * Nₐ * (Sₐ/sizeₘₐₓ)*((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
+      du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (Exp(t,rate) * Nₐ)
+      du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - Exp(t,rate))))
+    end
+=#
 
-## defining model parameters
-function exploit(t, rate)
+# Complex Life Cycle: equations for one Site
+
+function CLC_OS!(du, u, p, t)
+  N_e, N_t, N_v, N_j, N_a, S_a = u
+  r, d, K, Exp, size_growth_rate, size_max, X, rate = p
+  # dN_e/dt    = [X    * r    * N_a * (S/S_max)      * ((K-N_A)/k)] - (d_e * N_e)  - (g_et * N_e)
+  du[1] = dN_e = (X(t) * r[1] * N_a * (S_a/size_max) * ((K*N_a)/K)) - (d[1] * N_e) - (r[2] * N_e)
+
+  # dN_t/dt    = (g_et * N_e) - (d_t * N_t) - (g_tv * N_t)
+  du[2] = dN_t = (r[2]* N_e) - (d[2] * N_t) - (r[3] * N_t)
+  
+  # dN_v/dt    = (g_tv * N_t) - (d_v * N_v) - (g_vj * N_v)
+  du[3] = dN_v = (r[3]* N_t) - (d[3] * N_v) - (r[4] * N_v)
+
+  #dN_j/dt     = (g_vj * N_v) - (d_j * N_j) - (g_ja * N_j)
+  du[4] = dN_j = (r[4] * N_v) - (d[4] * N_t) - (r[5] * N_j)
+  
+  #dN_a/dt     = (g_ja * N_j) - (d_a * N_a) - [(1 - X) * E * N_a] 
+  du[5] = dN_a = (r[5] * N_j) - (d[5] * N_a) - (Exp(t,rate) * N_a)
+
+  #dS_a/dt     = γ * S_a * [1 - (S_a / (Smax * (1 - X)))]
+  du[6] = dS_a = size_growth_rate * S_a * [1- S_a/(size_max * (1-Exp(t,rate)))]
+end
+
+## Model parameters definition:
+# Exploitation: equals to zero when organisms reproduce
+
+function Exp(t, rate)
   if (t % 365) / 365 < 0.42
     return rate
   else
-    # return 0.0
-    return 0.01
-  end
+    return 0.00
+    end
 end
 
-"""
-captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce
-"""
-function reproductive_cycle(t)
+# Captures the reproductive cycle are equals to zero when fishing and to one when organisms reproduce
+
+function X(t)
   if (t % 365) / 365 >= 0.42
     return 1.0
   else
-    return 0.01
-    # return 0.0
+    return 0.00
   end
 end
 
-# conversion rates between stages
 
-# average oocytes per year per adult
+# Conversion rates between stages
+
+# Average oocytes per year per adult
+
 avg_oocytes = mean([92098, 804183])
 
 # conversion rate of adults to eggs.
+
 reggs = avg_oocytes / (365 * 0.42) 
-reggs = reggs / 500 
-r=reggs
+
+reggs = reggs / 10000 
+
+r=reggs #Eggs population intrinsic growth rate
+
 # because the rate is too high to be handled
- #r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
+# = [r,     g_et,     g,tv,     g_vj,     g_ja]
+r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
 
 # natural death rates per life stage.
+# = [d_e,   d_t,   t_v,   d_j,   d_a]
 d = [0.001, 0.001, 0.001, 0.001, 0.000322]
 
-size_growth_rate = 0.32/365
+size_growth_rate = 0.32/365 # γ 
 
-exploitation_rates = rand(0.001:0.001:0.003)  # TODO: use empirical values
+exploitation_rates = rand(0.001:0.001:0.003)  # E: use empirical values
 
 size_max = 56.0
 
 K = 64_000  # for 6.4 km2 per site.
 
-# α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
-# Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
-p_general =[r, d, size_growth_rate, exploitation_rates, size_max, K]
+p_general =[r, d, convert(Float64,K), Exp, size_growth_rate, size_max, X, exploitation_rates]
+
+u0 = [20000.0, 20000.0, 20000.0, 20000.0, 20000.0, 40.0]
+
+tspan_0 = (0,365*2) # Simulation for 2 years time range
+tspan_0_ = convert(Tuple{Float64,Float64}, tspan_0)
 
 
-function Single_site_CLC!(du, u, p, t)
-  # Change these parameters if you change the model
-  #nsites = 4
-  nlifestages = 5
-  # site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
-
-  counter = 0
-  #for site in 1:nsites
-    # site_index = (site * (nlifestages + 1)) - (nlifestages + 1)
-    # site_index = site_indices[site]
-
-    # Stages 1 Egg
-    counter += 1
-    stage = 1
-    prev_stage = 5
-    du[counter] = (reproductive_cycle(t) * p[1][stage] * u[prev_stage] * ((p[6] - u[prev_stage]) / p[6])) -
-                  (p[1][stage+1] * u[stage]) -
-                  (p[2][stage] * u[stage])
-    # Stage 2 Trochophore
-    counter += 1
-    stage = 2
-    prev_stage = 1
-    du[counter] = (p[1][stage] * u[prev_stage]) -
-                  (p[1][stage+1] * u[stage]) -
-                  (p[2][stage] * u[stage])
-    #stage 3 Veliger
-    counter += 1
-    stage = 3
-    prev_stage = 2
-    du[counter] = (p[1][stage] * u[prev_stage]) -
-              (p[1][stage+1] * u[stage]) -
-              (p[2][stage] * u[stage])
-    # stage 4 Juvenile
-    counter += 1  
-    stage = 4
-    prev_stage = 3
-    du[counter] = (p[1][stage] * u[prev_stage]) -
-                (p[1][stage+1] * u[stage]) - 
-                (p[2][stage] * u[stage]) 
-
-    # stage 5 adult
-    counter += 1
-    stage = 5
-    prev_stage = 4
-    du[counter] = (p[1][stage] * u[site, prev_stage]) - 
-                (exploit(t, p[4]) * u[ stage]) -
-                (p[2][stage] * u[ stage])
-                
-    # adult sizes
-    # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    counter += 1
-    du[counter] = p[3] * u[nlifestages+1] * (1 - u[nlifestages+1] / (p[5] - (p[5] * exploit(t, p[4]))))
-end
-
-tspan_general = (100.0, 200.0)
-prob_general = ODEProblem(Single_site_CLC!, u0_general, tspan_general, p_general)
-# sol_general = solve(prob_general, Rosenbrock23());
-# sol_general = solve(prob_general, alg_hints=[:stiff]);
-sol_general = solve(prob_general, ROS34PW2(), dt=0.0000001, adaptive=false);
+prob_CLC_1= ODEProblem(CLC_OS!, u0, tspan_0_, p_general) 
+sol_CLC_1 = solve(prob_CLC_1, Tsit5())
 
