@@ -77,24 +77,37 @@ function single_site!(du, u, p, t)
   du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
 end
 
-Et(t) = (sin(t)^2) / 2  # time varying exploitation
+Et(t) = (sin(t * 0.1)^2) / 2  # time varying exploitation
 # To adjust the sin function horizonally (stretch/shrink the wave length), multiply t by a factor c.
-# You may also use a function with if statements.
-function Et(t)
-  if modf(t)[1] < 0.5
-    return 0.0
-  else
-    return 0.5
-  end
-end
-p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
+
+# # You may also use a function with if statements.
+# function Et(t)
+#   if modf(t)[1] < 0.5
+#     return 0.0
+#   else
+#     return 0.5
+#   end
+# end
+
+# # Using this function results in errors.
+# function Et(t)
+#   if (t % 365) / 365 >= 0.42
+#     return 1.0
+#   else
+#     return 5.0
+#   end
+# end
+
+p_1 = [5.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40.0]
 u0_1 = [1e3, 1e3, 40.0]
-tspan_1 = (0.0, 50.0)
+tspan_1 = (0.0, 500.0)
 prob_1 = ODEProblem(single_site!, u0_1, tspan_1, p_1)
 sol_1 = solve(prob_1, Tsit5())
 
-plot(sol_1, vars=(0, 1), label="Nⱼ")
-plot!(sol_1, vars=(0, 2), label="Nₐ")
+fig, ax, plt = lines(sol_1.t, [i[1] for i in sol_1.u], label="Nⱼ")
+lines!(ax, sol_1.t, [i[2] for i in sol_1.u], label="Nₐ")
+fig[1, 2] = Legend(fig, ax, "Stage")
+save("one_site_model.png", fig)
 
 ### ----------------------------------------------------------------
 ### 2. Two sites
@@ -111,23 +124,26 @@ function two_sites!(du, u, p, t)
   sizeₘₐₓ₁, sizeₘₐₓ₂ = p
 
   du[1] = dNⱼ₁ = (r * Nₐ₁ * ((K₁ - Nₐ₁) / K₁)) + (mₒᵤₜ₂ * Nⱼ₂) - (mₒᵤₜ₁ * Nⱼ₁) - (dⱼ * Nⱼ₁) - (g * Nⱼ₁)
-  du[2] = dNₐ₁ = (g * Nⱼ₁) - (dₐ * Nₐ₁) - (E₁ * Nₐ₁)
+  du[2] = dNₐ₁ = (g * Nⱼ₁) - (dₐ * Nₐ₁) - (E₁(t) * Nₐ₁)
   # track the influence of migration on body size. If there is immigration from a site where individuals are genetically small, then it should affect the distribution of body size in this site too. 
   # S₁ need to be replaced by the mean body size of this population which is a function of body sizes of all source populations and their contribution to this sink population.
   # frac = ((mₒᵤₜ₂ * Nⱼ₂) / Nⱼ₁)
   # du[3] = dS₁ = size_growth_rate * ((S₁ * (1 - ((mₒᵤₜ₂ * Nⱼ₂) / Nⱼ₁))) + (S₂ * ((mₒᵤₜ₂ * Nⱼ₂) / Nⱼ₁))) * (1 - ((S₁ * (1 - ((mₒᵤₜ₂ * Nⱼ₂) / Nⱼ₁))) + (S₂ * ((mₒᵤₜ₂ * Nⱼ₂) / Nⱼ₁))) / (sizeₘₐₓ₁ - (sizeₘₐₓ₁ * E₁)))
-  du[3] = dS₁ = size_growth_rate * S₁ * (1 - S₁ / (sizeₘₐₓ₁ - (sizeₘₐₓ₁ * E₁)))  # logistic growth: rN(1- N/K)
+  du[3] = dS₁ = size_growth_rate * S₁ * (1 - S₁ / (sizeₘₐₓ₁ - (sizeₘₐₓ₁ * E₁(t))))  # logistic growth: rN(1- N/K)
 
   du[4] = dNⱼ₂ = (r * Nₐ₂ * ((K₂ - Nₐ₂) / K₂)) + (mₒᵤₜ₁ * Nⱼ₁) - (mₒᵤₜ₂ * Nⱼ₂) - (dⱼ * Nⱼ₂) - (g * Nⱼ₂)
-  du[5] = dNₐ₂ = (g * Nⱼ₂) - (dₐ * Nₐ₂) - (E₂ * Nₐ₂)
+  du[5] = dNₐ₂ = (g * Nⱼ₂) - (dₐ * Nₐ₂) - (E₂(t) * Nₐ₂)
   # frac = ((mₒᵤₜ₁ * Nⱼ₁) / Nⱼ₂)
   # du[6] = dS₂ = size_growth_rate * ((S₂ * (1 - ((mₒᵤₜ₁ * Nⱼ₁) / Nⱼ₂))) + (S₁ * ((mₒᵤₜ₁ * Nⱼ₁) / Nⱼ₂))) * (1 - ((S₂ * (1 - ((mₒᵤₜ₁ * Nⱼ₁) / Nⱼ₂))) + (S₁ * ((mₒᵤₜ₁ * Nⱼ₁) / Nⱼ₂))) / (sizeₘₐₓ₂ - (sizeₘₐₓ₂ * E₂)))
-  du[6] = dS₂ = size_growth_rate * S₂ * (1 - S₂ / (sizeₘₐₓ₂ - (sizeₘₐₓ₂ * E₂)))
+  du[6] = dS₂ = size_growth_rate * S₂ * (1 - S₂ / (sizeₘₐₓ₂ - (sizeₘₐₓ₂ * E₂(t))))
 end
 
-p_2 = [0.6, 0.1, 0.05, 0.08, 0.1,
+Et1(t) = (sin(t * 0.1)^2) / 1.1
+Et2(t) = (sin(t * 0.1)^2) / 2
+
+p_2 = [6.6, 0.1, 0.05, 0.08, 0.1,
   0.01, 0.04,
-  0.05, 0.4,
+  Et1, Et2,
   1e4, 1e4,
   55.0, 55.0
 ]
@@ -138,13 +154,20 @@ tspan_2 = (0.0, 100.0)
 prob_2 = ODEProblem(two_sites!, u0_2, tspan_2, p_2)
 sol_2 = solve(prob_2, Tsit5())
 
-plot(sol_2, vars=(0, 1), label="Nⱼ₁")
-plot!(sol_2, vars=(0, 2), label="Nₐ₁")
-plot!(sol_2, vars=(0, 4), label="Nⱼ₂")
-plot!(sol_2, vars=(0, 5), label="Nₐ₂")
 
-plot(sol_2, vars=(0, 3), label="S₁")
-plot!(sol_2, vars=(0, 6), label="S₂")
+fig, ax, plt = lines(sol_2.t, [i[1] for i in sol_2.u], label="Nⱼ₁")
+lines!(ax, sol_2.t, [i[2] for i in sol_2.u], label="Nₐ₁")
+lines!(ax, sol_2.t, [i[4] for i in sol_2.u], label="Nⱼ₂")
+lines!(ax, sol_2.t, [i[5] for i in sol_2.u], label="Nₐ₂")
+fig[1, 2] = Legend(fig, ax, "Stage")
+save("two_sites_model.png", fig)
+
+
+fig, ax, plt = lines(sol_2.t, [i[3] for i in sol_2.u], label="S₁")
+lines!(ax, sol_2.t, [i[6] for i in sol_2.u], label="S₂")
+fig[1, 2] = Legend(fig, ax, "Species size")
+save("two_sites_model_sizes.png", fig)
+
 
 
 ### ----------------------------------------------------------------
@@ -197,7 +220,7 @@ reggs = reggs / 500 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
 # natural death rates per life stage.
 d = [0.001, 0.001, 0.001, 0.001, 0.000322]
-size_growth_rate = 0.32/365
+size_growth_rate = 0.32 / 365
 distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Float64.(Matrix(distance_df)[:, 1:end-1])
 distance_matrix = distance_matrix[1:nsites, 1:nsites]
@@ -210,7 +233,7 @@ p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_m
 
 function nsites!(du, u, p, t)
   # Change these parameters if you change the model
-  nsites = 4
+  nsites = 1
   nlifestages = 5
   # site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
 
@@ -223,61 +246,61 @@ function nsites!(du, u, p, t)
     counter += 1
     stage = 1
     prev_stage = 5
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    dispersal_probs1[site] = 0.0
-    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    dispersal_probs2[site] = 0.0
+    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    # dispersal_probs1[site] = 0.0
+    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    # dispersal_probs2[site] = 0.0
     du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site, prev_stage] * ((p[7] - u[site, prev_stage]) / p[7])) -
                   (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) +
-                  (sum(dispersal_probs1 .* u[:, stage])) -
-                  (u[site, stage] * sum(dispersal_probs2))
+                  (p[2][stage] * u[site, stage]) #+
+    # (sum(dispersal_probs1 .* u[:, stage])) -
+    # (u[site, stage] * sum(dispersal_probs2))
 
     # Stage 2 Trochophore
     counter += 1
     stage = 2
     prev_stage = 1
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    dispersal_probs1[site] = 0.0
-    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    dispersal_probs2[site] = 0.0
+    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    # dispersal_probs1[site] = 0.0
+    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    # dispersal_probs2[site] = 0.0
     du[counter] = (p[1][stage] * u[site, prev_stage]) -
                   (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) +
-                  (sum(dispersal_probs1 .* u[:, stage])) -
-                  (u[site, stage] * sum(dispersal_probs2))
+                  (p[2][stage] * u[site, stage]) #+
+    # (sum(dispersal_probs1 .* u[:, stage])) -
+    # (u[site, stage] * sum(dispersal_probs2))
 
     #stage 3 Veliger
     counter += 1
     stage = 3
     prev_stage = 2
-    dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    dispersal_probs1[site] = 0.0
-    dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    dispersal_probs2[site] = 0.0
+    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
+    # dispersal_probs1[site] = 0.0
+    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
+    # dispersal_probs2[site] = 0.0
     du[counter] = (p[1][stage] * u[site, prev_stage]) -
-              (p[1][stage+1] * u[site, stage]) -
-              (p[2][stage] * u[site, stage]) +
-              (sum(dispersal_probs1 .* u[:, stage])) -
-              (u[site, stage] * sum(dispersal_probs2))
-      
+                  (p[1][stage+1] * u[site, stage]) -
+                  (p[2][stage] * u[site, stage]) #+
+    # (sum(dispersal_probs1 .* u[:, stage])) -
+    # (u[site, stage] * sum(dispersal_probs2))
+
     # stage 4 Juvenile
-    counter += 1  
+    counter += 1
     stage = 4
     prev_stage = 3
     # du[counter] = (p[1][stage] * u[site, prev_stage] * ((p[7] - u[site, prev_stage]) / p[7])) -
     du[counter] = (p[1][stage] * u[site, prev_stage]) -
-                (p[1][stage+1] * u[site, stage]) - 
-                (p[2][stage] * u[site, stage]) 
+                  (p[1][stage+1] * u[site, stage]) -
+                  (p[2][stage] * u[site, stage])
 
     # stage 5 adult
     counter += 1
     stage = 5
     prev_stage = 4
-    du[counter] = (p[1][stage] * u[site, prev_stage]) - 
-                (exploit(t, p[5][site]) * u[site, stage]) -
-                (p[2][stage] * u[site, stage])
-                
+    du[counter] = (p[1][stage] * u[site, prev_stage]) -
+                  (exploit(t, p[5][site]) * u[site, stage]) -
+                  (p[2][stage] * u[site, stage])
+
     # adult sizes
     # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
     counter += 1
@@ -289,22 +312,22 @@ end
 tspan_general = (100.0, 200.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
 # sol_general = solve(prob_general, Rosenbrock23());
-# sol_general = solve(prob_general, alg_hints=[:stiff]);
-sol_general = solve(prob_general, ROS34PW2(), dt=0.0000001, adaptive=false);
+sol_general = solve(prob_general, alg_hints=[:stiff]);
+# sol_general = solve(prob_general, ROS34PW2(), dt=0.00001, adaptive=false);
 
 # Plot
 # site_names = distance_df.site
-site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
-site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
+site_names = ["Porto Moniz"]#, "Pacl do Mar", "Funchal"]#, "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+site_indices = [0]#, 6, 12]#, 18, 24, 30, 36, 42]#, 48, 54]
 for stage in 1:5
   fig = Figure()
   ax1 = Axis(fig[1, 1])
   lines!(ax1, sol_general.t, [sol_general.u[i][1, stage] for i in 1:length(sol_general.t)], yscale=:log10, label=site_names[1])
   ax1.title = "N for stage: $(stage)"
-  for site in 2:8
+  for site in 1:1#2:8
     lines!(ax1, sol_general.t, [sol_general.u[i][site, stage] for i in 1:length(sol_general.t)], label=site_names[site])
   end
-  fig[1,2] = Legend(fig, ax1, "Site")
+  fig[1, 2] = Legend(fig, ax1, "Site")
   save("figs/stage=$stage.pdf", fig)
 end
 
