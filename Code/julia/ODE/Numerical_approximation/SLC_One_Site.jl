@@ -428,7 +428,7 @@ savefig("SLC_OS_S.png")
 Exp_lim = 0.9999                 # Exploitation max limit 
 m=0.0559                         # Interval of exploitation values 
 Expl= 0:m:Exp_lim                # Expoitation values for plotting
-tspan = (0.0, 100)                # Time value 
+tspan = (0.0, 365*2)                # Time value 
 u0 = [1e3,1e2,40]                # Initial conditions of N_e, N_a, S_a
 
 N_et_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
