@@ -80,3 +80,10 @@ p = Dict([
 ## Simulation
 sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 =#
+@variables x1 x2 r K g d1 d2 E
+#Symbolics.jacobian([y2 + y2*y1, y1^2 + y1],[y1, y2])
+
+J=Symbolics.jacobian([(r * x2 * ((K - x2) / K)) - (d1 * x1) - (g * x1),
+(g * x1) - (d2 * x2) - (E * x2)],[x1, x2])
+det(J)
+# Despejar x2 del determinante, obtener la x1 de las escuaciones y hacer las simulaciones para todo el rango de E
