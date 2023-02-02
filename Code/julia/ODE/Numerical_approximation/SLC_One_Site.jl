@@ -41,7 +41,7 @@ In the first formulation of the equations abundances aren't linked with the size
 
 function single_site!(du, u, p, t)
   Nⱼ, Nₐ, Sₐ = u
-  r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ = p
+  r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ = pm
   du[1] = dNⱼ = (r * Nₐ * ((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
   du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
   du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
