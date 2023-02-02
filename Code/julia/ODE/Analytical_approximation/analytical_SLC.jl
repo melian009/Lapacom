@@ -13,7 +13,7 @@ using DiffEqParamEstim
 using Optim
 using Plots
 using Plots.PlotMeasures
-
+using Symbolics
 import ForwardDiff.jacobian
 
 
@@ -23,11 +23,12 @@ function f(x)
     
     
     function single_site_S!(du, u, p, t)
-  Nⱼ, Nₐ, Sₐ = u
+  Nⱼ, Nₐ, Sₐ = x
   r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ = p
-  du[1] = dNⱼ = (r * Nₐ * (Sₐ/sizeₘₐₓ) * ((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-  du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
-  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
+  #du[1] = dNⱼ = (r * Nₐ * (Sₐ/sizeₘₐₓ) * ((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
+  du[1] = dNⱼ = (r * x[2] * ((K - x[2]) / K)) - (dⱼ * x[1]) - (g * x[1])
+  du[2] = dNₐ = (g * x[1]) - (dₐ * x[2]) - (E(t) * x[2])
+  # du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t)))) 
 end
 
     F[1] = x[1]^2 + x[3]
