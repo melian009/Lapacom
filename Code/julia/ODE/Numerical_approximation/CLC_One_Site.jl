@@ -1,18 +1,4 @@
 ## Packeges
-using Pkg
-Pkg.activate(".")
-using LinearAlgebra
-#using OrdinaryDiffEq
-using DifferentialEquations
-using GlobalSensitivity
-using CairoMakie
-using Statistics
-using DataFrames
-using CSV
-using DiffEqParamEstim
-using Optim
-using Plots
-using Plots.PlotMeasures
 
 ### ------------------------------------------------------------------------------------------------
 ### Model formulation for Complex Life Cycle (CLC) for a Single Site (One Site)
