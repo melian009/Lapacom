@@ -1,18 +1,4 @@
 ## Packeges
-using Pkg
-Pkg.activate(".")
-using LinearAlgebra
-#using OrdinaryDiffEq
-using DifferentialEquations
-using GlobalSensitivity
-using CairoMakie
-using Statistics
-using DataFrames
-using CSV
-using DiffEqParamEstim
-using Optim
-using Plots
-using Plots.PlotMeasures
 
 ### ------------------------------------------------------------------------------------------------
 ### Model formulation for Complex Life Cycle (CLC) for a Single Site (One Site)
@@ -53,8 +39,8 @@ Parameters:
 function CLC_OS!(du, u, p, t)
   N_e, N_t, N_v, N_j, N_a, S_a = u
   r, d, K, Exp, size_growth_rate, size_max, X, rate = p
-  # dN_e/dt    = [X    * r    * N_a * (S/S_max)      * ((K-N_A)/k)] - (d_e * N_e)  - (g_et * N_e)
-  du[1] = dN_e = (X(t) * r[1] * N_a * (S_a/size_max) * ((K*N_a)/K)) - (d[1] * N_e) - (r[2] * N_e)
+  # dN_e/dt    = [X    * r    * N_a * (S/S_max)      * ((K - N_A)/k)] - (d_e * N_e)  - (g_et * N_e)
+  du[1] = dN_e = (X(t) * r[1] * N_a * (S_a/size_max) * ((K * N_a)/K)) - (d[1] * N_e) - (r[2] * N_e)
 
   # dN_t/dt    = (g_et * N_e) - (d_t * N_t) - (g_tv * N_t)
   du[2] = dN_t = (r[2]* N_e) - (d[2] * N_t) - (r[3] * N_t)
@@ -124,14 +110,16 @@ size_max = 56.0
 
 K = 64_000  # for 6.4 km2 per site.
 
-p_general =[r, d, convert(Float64,K), Exp, size_growth_rate, size_max, X, exploitation_rates]
+p_general =[r, d, K, Exp, size_growth_rate, size_max, X, exploitation_rates]
 
+# Initial abundances of each life state and size.
 u0 = [20000.0, 20000.0, 20000.0, 20000.0, 20000.0, 40.0]
+u0_ = convert(Float64, u0)
 
 tspan_0 = (0,365*2) # Simulation for 2 years time range
 tspan_0_ = convert(Tuple{Float64,Float64}, tspan_0)
 
 
 prob_CLC_1= ODEProblem(CLC_OS!, u0, tspan_0_, p_general) 
-sol_CLC_1 = solve(prob_CLC_1, Tsit5())
+sol_CLC_1 = solve(prob0_CLC_1, Tsit5())
 
