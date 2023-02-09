@@ -1,4 +1,16 @@
 ## Packeges
+using Pkg
+Pkg.activate(".")
+using LinearAlgebra
+# using OrdinaryDiffEq
+using DifferentialEquations
+using GlobalSensitivity
+using CairoMakie
+using Statistics
+using DataFrames
+using CSV
+using DiffEqParamEstim
+using Optim
 
 ### ------------------------------------------------------------------------------------------------
 ### Model formulation for Complex Life Cycle (CLC) for a Single Site (One Site)
@@ -84,7 +96,7 @@ end
 
 # Average oocytes per year per adult
 
-avg_oocytes = mean([92098, 804183])
+avg_oocytes = mean([92098, 804183]) #804.000 huevos para una talla 58mm 
 
 # conversion rate of adults to eggs.
 
@@ -95,8 +107,8 @@ reggs = reggs / 10000
 r=reggs #Eggs population intrinsic growth rate
 
 # because the rate is too high to be handled
-# = [r,     g_et,     g,tv,     g_vj,     g_ja]
-r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
+# = [r: 385.613eggs, g_et: 0.7d, g_tv: 1.3d, g_vj: 4d + 3d (7d), g_ja:730]
+r = [reggs,          0.998611,   0.971057,   0.683772,           0.00629]
 
 # natural death rates per life stage.
 # = [d_e,   d_t,   t_v,   d_j,   d_a]
@@ -107,7 +119,6 @@ size_growth_rate = 0.32/365 # γ
 exploitation_rates = rand(0.001:0.001:0.003)  # E: use empirical values
 
 size_max = 56.0
-
 K = 64_000  # for 6.4 km2 per site.
 
 p_general =[r, d, K, Exp, size_growth_rate, size_max, X, exploitation_rates]
