@@ -1,5 +1,7 @@
 # Lapacom
 
+
+
 ## To do
 
 * [ ] We can fit the model to the data. But to make a reliable fit, we need to fix either exploitation rate or migration rates between sites. Which one are we more sure about?
@@ -22,3 +24,16 @@ Just a few questions about the data --
 2. We are gonna get the sinks and sources from the data -- meaning estimating the immigration and emigration per site from the fitting to the size distribution in each site. From this we need a good approximation of the exploitation values -- we see there are three categories in the proximity to human settlements column -- Near, Far, Control -- is this all we have? OR do we have approximate distances between the site an the human settlements also?
    We essentially need to fix either exploitation rate per site OR migration rate between sites. Which one do we have more information about?
 3. Many rows in the dataset have not information about the site name / coordinates. Are they unknown and need to be deleted?
+
+# 8 Feb 2023
+ODE Main.jl
+
+## Questions
+1. L230 Exponential decay 
+α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
+2. L22 Conversion rates for the given number of days is as follows:
+# 730: 0.00629
+# 3: 0.784557
+# 0.7: 0.998611
+# 1.3: 0.971057
+# 4: 0.683772
