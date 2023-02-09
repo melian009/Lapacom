@@ -16,6 +16,7 @@ using Plots.PlotMeasures
 using Symbolics
 import ForwardDiff.jacobian
 
+
 @variables x[1] x[2]
 @parameters r K g d[1] d[2] E
 function f(x)
@@ -86,4 +87,3 @@ sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 J=Symbolics.jacobian([(r * x2 * ((K - x2) / K)) - (d1 * x1) - (g * x1),
 (g * x1) - (d2 * x2) - (E * x2)],[x1, x2])
 det(J)
-# Despejar x2 del determinante, obtener la x1 de las escuaciones y hacer las simulaciones para todo el rango de E
