@@ -83,6 +83,9 @@ p = Dict([
 ## Simulation
 sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 =#
+
+
+
 @variables x1 x2 r K g d1 d2 E
 #Symbolics.jacobian([y2 + y2*y1, y1^2 + y1],[y1, y2])
 J = Symbolics.jacobian([(r * x2 * ((K - x2) / K)) - (d1 * x1) - (g * x1),
@@ -113,9 +116,6 @@ X_2[c,] = x2
 end
 
 plot(Expl,X_2)
-xlims!(0.0,1)
-xlabel!("Exploitation rate")
-ylabel!("N (nº individuals)")
 
 #= This is the inecuality for the adult abundances
  Equation:
