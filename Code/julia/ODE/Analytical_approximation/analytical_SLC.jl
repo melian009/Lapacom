@@ -17,7 +17,7 @@ using Symbolics
 using SymPy
 import ForwardDiff.jacobian
 
-
+#=
 @variables x[1] x[2]
 @parameters r K g d[1] d[2] E
 
@@ -37,7 +37,7 @@ J0 = jacobian(f, x0)
 # 1  1  0
 # 0  4  6
 
-
+=#
 
 
 #= Set up symbolic variables and parameters
@@ -86,16 +86,17 @@ sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 
 
 
-@variables x1 x2 r K g d1 d2 E
-#Symbolics.jacobian([y2 + y2*y1, y1^2 + y1],[y1, y2])
-J = Symbolics.jacobian([(r * x2 * ((K - x2) / K)) - (d1 * x1) - (g * x1),
-(g * x1) - (d2 * x2) - (E * x2)],[x1, x2])
+@variables Ne Ne r K g de da E
+# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
+J = Symbolics.jacobian(
+    [(r * Na * ((K - Na) / K)) - (de * Ne) - (g * Ne), #dNe/dt 
+    (g * Ne) - (da * Na) - (E * Na)], #dNa/dt
+    [Ne, Na]) #Vairables a considerar para calcular la matriz jacobiana                                                 
 Det_J = det(J)
 
 
 
 M = Symbolics.simplify(Det_J)
-
 
 
 Exp_lim = 1                 # Exploitation max limit 
@@ -123,3 +124,41 @@ plot(Expl,X_2)
  Conditions:
  X2>0 if  g * (r - E - d2)  > d1 * (E + d2)
 =#
+
+
+# Despejar la variable X1 (eggs) a partir de la X2 (adults)
+
+# X2= K * ( g * (r - E - d2) - d1 * (E + d2) ) / (2 * g * r)
+# y2= (g * x1) - (d2 * x2) - (E * x2)
+# X1= -(d2 + E)*X2
+
+@variables r K g d1 d2 E
+X1 = -(d2 + E)/g * K * (g * (r - E - d2) - d1 * (E + d2))/(2 * g * r)
+X1_simp = Symbolics.simplify(X1)
+X1_simp
+
+
+#Aproximación analítica para X1 (N_e)
+Exp_lim = 1                 # Exploitation max limit 
+m=0.05                      # Interval of exploitation values 
+Expl= 0:m:Exp_lim 
+X_1= zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
+c=0
+for n = 0:m:Exp_lim
+r = 0.6
+g = 0.06
+d1 = 0.05
+d2 = 0.08 
+E = n 
+K=1e4 
+x1= X1_simp
+c=c+1
+X_1[c,] = x1
+end
+
+plot(Expl,X_1,label="N (eggs)",colour="blue")
+plot!(Expl,X_2,label="N (adults)",colour="red")
+xlims!(0.0,1)
+xlabel!("Exploitation rate (E)")
+ylabel!("Abundance (N)")
+
