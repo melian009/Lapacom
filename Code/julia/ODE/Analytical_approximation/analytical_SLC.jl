@@ -266,7 +266,7 @@ end
 #Estimamos los valores de Na y Sa para distintos valores de E.
 
 Exp_lim = 1                 # Exploitation max limit 
-m=0.05                      # Interval of exploitation values 
+m=0.005                      # Interval of exploitation values 
 Expl= 0:m:Exp_lim           # Exploitation ranges
 Sa_ = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
 Na_ = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
@@ -282,7 +282,7 @@ for n = 0:m:Exp_lim
  end
  p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, Smax
  u0 = [1e3,40]
- tspan = [365*2,365*2]
+ tspan = [0,365*2]
  prob_1 = ODEProblem(analitical_aproach_SLC_SS!, u0, tspan, p_1)
  sol_1 = solve(prob_1, Tsit5())
  c=c+1
@@ -293,8 +293,7 @@ for n = 0:m:Exp_lim
 end
 
 #Adult size plot by exploitation
-plot!(Expl,Na_,label="NA: N (adults)")
+plot(Expl,Sa_,label="NA: N (adults)")
 xlims!(0,1)
-ylims!(-1000,15000)
 xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)") 
