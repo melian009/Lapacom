@@ -205,7 +205,7 @@ end
 
 # conversion rates between stages
 # average oocytes per year per adult
-```Oocyte values ​are for ordinary Patella only. 
+```Oocyte values ​are for Patella ordinaria only. 
 It needs to include the values ​​for the other species.```
 avg_oocytes = mean([92098, 804183]) 
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
