@@ -218,15 +218,14 @@ ylims!(-1000,15000)
 xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)") 
 
-#El punto de corte en N=0 en la Explotación 
-# difiere entre la aproximación analitica y la aproximación numérica.
+# El punto de corte en N=0 en la Explotación difiere entre la aproximación analitica y la aproximación numérica.
 # Analytical approach = 0.403
 # Numérical approach = 0.55
 
 
-#====================================================================
+#======================================================================
 Analytical approach for the simple life cycle in a single site (SLC-OS)
-====================================================================#
+======================================================================#
 
 ```
 Simple life cycle equations:
