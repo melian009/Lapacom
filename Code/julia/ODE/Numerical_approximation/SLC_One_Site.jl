@@ -69,7 +69,7 @@ function single_site_S!(du, u, p, t)
   r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ = p
   du[1] = dNⱼ = (r * Nₐ * (Sₐ/sizeₘₐₓ) * ((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
   du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (E(t) * Nₐ)
-  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
+  du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (1 * E(t))))
 end
 
 #=

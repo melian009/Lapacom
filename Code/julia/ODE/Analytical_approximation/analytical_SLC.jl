@@ -84,9 +84,9 @@ p = Dict([
 sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 =#
 
-```
-Cálculo de la matrix jacobianan del sistema SLC en One site.
-```
+
+# Jacobian matrix extimation for a simple life cycle (only abundance equations).
+
 @variables Ne Na r K g de da E
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
@@ -111,11 +111,11 @@ Si Det(J)=0
  Na = (K*g*r - (E*K*de + E*K*g + K*da*de + K*da*g))/(2*g*r)
 =#
 
-```
+#=
  Simplificamos la ecuación:
  Na = (K *(g *(r - (de + E)) - da *(de + g)))/(2*g*r) 
     Si g*(r-(de + E) > da *(de + g) | Na > 0
-```
+=#
 #=
  Si dNa/dt = 0 y Na = f(K,g,r,da,de):
     dNa/dt = (g * Ne) - (da * Na) - (E * Na) = 0
@@ -147,7 +147,8 @@ Ne_[c,] = Ne
 Na_[c,] = Na
 end
 
-#= This is the inecuality for the adult abundances
+#= 
+This is the inecuality for the adult abundances
  Equations:
  Na = K * ( g * (r - E - d2) - d1 * (E + d2) ) / (2 * g * r)
  Ne = ((da + E) * Na)/g
@@ -165,10 +166,12 @@ ylabel!("Abundance (N)")
 
 #Punto de inflexión en E = 0.4
 
-```
+
+
+#=
 Realizamos la aproximación numérica al mismo sistema de ecuaciones 
  y comprobamos si coinciden los resultados:
-```
+=#
 
 # SLC in One site: 
 function single_site!(du, u, p, t)
@@ -219,5 +222,37 @@ ylabel!("N (nº individuals)")
 # difiere entre la aproximación analitica y la aproximación numérica.
 # Analytical approach = 0.403
 # Numérical approach = 0.55
-  
+
+
+#====================================================================
+Analytical approach for the simple life cycle in a single site (SLC-OS)
+====================================================================#
+
+```
+Simple life cycle equations:
+ dNe/dt = (r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
+ dNa/dt = (g * Ne) - (da * Na) - (E * Na)
+ dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1-E)))
+```
+
+@variables Na Ne Sa r K de da g E Smax size_growth_rate
+
+# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
+#=
+J_SLC = Symbolics.jacobian([
+    (r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne), # = dNe/dt 
+    (g * Ne) - (da * Na) - (E * Na), # = dNa/dt
+    size_growth_rate * Sa * (1 - Sa/(Smax * (1-E)))], # = dSa/dt
+[Ne, Ne, Sa]) #Vairables a considerar para calcular la matriz jacobiana  
+=#
+
+J_SLC = [(-de-g) ((Sa*r*(K-2 * Na))/(K*Smax)) ((Na*r*(K-Na))/(K*Smax));g (-E-da) 0;0 0 (size_growth_rate*Sa*(1-(2*Na)/(Smax*(1-E))))]
+
+# Cálculo del determinante
+Det_SLC = det(J_SLC)
+
+#Simplificación del determinante para despejar las las variables.
+M = Symbolics.simplify(Det_SLC)
+
+
 
