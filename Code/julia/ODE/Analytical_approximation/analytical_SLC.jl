@@ -254,4 +254,40 @@ Det_SLC = det(J_SLC)
 M = Symbolics.simplify(Det_SLC)
 
 
+# Tras el desarrollo de las ecuaciones, se obtubieron las ecuaciones de Sa y Na para la aproximación teórica.
 
+function analitical_aproach_SLC_SS!(du,u, p, t)
+  Na, Sa = u
+  r, g, de, da, E, K, size_growth_rate, Smax = p
+  du[1] = Sa = (size_growth_rate * (E(t) + da) * (de + g) * K * Smax)/(g * r * (K - 2 * Na))
+  du[2] = Na = (K/2)*(1 - (size_growth_rate * (E(t) + da) * (de + g) * Smax)/(g * r * Sa))
+end
+
+#Estimamos los valores de Na y Sa para distintos valores de E.
+
+Exp_lim = 1                 # Exploitation max limit 
+m=0.05                      # Interval of exploitation values 
+Expl= 0:m:Exp_lim           # Exploitation ranges
+Sa_ = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
+Na_ = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
+c=0
+
+for n = 0:m:Exp_lim
+  function Et(t)
+  if modf(t)[1] < 0.5         # 50% of the adult population is exploited
+    return 0.0
+  else
+    return n                    #For an exploitation value equal to 1, the mathematical result is erratic because the size equation will present a denominator division equal to 0
+  end
+ end
+ p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, Smax
+ u0 = [1e3,40]
+ tspan = [0,365*2]
+ prob_1 = ODEProblem(analitical_aproach_SLC_SS!, u0, tspan, p_1)
+ sol_1 = solve(prob_1, Tsit5())
+ c=c+1
+
+ N_at_1[c,] = sol_1[2,end]
+ S_at_1[c,] = sol_1[3,end]
+
+end
