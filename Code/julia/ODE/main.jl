@@ -176,7 +176,7 @@ save("two_sites_model_sizes.png", fig)
 
 ## Starting the model
 #---------------------------
-nsites = 4
+nsites = 8
 nlifestages = 5
 
 ## initial state of the system
@@ -191,14 +191,6 @@ end
 u0_general = reshape(reduce(vcat, u0_general), length(u0_general[1]), length(u0_general))'
 
 ## defining model parameters
-function exploit(t, rate)
-  if (t % 365) / 365 < 0.42
-    return rate
-  else
-    # return 0.0
-    return 0.01
-  end
-end
 
 """
 captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce
@@ -207,8 +199,7 @@ function reproductive_cycle(t)
   if (t % 365) / 365 >= 0.42
     return 1.0
   else
-    return 0.01
-    # return 0.0
+    return 0.0
   end
 end
 
@@ -232,100 +223,93 @@ K = 64_000  # for 6.4 km2 per site.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
 
 function nsites!(du, u, p, t)
-  # Change these parameters if you change the model
   nsites = 1
   nlifestages = 5
-  # site_indices = [0, 6, 12, 18, 24, 30, 36, 42]#, 48, 54]
 
-  counter = 0
+  r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α = p
   for site in 1:nsites
-    # site_index = (site * (nlifestages + 1)) - (nlifestages + 1)
-    # site_index = site_indices[site]
 
     # Stages 1 Egg
-    counter += 1
     stage = 1
     prev_stage = 5
-    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    # dispersal_probs1[site] = 0.0
-    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    # dispersal_probs2[site] = 0.0
-    du[counter] = (reproductive_cycle(t) * p[1][stage] * u[site, prev_stage] * ((p[7] - u[site, prev_stage]) / p[7])) -
-                  (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) #+
-    # (sum(dispersal_probs1 .* u[:, stage])) -
-    # (u[site, stage] * sum(dispersal_probs2))
+
+    dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
+    dispersal_probs1[site] = 0.0
+    dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
+    dispersal_probs2[site] = 0.0
+
+    du[site, stage] = (reproductive_cycle(t) * r[stage] * u[site, prev_stage]) -
+                      (r[stage+1] * u[site, stage]) -
+                      (d[stage] * u[site, stage]) +
+                      (sum(dispersal_probs1 .* u[:, stage])) -
+                      (u[site, stage] * sum(dispersal_probs2))
 
     # Stage 2 Trochophore
-    counter += 1
     stage = 2
     prev_stage = 1
-    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    # dispersal_probs1[site] = 0.0
-    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    # dispersal_probs2[site] = 0.0
-    du[counter] = (p[1][stage] * u[site, prev_stage]) -
-                  (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) #+
-    # (sum(dispersal_probs1 .* u[:, stage])) -
-    # (u[site, stage] * sum(dispersal_probs2))
+
+    dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
+    dispersal_probs1[site] = 0.0
+    dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
+    dispersal_probs2[site] = 0.0
+
+    du[site, stage] = (r[stage] * u[site, prev_stage]) -
+                      (r[stage+1] * u[site, stage]) -
+                      (d[stage] * u[site, stage]) +
+                      (sum(dispersal_probs1 .* u[:, stage])) -
+                      (u[site, stage] * sum(dispersal_probs2))
 
     #stage 3 Veliger
-    counter += 1
     stage = 3
     prev_stage = 2
-    # dispersal_probs1 = (exp(-p[8][stage]) ./ p[4][:, site])
-    # dispersal_probs1[site] = 0.0
-    # dispersal_probs2 = (exp(-p[8][stage]) ./ p[4][site, :])
-    # dispersal_probs2[site] = 0.0
-    du[counter] = (p[1][stage] * u[site, prev_stage]) -
-                  (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage]) #+
-    # (sum(dispersal_probs1 .* u[:, stage])) -
-    # (u[site, stage] * sum(dispersal_probs2))
+    
+    dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
+    dispersal_probs1[site] = 0.0
+    dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
+    dispersal_probs2[site] = 0.0
+
+    du[site, stage] = (r[stage] * u[site, prev_stage] * ((K - u[site, stage]) / K)) -
+                      (r[stage+1] * u[site, stage]) -
+                      (d[stage] * u[site, stage]) +
+                      (sum(dispersal_probs1 .* u[:, stage])) -
+                      (u[site, stage] * sum(dispersal_probs2))
 
     # stage 4 Juvenile
-    counter += 1
     stage = 4
     prev_stage = 3
-    # du[counter] = (p[1][stage] * u[site, prev_stage] * ((p[7] - u[site, prev_stage]) / p[7])) -
-    du[counter] = (p[1][stage] * u[site, prev_stage]) -
-                  (p[1][stage+1] * u[site, stage]) -
-                  (p[2][stage] * u[site, stage])
+    du[site, stage] = (r[stage] * u[site, prev_stage] * ((K - u[site, stage]) / K)) -
+                      (r[stage+1] * u[site, stage]) -
+                      (d[stage] * u[site, stage])
 
     # stage 5 adult
-    counter += 1
     stage = 5
     prev_stage = 4
-    du[counter] = (p[1][stage] * u[site, prev_stage]) -
-                  (exploit(t, p[5][site]) * u[site, stage]) -
-                  (p[2][stage] * u[site, stage])
+    du[site, stage] = (r[stage] * u[site, prev_stage] * ((K - u[site, stage]) / K)) -
+                      ((reproductive_cycle(t) * exploitation_rates[site]) * u[site, stage]) -
+                      (d[stage] * u[site, stage])
 
     # adult sizes
-    # adult sizes. dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ - (sizeₘₐₓ * E(t))))
-    counter += 1
-    du[counter] = p[3] * u[site, nlifestages+1] * (1 - u[site, nlifestages+1] / (p[6] - (p[6] * exploit(t, p[5][site]))))
-
+    stage = 6
+    du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - u[site, nlifestages+1] / (size_max - (size_max * (reproductive_cycle(t) * exploitation_rates[site]))))
   end
 end
 
-tspan_general = (100.0, 200.0)
+tspan_general = (1.0, 3000.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
-# sol_general = solve(prob_general, Rosenbrock23());
-sol_general = solve(prob_general, alg_hints=[:stiff]);
-# sol_general = solve(prob_general, ROS34PW2(), dt=0.00001, adaptive=false);
+sol_general = solve(prob_general)
 
 # Plot
+all_u = sol_general.u
+all_times = sol_general.t
 # site_names = distance_df.site
-site_names = ["Porto Moniz"]#, "Pacl do Mar", "Funchal"]#, "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
-site_indices = [0]#, 6, 12]#, 18, 24, 30, 36, 42]#, 48, 54]
+site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
 for stage in 1:5
   fig = Figure()
   ax1 = Axis(fig[1, 1])
-  lines!(ax1, sol_general.t, [sol_general.u[i][1, stage] for i in 1:length(sol_general.t)], yscale=:log10, label=site_names[1])
+  lines!(ax1, all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
   ax1.title = "N for stage: $(stage)"
-  for site in 1:1#2:8
-    lines!(ax1, sol_general.t, [sol_general.u[i][site, stage] for i in 1:length(sol_general.t)], label=site_names[site])
+  for site in 2:nsites#2:8
+    lines!(ax1, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
   end
   fig[1, 2] = Legend(fig, ax1, "Site")
   save("figs/stage=$stage.pdf", fig)
@@ -333,10 +317,10 @@ end
 
 # Changes in body size
 stage = 6
-fig, ax, plt = lines(sol_general.t, [sol_general.u[i][1, stage] for i in 1:length(sol_general.t)], yscale=:log10, label=site_names[1])
+fig, ax, plt = lines(all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
 ax.title = "Body size"
-for site in 2:8
-  lines!(ax, sol_general.t, [sol_general.u[i][site, stage] for i in 1:length(sol_general.t)], label=site_names[site])
+for site in 2:nsites
+  lines!(ax, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
 end
 fig[1, 2] = Legend(fig, ax, "Site")
 save("figs/body_sizes.pdf", fig)
