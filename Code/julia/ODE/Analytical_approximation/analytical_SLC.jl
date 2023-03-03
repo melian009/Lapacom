@@ -237,6 +237,7 @@ Simple life cycle equations:
 @variables Na Ne Sa r K de da g E Smax size_growth_rate
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
+J_SLC = Symbolics.jacobian([(r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne),(g * Ne) - (da * Na) - (E * Na),size_growth_rate * Sa * (1 - Sa/(Smax * (1-E)))], [Ne, Ne, Sa])
 #=
 J_SLC = Symbolics.jacobian([
     (r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne), # = dNe/dt 
