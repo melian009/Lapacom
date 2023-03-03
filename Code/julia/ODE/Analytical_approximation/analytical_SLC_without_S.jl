@@ -15,7 +15,7 @@ using Plots
 using Plots.PlotMeasures
 using Symbolics
 # using SymPy
-import ForwardDiff.jacobian
+# import ForwardDiff.jacobian
 
 # Jacobian matrix extimation for a simple life cycle (only abundance equations).
 
@@ -149,7 +149,7 @@ xlims!(0,1)
 ylims!(-1000,15000)
 xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)") 
-
+savefig("SLC_AA_NA.png")
 # El punto de corte en N=0 en la Explotación difiere entre la aproximación analitica y la aproximación numérica.
 # Analytical approach = 0.403
 # Numérical approach = 0.55
