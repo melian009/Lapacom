@@ -90,19 +90,19 @@ Analytical approach for the simple life cycle in a single site (SLC-OS)
 
 ```
 Simple life cycle equations:
- dNe/dt = (r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
- dNa/dt = (g * Ne) - (da * Na) - (E * Na)
- dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1-E)))
+ dNe/dt = (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
+ dNa/dt = (g * Ne) - (da * Na) - (Na * H * (1-X))
+ dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
 ```
 
-@variables Na Ne Sa r K de da g E Smax size_growth_rate
+@variables Na Ne Sa r K de da g X E Smax size_growth_rate 
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
 #=
 J_SLC = Symbolics.jacobian([
-    (r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne), # = dNe/dt 
-    (g * Ne) - (da * Na) - (E * Na), # = dNa/dt
-    size_growth_rate * Sa * (1 - Sa/(Smax * (1-E)))], # = dSa/dt
+ (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne),
+ (g * Ne) - (da * Na) - (Na * H * (1-X)),
+ size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))], # = dSa/dt
 [Ne, Ne, Sa]) #Vairables a considerar para calcular la matriz jacobiana  
 =#
 
@@ -158,3 +158,45 @@ plot(Expl,Sa_,label="NA: N (adults)")
 xlims!(0,1)
 xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)") 
+
+
+
+````````````````````````````````````````````````````
+
+````````````````````````````````````````````````````
+
+#= Possible analitical solution for SLC in a single site
+  Na = K*(2*E + g + da)*(3*E + g + 2*da)^-1
+  Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2*Na))^-1
+  Sa = (- E - g) * (- da - g) * K * Smax * (g*r*(K - 2*Na))^-1
+=#
+
+#Estimamos los valores de Na y Ne para distintos valores de E.
+
+Exp_lim = 1                 # Exploitation max limit 
+m=0.05                      # Interval of exploitation values 
+Expl= 0:m:Exp_lim           # Exploitation ranges
+Ne_ = zeros(Float64, size(Expl)) # Void vector to array number of eggs for diferent exploitation values
+Na_ = zeros(Float64, size(Expl)) # Void vector to array number of adults for diferent exploitation values
+Sa_ = zeros(Float64, size(Expl))
+c=0
+
+for n = 0:m:Exp_lim
+r = 0.6
+g = 0.06
+de = 0.05
+da = 0.08 
+E = n 
+K = 1e4 
+Na = K * (2 * E + g + da) * (3 * E + g + 2 * da)^-1
+Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2 * Na))^-1
+Sa = (- E - g) * (- da - g) * K * Smax * (g * r * (K - 2 * Na))^-1
+c=c+1
+Ne_[c,] = Ne
+Na_[c,] = Na
+end
+
+
+Na = K*(2*E + g + da)*(3*E + g + 2*da)^-1
+Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2*Na))^-1
+Sa = (- E - g) * (- da - g) * K * Smax * (g*r*(K - 2*Na))^-1
