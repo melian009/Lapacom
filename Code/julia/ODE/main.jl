@@ -19,7 +19,7 @@ using Optim
 # 3: 0.784557
 # 0.7: 0.998611
 # 1.3: 0.971057
-# 4: 0.683772
+# 7: 0.4820525
 # In the ODEs, the unit of left side is individuals per day. This means that each time step is one day. The rate of the right side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
 ## [x]: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
 ## [x]: Check how to add all equations in a loop instead of writing by hand.
@@ -207,10 +207,10 @@ end
 # average oocytes per year per adult
 ```Oocyte values ​are for Patella ordinaria only. 
 It needs to include the values ​​for the other species.```
-avg_oocytes = mean([92098, 804183]) 
+avg_oocytes = mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 reggs = reggs / 500 # because the rate is too high to be handled
-r = [reggs, 0.998611, 0.971057, 0.683772, 0.00629]
+r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
 d = [0.001, 0.001, 0.001, 0.001, 0.000322]
 size_growth_rate = 0.32 / 365
@@ -264,7 +264,7 @@ function nsites!(du, u, p, t)
     #stage 3 Veliger
     stage = 3
     prev_stage = 2
-    
+
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
