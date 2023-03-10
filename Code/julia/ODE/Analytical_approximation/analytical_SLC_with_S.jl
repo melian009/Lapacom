@@ -1,6 +1,6 @@
 using Pkg
+Pkg.activate(".")
 using ForwardDiff
-# Pkg.activate(".")
 using LinearAlgebra
 # using OrdinaryDiffEq
 using DifferentialEquations
@@ -14,7 +14,6 @@ using Optim
 using Plots
 using Plots.PlotMeasures
 using Symbolics
-# using SymPy
 import ForwardDiff.jacobian
 
 #=
@@ -95,34 +94,34 @@ Simple life cycle equations:
  dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
 ```
 
-@variables Na Ne Sa r K de da g X E Smax size_growth_rate 
+@variables Na Ne Sa r K de da g X H Smax size_growth_rate 
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
-#=
+
 J_SLC = Symbolics.jacobian([
  (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne),
  (g * Ne) - (da * Na) - (Na * H * (1-X)),
  size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))], # = dSa/dt
-[Ne, Ne, Sa]) #Vairables a considerar para calcular la matriz jacobiana  
-=#
+[Ne, Na, Sa]) #Vairables a considerar para calcular la matriz jacobiana  
 
-J_SLC = [(-de-g) ((Sa*r*(K-2 * Na))/(K*Smax)) ((Na*r*(K-Na))/(K*Smax));g (-E-da) 0;0 0 (size_growth_rate*Sa*(1-(2*Na)/(Smax*(1-E))))]
+
+#J_SLC = [(-de-g) ((Sa*r*(K-2 * Na))/(K*Smax)) ((Na*r*(K-Na))/(K*Smax));g (-E-da) 0;0 0 (size_growth_rate*Sa*(1-(2*Na)/(Smax*(1-E))))]
 
 # Cálculo del determinante
 Det_SLC = det(J_SLC)
+
+
 
 #Simplificación del determinante para despejar las las variables.
 M = Symbolics.simplify(Det_SLC)
 
 
-# Tras el desarrollo de las ecuaciones, se obtubieron las ecuaciones de Sa y Na para la aproximación teórica.
+Symbolics.solve_for(M, Sa)
 
-function analitical_aproach_SLC_SS!(du,u, p, t)
-  Na, Sa = u
-  r, g, de, da, E, K, size_growth_rate, Smax = p
-  du[1] = Sa = (size_growth_rate * (E(t) + da) * (de + g) * K * Smax)/(g * r * (K - 2 * Na))
-  du[2] = Na = (K/2)*(1 - (size_growth_rate * (E(t) + da) * (de + g) * Smax)/(g * r * Sa))
-end
+
+
+
+
 
 #Estimamos los valores de Na y Sa para distintos valores de E.
 
