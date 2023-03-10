@@ -193,9 +193,18 @@ Sa = (- E - g) * (- da - g) * K * Smax * (g * r * (K - 2 * Na))^-1
 c=c+1
 Ne_[c,] = Ne
 Na_[c,] = Na
+Sa_[c,] = Sa
 end
 
+plot(Expl,Ne_,label="AA: N (eggs)")
+plot!(Expl,Na_,label="AA: N (adults)")
+xlims!(0,1)
+ylims!(-1000,15000)
+xlabel!("Exploitation rate")
+ylabel!("N (nº individuals)") 
 
-Na = K*(2*E + g + da)*(3*E + g + 2*da)^-1
-Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2*Na))^-1
-Sa = (- E - g) * (- da - g) * K * Smax * (g*r*(K - 2*Na))^-1
+plot(Expl,Sa_,label="AA: Size (adults)")
+xlims!(0,1)
+ylims!(-1000,15000)
+xlabel!("Exploitation rate")
+ylabel!("N (nº individuals)") 
