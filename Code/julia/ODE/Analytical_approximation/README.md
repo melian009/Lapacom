@@ -87,9 +87,18 @@ sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 Analytical approach for the simple life cycle in a single site (SLC-OS)
 ======================================================================#
 
+#Sa should be constrained to have values larger than Sc, where Sc is the first maturity size.
 ```
 Simple life cycle equations:
  dNe/dt = (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
+ dNa/dt = (g * Ne) - (da * Na) - (Na * H * (1-X))
+ dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
+```
+
+#Sa => Sc we secure Ne changes when Sa => Sc 
+```
+Simple life cycle equations (density dependence for Ne Na)
+ dNe/dt = (X * r * Na *Sc*((K - Na)/K)) - (de * Ne) - (g * Ne)
  dNa/dt = (g * Ne) - (da * Na) - (Na * H * (1-X))
  dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
 ```
@@ -101,8 +110,9 @@ Simple life cycle equations:
 J_SLC = Symbolics.jacobian([
  (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne),
  (g * Ne) - (da * Na) - (Na * H * (1-X)),
- size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))], # = dSa/dt
-[Ne, Na, Sa]) #Vairables a considerar para calcular la matriz jacobiana  
+ size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))], [Ne, Na, Sa])
+ # = dSa/dt
+#Variables a considerar para calcular la matriz jacobiana  
 
 
 #J_SLC = [(-de-g) ((Sa*r*(K-2 * Na))/(K*Smax)) ((Na*r*(K-Na))/(K*Smax));g (-E-da) 0;0 0 (size_growth_rate*Sa*(1-(2*Na)/(Smax*(1-E))))]
