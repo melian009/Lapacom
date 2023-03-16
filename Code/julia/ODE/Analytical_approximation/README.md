@@ -1,6 +1,6 @@
 using Pkg
+Pkg.activate(".")
 using ForwardDiff
-# Pkg.activate(".")
 using LinearAlgebra
 # using OrdinaryDiffEq
 using DifferentialEquations
@@ -14,7 +14,6 @@ using Optim
 using Plots
 using Plots.PlotMeasures
 using Symbolics
-# using SymPy
 import ForwardDiff.jacobian
 
 #=
@@ -88,6 +87,7 @@ sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
 Analytical approach for the simple life cycle in a single site (SLC-OS)
 ======================================================================#
 
+#Sa should be constrained to have values larger than Sc, where Sc is the first maturity size.
 ```
 Simple life cycle equations:
  dNe/dt = (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
@@ -95,34 +95,49 @@ Simple life cycle equations:
  dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
 ```
 
-@variables Na Ne Sa r K de da g X E Smax size_growth_rate 
+#Sa => Sc we secure Ne changes when Sa => Sc 
+```
+Simple life cycle equations (density dependence for Ne Na)
+ dNe/dt = (X * r * Na *Sc*((K - Na)/K)) - (de * Ne) - (g * Ne)
+ dNa/dt = (g * Ne) - (da * Na) - (Na * H * (1-X))
+ dSa/dt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
+```
+
+@variables Na Ne Sa r K de da g X H Smax size_growth_rate 
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
-#=
+
 J_SLC = Symbolics.jacobian([
  (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne),
  (g * Ne) - (da * Na) - (Na * H * (1-X)),
- size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))], # = dSa/dt
-[Ne, Ne, Sa]) #Vairables a considerar para calcular la matriz jacobiana  
-=#
+ size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))], [Ne, Na, Sa])
+ # = dSa/dt
+#Variables a considerar para calcular la matriz jacobiana  
 
-J_SLC = [(-de-g) ((Sa*r*(K-2 * Na))/(K*Smax)) ((Na*r*(K-Na))/(K*Smax));g (-E-da) 0;0 0 (size_growth_rate*Sa*(1-(2*Na)/(Smax*(1-E))))]
+
+#J_SLC = [(-de-g) ((Sa*r*(K-2 * Na))/(K*Smax)) ((Na*r*(K-Na))/(K*Smax));g (-E-da) 0;0 0 (size_growth_rate*Sa*(1-(2*Na)/(Smax*(1-E))))]
 
 # Cálculo del determinante
 Det_SLC = det(J_SLC)
+
+
 
 #Simplificación del determinante para despejar las las variables.
 M = Symbolics.simplify(Det_SLC)
 
 
-# Tras el desarrollo de las ecuaciones, se obtubieron las ecuaciones de Sa y Na para la aproximación teórica.
+# Symbolics.solve_for(M, Sa) # Error
 
-function analitical_aproach_SLC_SS!(du,u, p, t)
-  Na, Sa = u
-  r, g, de, da, E, K, size_growth_rate, Smax = p
-  du[1] = Sa = (size_growth_rate * (E(t) + da) * (de + g) * K * Smax)/(g * r * (K - 2 * Na))
-  du[2] = Na = (K/2)*(1 - (size_growth_rate * (E(t) + da) * (de + g) * Smax)/(g * r * Sa))
-end
+Na = Symbolics.solve_for(M, Na) #
+
+dNedt = (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
+dNadt = (g * Ne) - (da * Na) - (Na * H * (1-X))
+dSadt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
+
+
+Ne = Symbolics.solve_for(dNadt, Ne)
+
+Sa = Symbolics.solve_for(dNadt, Sa)
 
 #Estimamos los valores de Na y Sa para distintos valores de E.
 
@@ -188,15 +203,26 @@ de = 0.05
 da = 0.08 
 E = n 
 K = 1e4 
+#Possible Analytical solution
 Na = K * (2 * E + g + da) * (3 * E + g + 2 * da)^-1
 Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2 * Na))^-1
 Sa = (- E - g) * (- da - g) * K * Smax * (g * r * (K - 2 * Na))^-1
+
 c=c+1
 Ne_[c,] = Ne
 Na_[c,] = Na
+Sa_[c,] = Sa
 end
 
+plot(Expl,Ne_,label="AA: N (eggs)")
+plot!(Expl,Na_,label="AA: N (adults)")
+xlims!(0,1)
+ylims!(-1000,15000)
+xlabel!("Exploitation rate")
+ylabel!("N (nº individuals)") 
 
-Na = K*(2*E + g + da)*(3*E + g + 2*da)^-1
-Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2*Na))^-1
-Sa = (- E - g) * (- da - g) * K * Smax * (g*r*(K - 2*Na))^-1
+plot(Expl,Sa_,label="AA: Size (adults)")
+xlims!(0,1)
+ylims!(-1000,15000)
+xlabel!("Exploitation rate")
+ylabel!("N (nº individuals)") 
