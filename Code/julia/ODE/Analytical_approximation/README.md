@@ -126,12 +126,18 @@ Det_SLC = det(J_SLC)
 M = Symbolics.simplify(Det_SLC)
 
 
-Symbolics.solve_for(M, Sa)
+# Symbolics.solve_for(M, Sa) # Error
+
+Na = Symbolics.solve_for(M, Na) #
+
+dNedt = (X * r * Na *(Sa/Smax)*((K - Na)/K)) - (de * Ne) - (g * Ne)
+dNadt = (g * Ne) - (da * Na) - (Na * H * (1-X))
+dSadt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
 
 
+Ne = Symbolics.solve_for(dNadt, Ne)
 
-
-
+Sa = Symbolics.solve_for(dNadt, Sa)
 
 #Estimamos los valores de Na y Sa para distintos valores de E.
 
@@ -197,9 +203,11 @@ de = 0.05
 da = 0.08 
 E = n 
 K = 1e4 
+#Possible Analytical solution
 Na = K * (2 * E + g + da) * (3 * E + g + 2 * da)^-1
 Ne = (Na * (- E - g) * (K - Na)) * (g * (K - 2 * Na))^-1
 Sa = (- E - g) * (- da - g) * K * Smax * (g * r * (K - 2 * Na))^-1
+
 c=c+1
 Ne_[c,] = Ne
 Na_[c,] = Na
