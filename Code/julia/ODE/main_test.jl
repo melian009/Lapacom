@@ -53,17 +53,20 @@ It needs to include the values ​​for the other species.```
 avg_oocytes = mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 reggs = reggs / 500 # because the rate is too high to be handled
+
 r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
+
 # natural death rates per life stage.
 d = [0.001, 0.001, 0.001, 0.001, 0.000322]
+# d = 
 
 #=
-Estimated mortality (Z,d,F) and exploitation rates (E):
+Empirical estimated mortality (Z,d,F) and exploitation rates (E):
 
 {Patella ordinaria} (Henriques, 2012)
 
 - Natural Mortality rate (d) was 0.55 year^{-1}
-- Fishing mortality rate (F) was 1.24 year^{−1}
+- Fishing mortality rate (F) was 1.24 year^{−1} 
 - Total mortality rate (Z=d+F) was 1.79 year^{−1}; 
 - Exploitation rate (E=F/Z) was 0.693. 
 
@@ -74,9 +77,17 @@ Estimated mortality (Z,d,F) and exploitation rates (E):
 - Total mortality (Z=d+F) was 1.38 year^{-1};
 - Exploitation rate (E=F/Z) was 0.57. 
 
-For numerical simulation using these rates.
-=#
+For numerical simulation using these rates d and E.
 
+Mean size: 
+Before (1996-2006)
+P apera = 43.53mm
+P ordinaria = 46.26mm
+After  (2007-2017)
+P aspera = 44.45mm
+P ordinaria = 46.44mm
+
+=#
 
 size_growth_rate = 0.32 / 365
 distance_df = CSV.read("distance_matrix.csv", DataFrame)
