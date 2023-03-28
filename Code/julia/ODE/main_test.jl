@@ -79,14 +79,24 @@ Empirical estimated mortality (Z,d,F) and exploitation rates (E):
 
 For numerical simulation using these rates d and E.
 
-Mean size: 
-Before (1996-2006)
+Average size: 
+Before (1996-2006): FULL ACCESS.
 Patella apera = 43.53mm
 Patella ordinaria = 46.26mm
-After  (2007-2017)
+
+After  (2007-2017): MPA+FULL
 Patella aspera = 44.45mm
 Patella ordinaria = 46.44mm
 
+Only MPS
+After (2007-2017)
+Patella aspera = 50.61mm
+Patella ordinaria = 49.25mm
+
+Only Full access (2007-2017) 
+After implementation 
+Patella aspera = 43.41mm
+Patella ordinaria = 45.72mm
 =#
 
 size_growth_rate = 0.32 / 365
