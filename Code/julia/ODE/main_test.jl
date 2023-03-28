@@ -81,11 +81,11 @@ For numerical simulation using these rates d and E.
 
 Mean size: 
 Before (1996-2006)
-P apera = 43.53mm
-P ordinaria = 46.26mm
+Patella apera = 43.53mm
+Patella ordinaria = 46.26mm
 After  (2007-2017)
-P aspera = 44.45mm
-P ordinaria = 46.44mm
+Patella aspera = 44.45mm
+Patella ordinaria = 46.44mm
 
 =#
 
