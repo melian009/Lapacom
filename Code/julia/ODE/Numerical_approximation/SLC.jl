@@ -12,7 +12,7 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 using Plots
-using Plots.PlotMeasures
+# using Plots.PlotMeasures
 using Symbolics
 import ForwardDiff.jacobian
 
@@ -117,8 +117,8 @@ end
 
 # Population Growth rate estimation (r=reggs):
 
-oocytes_po = 385613+ 194902-194902   # Patella ordinaria (nº of Eggs)
-oocytes_pa = 703029 + 43496 - 43496  # Patella aspera (nº of Eggs)
+oocytes_po = 385613 + 194902 - 194902  # Average: Patella ordinaria (nº of Eggs)
+oocytes_pa = 703029 + 43496 - 43496  # Average: Patella aspera (nº of Eggs)
 oocytes = [oocytes_pa,oocytes_po]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
@@ -127,7 +127,7 @@ Kt = 1e4             # Carrying capacity
 rates = [0.639,0.57] # Exploitation rate
 gEA = 0.006          # Instant conversion between stages.
 da_ =  [0.55,0.59]   # Natural mortality rate for adults
-de_ = [0.975,0.977]  # Need to be estimated by numerical aproximation
+de_ = [0.975,0.977]  # Not estimated values. Need to be calculated by numerical aproximation
 Sm = 56              # Maximum size for adults
 gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
@@ -141,8 +141,12 @@ tspan = (0.0,365.0*2) # Temporal ranges for simulations: 2 years.
 prob_1_po = ODEProblem(SLC_metapop!, u0, tspan, P_sol_po) 
 sol_1_po = solve(prob_1_po, Tsit5())
 
-plot(sol_1_po=(0, 1), label="Ne")
-plot!(sol_1_po=(0, 2), label="Na")
-title!("3rd definition: 1y")
-xlabel!("t (days)")
-ylabel!("N (Nº individuals)")
+time = 0.0:1.434108527131783:370.0
+
+Plots.plot(sol_1_po,vars=(0,1), label="Ne")
+Plots.plot!(time,sol_1_po[2], label="Na")
+Plots.title!("3rd definition: 1y")
+Plots.xlabel!("t (days)")
+Plots.ylabel!("N (Nº individuals)")
+
+#Numerical aproximation to obtain natural mortality rates of eggs.
