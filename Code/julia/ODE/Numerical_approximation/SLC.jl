@@ -12,7 +12,6 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 using Plots
-# using Plots.PlotMeasures
 using Symbolics
 import ForwardDiff.jacobian
 
@@ -135,13 +134,16 @@ i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2
 P_sol_po = [i[1], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella ordinaria" 
 P_sol_pa = [i[2], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella aspera" 
 
-u0 = [1e3,1e3,40]     # Initial populations abundance and size for the simulations
+u0 = [1e3,1e3,33.4; 1e3,1e3,34.6]     # Initial populations abundance and size for the simulations
+
 tspan = (0.0,365.0*2) # Temporal ranges for simulations: 2 years.
 
-prob_1_po = ODEProblem(SLC_metapop!, u0, tspan, P_sol_po) 
-sol_1_po = solve(prob_1_po, Tsit5())
-
-time = 0.0:1.434108527131783:370.0
+#Simulation for "Patella ordinaria"
+prob_po = ODEProblem(SLC_metapop!, u0[1,], tspan, P_sol_po) 
+sol_po = solve(prob_po, Tsit5())
+# Simulation for "Patella aspera"
+prob_pa = ODEProblem(SLC_metapop!, uo[2,], tspan, P_sol_pa)
+sol_pa = solve(prob_pa,Tsit5())
 
 Plots.plot(sol_1_po,vars=(0,1), label="Ne")
 Plots.plot!(time,sol_1_po[2], label="Na")
@@ -149,4 +151,15 @@ Plots.title!("3rd definition: 1y")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("N (Nº individuals)")
 
-#Numerical aproximation to obtain natural mortality rates of eggs.
+
+
+
+
+#Numerical aproximation to obtain natural mortality rates of eggs from empirical parameters.
+
+@variables de i, r, K, rate, Exp, X, g,da, Smax, gamma, Ne, Na, Sa
+
+dNe = (X(t) * r[i] * Na) - (de[i] * Ne) - (g * Na)
+dNa = (g * Ne * ((K - Na) / K)) - (da[i] * Na) - (Exp(t,rate,i) * Na)
+dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * Exp(t,rate,i))))
+
