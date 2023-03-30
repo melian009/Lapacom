@@ -176,12 +176,12 @@ KTotal=oocytes_pa+oocytes_po
 # Para "Patella ordinaria".
 # Calculamos la cantidad de huevos que mueren de una poblacion inicial promedio.
 
-Ne_pa=oocytes_po
+Ne_po=oocytes_po
 
 dNe_po=((2*KTotal*gEA)/(KTotal*(da_[1]+gEA)))*((KTotal/2)-Ne_po)
 
 # Calculamos la proporción de huevo muertos en relación al total de huevos iniciales que consideramos.
-de_po =abs(dNe/Ne_po)
+de_po =abs(dNe_po/Ne_po)
 
 # Repetimos el mismo procedimiento para la otra especie: "Patella asera".
 
@@ -189,7 +189,7 @@ Ne_pa=oocytes_pa
 
 dNe_pa=((2*KTotal*gEA)/(KTotal*(da_[2]+gEA)))*((KTotal/2)-Ne_pa)
 
-de_pa =abs(dNe/Ne_po)
+de_pa =abs(dNe_pa/Ne_pa)
 
 # Definimos un vector que engloba ambos ratios de mortalidad de huevos para el periodo reproductivo.
 
