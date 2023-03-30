@@ -124,21 +124,77 @@ end
 
 # Population Growth rate estimation (r=reggs):
 
-oocytes_po = 385613 + 194902 - 194902  # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = 703029 + 43496 - 43496  # Average: Patella aspera (nº of Eggs)
-oocytes = [oocytes_pa,oocytes_po]    # Patella ordinaria, Patella aspera
+oocytes_po = 385613                  # Average: Patella ordinaria (nº of Eggs)
+oocytes_pa = 73029                   # Average: Patella aspera (nº of Eggs)
+oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
 re = reggs / 500     # Population growth rate
-Kt = 64000           # Carrying capacity
+Kt = 640000          # Carrying capacity
 rates = [0.639,0.57] # Exploitation rate (H)
 rates2 = [0.02,0.01]
 gEA = 0.006          # Instant conversion between stages.
 da_ = [0.55,0.59]    # Natural mortality rate for adults
-de_ = [0.001,0.003]  # Not estimated values. Need to be calculated by numerical aproximation
 Sm = 56              # Maximum size for adults
 gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
+
+#de_ = [de_po,de_pe] # Not estimated values. Need to be calculated by numerical aproximation
+
+#= Numerical aproximation: jacobian matrix determination for Full acces SLC metapopulation model
+
+@variables Na, Ne , Sa, r, K, rate, Exp, X, g, de, da, Smax, gamma
+
+# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
+
+J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Ne),
+ (g * Ne * ((K - Ne) / K)) - (da * Na) - ((1 - X) * rate * Na), 
+ gamma * Sa * (1 - (Sa / (Smax * (1 - rate*(1-X)))))],
+ [Sa])
+ expand(J)
+
+# Cálculo del determinante
+Det_J = det(J)
+#Simplificación del determinante
+M = Symbolics.simplify(Det_J)
+
+# Depejamos Ne del Det_J sabiendo que para que se produzcan huevos X = 1.
+Ne = 
+
+Ne = K/2*(1-((de*da+g*de)/r*g))
+
+#Despejamos de del determinante
+
+de=((2*K*g)/(K*(da+g)))*((K/2)-Ne)
+=#
+
+# En base a la cantidad de huevos promedio que pone cada especie,
+# definimos una capacidad de carga de huevos común para ambas metapoblaciones (KTotal).
+
+KTotal=oocytes_pa+oocytes_po
+
+# Para "Patella ordinaria".
+# Calculamos la cantidad de huevos que mueren de una poblacion inicial promedio.
+
+Ne_pa=oocytes_po
+
+dNe_po=((2*KTotal*gEA)/(KTotal*(da_[1]+gEA)))*((KTotal/2)-Ne_po)
+
+# Calculamos la proporción de huevo muertos en relación al total de huevos iniciales que consideramos.
+de_po =abs(dNe/Ne_po)
+
+# Repetimos el mismo procedimiento para la otra especie: "Patella asera".
+
+Ne_pa=oocytes_pa
+
+dNe_pa=((2*KTotal*gEA)/(KTotal*(da_[2]+gEA)))*((KTotal/2)-Ne_pa)
+
+de_pa =abs(dNe/Ne_po)
+
+# Definimos un vector que engloba ambos ratios de mortalidad de huevos para el periodo reproductivo.
+
+de_=(de_po,de_pa)
+
 
 
 # Before and after
@@ -173,10 +229,16 @@ u0_pa_mpa = [1e4, 1e4, 50.61] #Patella aspera
 
 tspan = (1, 3000) # Temporal ranges for simulations: 2 years.
 
+
+
+
+
+
+
 #Simulation for "Patella ordinaria"
 
 #Before
-prob_po_before = ODEProblem(SLC_metapop_FULL!, u0_po_before, tspan, P_sol_po_full) 
+prob_po_before = ODEProblem(SLC_metapop_before!, u0_po_before, tspan, P_sol_po_full) 
 sol_po_before = solve(prob_po_before, Tsit5())
 
 #After:
@@ -196,7 +258,7 @@ sol_pa_before = solve(prob_pa_before,Tsit5())
 
 # After:
 # Full Acces
-prob_pa_full = ODEProblem(SLC_metapop_before!, u0_pa_full, tspan, P_sol_pa_full)
+prob_pa_full = ODEProblem(SLC_metapop_FULL!, u0_pa_full, tspan, P_sol_pa_full)
 sol_pa_full = solve(prob_pa_full,Tsit5())
 
 # MPA
@@ -218,40 +280,40 @@ title!("'Patella ordinaria'")
 xlabel!("t (days)")
 ylabel!("LOG10(N) (Nº individuals)")
 
+plot(sol_po_before, vars=(0,3), label= "Sa: Before")
+plot!(sol_po_full, vars=(0,3), label= "Sa: Full access")
+plot!(sol_po_mpa, vars=(0,3),  label= "Sa: MPA")
+title!("'Patella ordinaria'")
+xlabel!("t (days)")
+ylabel!("Sa (mm)")
+ylims!(55,57)
+
 #Patella ordinaria
-plot(sol_pa_before, vars=(0,2), yscale=:log10, label= "Na: Before")
+plot(sol_pa_before, vars=(0,1), yscale=:log10, label= "Ne: Before")
+plot!(sol_pa_full, vars=(0,1), yscale=:log10, label= "Ne: Full access")
+plot!(sol_pa_mpa, vars=(0,1), yscale=:log10,  label= "Ne: MPA")
+plot!(sol_pa_before, vars=(0,2), yscale=:log10, label= "Na: Before")
 plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na: Full access")
 plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
 title!("'Patella aspera'")
 xlabel!("t (days)")
 ylabel!("LOG10(N) (Nº individuals)")
 
-plot(sol_pa_before, vars=(0,2), yscale=:log10, label= "Na: Before")
-plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na: Full access")
-plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
+
+plot(sol_pa_before, vars=(0,3), label= "Sa: Before")
+plot!(sol_pa_full, vars=(0,3), label= "Sa: Full access")
+plot!(sol_pa_mpa, vars=(0,3),  label= "Sa: MPA")
 title!("'Patella aspera'")
 xlabel!("t (days)")
-ylabel!("LOG10(N) (Nº individuals)")
+ylabel!("Sa (mm)")
+ylims!(55,56.5)
 
 
 
 
-
-# Numerical aproximation: jacobian matrix determination.
-
-@variables Na, Ne , Sa, r, K, rate, Exp, X, g, de, da, Smax, gamma
-
-# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
-
-J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Ne),
- (g * Ne * ((K - Ne) / K)) - (da * Na) - ((1 - X) * rate * Na), 
- gamma * Sa * (1 - Sa / (Smax * (1 - rate*(1-X))))],
- [Na])
-
-
-# Cálculo del determinante
-Det_J = det(J)
-
-#Simplificación del determinante
-M = Symbolics.simplify(Det_J)
-
+plot(sol_po_full, vars=(0,2), label= "Full access: 'Patella ordinaria")
+plot!(sol_pa_full, vars=(0,2),  label= "Full access: 'Patella aspera")
+ylims!(0,2000)
+plot(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
+plot!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
+ylims!(0,2000)
