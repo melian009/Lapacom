@@ -85,34 +85,42 @@ Average sizes before and after marine protected area implementations
 =#
 
 # Metapopulation dynamic model 
+function SLC_metapop_before!(du, u, p, t)
+  Ne, Na, Sa = u
+   i, r, K, H, X, g, de,da, Smax, gamma = p
+  du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
+  du[2] = dNa = (g * Ne * ((K - Ne) / K)) - (da[i] * Na) - (H[i] * Na)
+  du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
+end
 
-function SLC_metapop!(du, u, p, t)
+function SLC_metapop_FULL!(du, u, p, t)
     Ne, Na, Sa = u
-    i, r, K, rate, Exp, X, g, de,da, Smax, gamma = p
-    du[1] = dNe = (X(t) * r[i] * Na) - (de[i] * Ne) - (g * Na)
-    du[2] = dNa = (g * Ne * ((K - Na) / K)) - (da[i] * Na) - (Exp(t,rate,i) * Na)
-    du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * Exp(t,rate,i))))
+     i, r, K, H, X, g, de,da, Smax, gamma = p
+    du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
+    du[2] = dNa = (g * Ne * ((K - Ne) / K)) - (da[i] * Na) - ((1 - X(t))* H[i] * Na)
+    du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H[i])))
 end
 
-#Exploitation period/rate implamantation H(t,rate,i)= (1-X)*H(i)
-
-function H(t, rate, i) #(1-X)*H(i)
-    if (t % 365) / 365 < 0.42
-      return rate[i]
-    else
-      return 0.0
-    end
+function SLC_metapop_MPA!(du, u, p, t)
+  Ne, Na, Sa = u
+   i, r, K, X, g, de,da, Smax, gamma = p
+  du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
+  du[2] = dNa = (g * Ne * ((K - Ne) / K)) - (da[i] * Na)
+  du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax))
 end
 
-# Reproductive Cycleç
+#Exploitation period/rate implamantation  X=0
+
+# Reproductive Cycle (X=1)
 
 function rep(t)
-    if (t % 365) / 365 >= 0.42
-      return 1.0
-    else
-      return 0.0
-    end
+  if (t % 365) / 365 >= 0.42
+    return 1.0 # Reproductive Cycle
+  else
+    return 0.0 # Exploitation Cycle
+  end
 end
+
 
 # Population Growth rate estimation (r=reggs):
 
@@ -122,34 +130,110 @@ oocytes = [oocytes_pa,oocytes_po]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
 re = reggs / 500     # Population growth rate
-Kt = 1e4             # Carrying capacity
-rates = [0.639,0.57] # Exploitation rate
+Kt = 64000           # Carrying capacity
+rates = [0.639,0.57] # Exploitation rate (H)
+rates2 = [0.02,0.01]
 gEA = 0.006          # Instant conversion between stages.
-da_ =  [0.55,0.59]   # Natural mortality rate for adults
-de_ = [0.975,0.977]  # Not estimated values. Need to be calculated by numerical aproximation
+da_ = [0.55,0.59]    # Natural mortality rate for adults
+de_ = [0.001,0.003]  # Not estimated values. Need to be calculated by numerical aproximation
 Sm = 56              # Maximum size for adults
 gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
 
-P_sol_po = [i[1], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella ordinaria" 
-P_sol_pa = [i[2], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella aspera" 
 
-u0 = [1e3 1e3 33.4; 1e3 1e3 34.6]     # Initial populations abundance and size for the simulations
+# Before and after
+# Full acces:     i,    r,  K,  H,     X,   g,   de,  da,  Smax, gamma = p
+P_sol_po_full = [i[1], re, Kt, rates, rep, gEA, de_, da_, Sm, gammas] # "Patella ordinaria" 
+P_sol_pa_full = [i[2], re, Kt, rates, rep, gEA, de_, da_, Sm, gammas] # "Patella aspera" 
+# After
+#MPA:            i,    r,  K,  X,   g,   de,  da, Smax, gamma = p
+P_sol_po_mpa = [i[1], re, Kt, rep, gEA, de_, da_, Sm, gammas] # "Patella ordinaria" 
+P_sol_pa_mpa = [i[2], re, Kt, rep, gEA, de_, da_, Sm, gammas] # "Patella aspera" 
 
-tspan = (1.0, 3000.0) # Temporal ranges for simulations: 2 years.
+
+# Initial populations abundance and mean size  for the simulations
+# Before:
+# Full access (1996-2006)
+u0_po_before = [1e4, 1e4, 46.26]    # Patella ordinaria 
+u0_pa_before = [1e4, 1e4, 43.53]    # Patella aspera
+
+# After:
+# FULL + MPA  (2007-2017)
+u0_po = [1e4, 1e4, 33.4]    # Patella ordinaria 
+u0_pa = [1e4, 1e4, 34.6]    # Patella aspera
+
+#Full access (2007-2017)
+u0_po_full = [1e4, 1e4, 43.41]    # Patella ordinaria 
+u0_pa_full = [1e4, 1e4, 45.72]    # Patella aspera
+
+#MPA (2007-2017
+u0_po_mpa = [1e4, 1e4, 49.25] #Patella ordinaria 
+u0_pa_mpa = [1e4, 1e4, 50.61] #Patella aspera
+
+
+tspan = (1, 3000) # Temporal ranges for simulations: 2 years.
 
 #Simulation for "Patella ordinaria"
-prob_po = ODEProblem(SLC_metapop!, u0[1,], tspan, P_sol_po) 
-sol_po = solve(prob_po, Tsit5())
-# Simulation for "Patella aspera"
-prob_pa = ODEProblem(SLC_metapop!, uo[2,], tspan, P_sol_pa)
-sol_pa = solve(prob_pa,Tsit5())
 
-Plots.plot(sol_1_po,vars=(0,1), label="Ne")
-Plots.plot!(time,sol_1_po[2], label="Na")
-Plots.title!("3rd definition: 1y")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("N (Nº individuals)")
+#Before
+prob_po_before = ODEProblem(SLC_metapop_FULL!, u0_po_before, tspan, P_sol_po_full) 
+sol_po_before = solve(prob_po_before, Tsit5())
+
+#After:
+#Full Acces
+prob_po_full = ODEProblem(SLC_metapop_FULL!, u0_po_full, tspan, P_sol_po_full) 
+sol_po_full = solve(prob_po_full, Tsit5())
+
+#MPA
+prob_po_mpa = ODEProblem(SLC_metapop_MPA!, u0_po_mpa, tspan, P_sol_po_mpa) 
+sol_po_mpa = solve(prob_po_mpa, Tsit5())
+
+
+# Simulation for "Patella aspera"
+#Before:
+prob_pa_before = ODEProblem(SLC_metapop_before!, u0_pa_before, tspan, P_sol_pa_full)
+sol_pa_before = solve(prob_pa_before,Tsit5())
+
+# After:
+# Full Acces
+prob_pa_full = ODEProblem(SLC_metapop_before!, u0_pa_full, tspan, P_sol_pa_full)
+sol_pa_full = solve(prob_pa_full,Tsit5())
+
+# MPA
+prob_pa_mpa = ODEProblem(SLC_metapop_MPA!, u0_pa_mpa, tspan, P_sol_pa_mpa)
+sol_pa_mpa = solve(prob_pa_mpa,Tsit5())
+
+
+
+
+#Plots
+#Patella ordinaria
+plot(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Ne: Before")
+plot!(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Ne: Full")
+plot!(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Ne: MPA")
+plot!(sol_po_before, vars=(0,2), yscale=:log10, label= "Na: Before")
+plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Na: Full access")
+plot!(sol_po_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
+title!("'Patella ordinaria'")
+xlabel!("t (days)")
+ylabel!("LOG10(N) (Nº individuals)")
+
+#Patella ordinaria
+plot(sol_pa_before, vars=(0,2), yscale=:log10, label= "Na: Before")
+plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na: Full access")
+plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
+title!("'Patella aspera'")
+xlabel!("t (days)")
+ylabel!("LOG10(N) (Nº individuals)")
+
+plot(sol_pa_before, vars=(0,2), yscale=:log10, label= "Na: Before")
+plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na: Full access")
+plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
+title!("'Patella aspera'")
+xlabel!("t (days)")
+ylabel!("LOG10(N) (Nº individuals)")
+
+
 
 
 
@@ -159,10 +243,10 @@ Plots.ylabel!("N (Nº individuals)")
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
 
-J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Na),
- (g * Ne * ((K - Na) / K)) - (da * Na) - ((1 - X) * H * Na), 
- gamma * Sa * (1 - Sa / (Smax * (1 - H*(1-X))))],
- [Na,Ne,Sa])
+J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Ne),
+ (g * Ne * ((K - Ne) / K)) - (da * Na) - ((1 - X) * rate * Na), 
+ gamma * Sa * (1 - Sa / (Smax * (1 - rate*(1-X))))],
+ [Na])
 
 
 # Cálculo del determinante
