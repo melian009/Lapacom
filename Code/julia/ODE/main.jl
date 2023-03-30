@@ -225,7 +225,7 @@ K = 64_000  # for 6.4 km2 per site.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
 
 function nsites!(du, u, p, t)
-  nsites = 1
+  nsites = 8
   nlifestages = 5
 
   r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α = p
@@ -237,8 +237,11 @@ function nsites!(du, u, p, t)
 
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
+    # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
+
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
     dispersal_probs2[site] = 0.0
+    # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
     du[site, stage] = (reproductive_cycle(t) * r[stage] * u[site, prev_stage]) -
                       (r[stage+1] * u[site, stage]) -
@@ -252,8 +255,11 @@ function nsites!(du, u, p, t)
 
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
+    # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
+
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
     dispersal_probs2[site] = 0.0
+    # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
     du[site, stage] = (r[stage] * u[site, prev_stage]) -
                       (r[stage+1] * u[site, stage]) -
@@ -267,8 +273,11 @@ function nsites!(du, u, p, t)
 
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
+    # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
+
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
     dispersal_probs2[site] = 0.0
+    # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
     du[site, stage] = (r[stage] * u[site, prev_stage] * ((K - u[site, stage]) / K)) -
                       (r[stage+1] * u[site, stage]) -
@@ -293,6 +302,11 @@ function nsites!(du, u, p, t)
     # adult sizes
     stage = 6
     du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - u[site, nlifestages+1] / (size_max - (size_max * (reproductive_cycle(t) * exploitation_rates[site]))))
+  end
+  for i in 1:nsites
+    for j in 1:(nlifestages-1)
+      du[i, j] = max(du[i, j], 0.0)
+    end
   end
 end
 

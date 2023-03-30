@@ -17,73 +17,6 @@ using Symbolics
 # using SymPy
 import ForwardDiff.jacobian
 
-#=
-@variables x[1] x[2]
-@parameters r K g d[1] d[2] E
-
-function f(x)
-    F = zero.(x)
-    F[1]  = (r * x[2] * ((K - x[2]) / K)) - (d[1] * x[1]) - (g * x[1])
-    F[2]  = (g * x[1]) - (d[2] * x[2]) - (E * x[2])
-    return F
-end
-
-x0 = [1,2]
-J0 = jacobian(f, x0)
-
-#Output
-#3×3 Matrix{Int64}:
-# 2  0  1
-# 1  1  0
-# 0  4  6
-
-=#
-
-
-#= Set up symbolic variables and parameters
-@variables x[1] x[2]
-@parameters r K g d[1] d[2] E
-
-# D = Differential(t)
-F[1]  = (r * x[2] * ((K - x[2]) / K)) - (d[1] * x[1]) - (g * x[1])
-F[2]  = (g * x[1]) - (d[2] * x[2]) - (E * x[2])
-
-
-  ## Inputs
-# Make Lagrangian
-V = -mₚ*Lₚ*g*cos(θ)
-T = (mₖ+mₗ)*v^2/2 + mₚ*(Lₚ^2*ω^2 + 2*Lₚ*ω*v*cos(θ) +v^2)/2
-L = T - V
-
-# Cart input force
-F = 1000sin(t)
-
-# Generalized forces
-Q = [F, 0]
-
-# Make equations of motion
-slosh_cart = LagrangeEOM(L, [v, ω], [x, θ], [Lₐ, Lₚ, mₖ, mₗ, mₚ, g], t; Q)
-
-# Initial Conditions
-ic = [
-    θ => deg2rad(10)
-]
-
-# Parameters
-p = Dict([
-    Lₐ => 10
-    Lₚ => 0.5
-    mₖ => 100
-    mₗ => 0
-    mₚ => 25
-    g => 9.80665
-])
-
-
-## Simulation
-sol = solve(ODEProblem(slosh_cart, ic, (0.0, 10.0), [p...]))
-=#
-
 
 # Jacobian matrix extimation for a simple life cycle (only abundance equations).
 
@@ -135,7 +68,7 @@ Na_ = zeros(Float64,size(Expl)) # Void vector to array number of adults for dife
 c=0
 for n = 0:m:Exp_lim
 r = 0.6
-g = 0.06
+g = 0.006
 de = 0.05
 da = 0.08 
 E = n 

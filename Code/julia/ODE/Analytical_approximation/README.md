@@ -137,7 +137,7 @@ dSadt = size_growth_rate * Sa * (1 - Sa/(Smax * (1 - H * (1-X))))
 
 Ne = Symbolics.solve_for(dNadt, Ne)
 
-Sa = Symbolics.solve_for(dNadt, Sa)
+# Sa = Symbolics.solve_for(Det_SLC, Sa)
 
 #Estimamos los valores de Na y Sa para distintos valores de E.
 
