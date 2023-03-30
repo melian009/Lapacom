@@ -226,3 +226,30 @@ xlims!(0,1)
 ylims!(-1000,15000)
 xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)") 
+
+
+#===============================================================================
+Analytical approach for the simple life cycle in a single site two species (SLC)
+#===============================================================================
+#Sa should be constrained to have values larger than Sc, where Sc is the first maturity size.
+```
+Simple life cycle equations:
+ dNe1/dt = (R1* X * r1 * Na1) - (de1 * Ne1) - (g1 * Ne1)
+ dNe2/dt = (R2* X * r2 * Na2) - (de1 * Ne2) - (g2 * Ne2)
+ 
+ dNa1/dt = (g1 * Ne1)*((K - Na1 - Na2)/K)) - (da1 * Na1) - (Na1 * H * (1-X))
+ dNa2/dt = (g2 * Ne2)*((K - Na1 - Na2)/K)) - (da2 * Na2) - (Na2 * H * (1-X))
+ 
+ dSa1/dt = size_growth_rate1 * Sa1 * (1 - Sa1/(Smax * (1 - H * (1-X))))
+ dSa2/dt = size_growth_rate2 * Sa2 * (1 - Sa2/(Smax * (1 - H * (1-X))))
+```
+
+@variables R1 R2 Na1 Na2 Ne1 Ne2 Sa1 Sa2 r1 r2 K de1 de2 da1 da2 g1 g2 X H Smax size_growth_rate1 size_growth_rate2
+
+# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
+
+J_SLC = Symbolics.jacobian([(R1* X * r1 * Na1) - (de1 * Ne1) - (g1 * Ne1),(R2* X * r2 * Na2) - (de1 * Ne2) - (g2 * Ne2),(g1 * Ne1)*((K - Na1 - Na2)/K) - (da1 * Na1) - (Na1 * H * (1-X)),(g2 * Ne2)*((K - Na1 - Na2)/K) - (da2 * Na2) - (Na2 * H * (1-X)),size_growth_rate1 * Sa1 * (1 - Sa1/(Smax * (1 - H * (1-X)))),size_growth_rate2 * Sa2 * (1 - Sa2/(Smax * (1 - H * (1-X))))],[Ne1, Ne2, Na1, Na2, Sa1, Sa2])
+
+Det_SLC = det(J_SLC)
+M = Symbolics.simplify(Det_SLC)
+
