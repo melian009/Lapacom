@@ -134,7 +134,7 @@ i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2
 P_sol_po = [i[1], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella ordinaria" 
 P_sol_pa = [i[2], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella aspera" 
 
-u0 = [1e3,1e3,33.4; 1e3,1e3,34.6]     # Initial populations abundance and size for the simulations
+u0 = [1e3 1e3 33.4; 1e3 1e3 34.6]     # Initial populations abundance and size for the simulations
 
 tspan = (1.0, 3000.0) # Temporal ranges for simulations: 2 years.
 
@@ -154,12 +154,13 @@ Plots.ylabel!("N (Nº individuals)")
 
 
 # Numerical aproximation: jacobian matrix determination.
-@variables Ne Na r K g de da E
+
+@variables Na, Ne , Sa, r, K, rate, Exp, X, g, de, da, Smax, gamma
 
 # Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
 
 J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Na),
- (g * Ne * ((K - Na) / K)) - (da[i] * Na) - ((1-X)*H * Na), 
+ (g * Ne * ((K - Na) / K)) - (da * Na) - ((1 - X) * H * Na), 
  gamma * Sa * (1 - Sa / (Smax * (1 - H*(1-X))))],
  [Na,Ne,Sa])
 
