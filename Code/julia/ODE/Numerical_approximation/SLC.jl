@@ -136,7 +136,7 @@ P_sol_pa = [i[2], re, Kt, rates, H, rep, gEA, de_,da_, Sm, gammas] # "Patella as
 
 u0 = [1e3,1e3,33.4; 1e3,1e3,34.6]     # Initial populations abundance and size for the simulations
 
-tspan = (0.0,365.0*2) # Temporal ranges for simulations: 2 years.
+tspan = (1.0, 3000.0) # Temporal ranges for simulations: 2 years.
 
 #Simulation for "Patella ordinaria"
 prob_po = ODEProblem(SLC_metapop!, u0[1,], tspan, P_sol_po) 
@@ -153,13 +153,20 @@ Plots.ylabel!("N (Nº individuals)")
 
 
 
+# Numerical aproximation: jacobian matrix determination.
+@variables Ne Na r K g de da E
+
+# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
+
+J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Na),
+ (g * Ne * ((K - Na) / K)) - (da[i] * Na) - ((1-X)*H * Na), 
+ gamma * Sa * (1 - Sa / (Smax * (1 - H*(1-X))))],
+ [Na,Ne,Sa])
 
 
-#Numerical aproximation to obtain natural mortality rates of eggs from empirical parameters.
+# Cálculo del determinante
+Det_J = det(J)
 
-@variables de i, r, K, rate, Exp, X, g,da, Smax, gamma, Ne, Na, Sa
-
-dNe = (X(t) * r[i] * Na) - (de[i] * Ne) - (g * Na)
-dNa = (g * Ne * ((K - Na) / K)) - (da[i] * Na) - (Exp(t,rate,i) * Na)
-dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * Exp(t,rate,i))))
+#Simplificación del determinante
+M = Symbolics.simplify(Det_J)
 
