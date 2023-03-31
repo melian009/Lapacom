@@ -270,23 +270,26 @@ sol_pa_mpa = solve(prob_pa_mpa,Tsit5())
 
 #Plots
 #Patella ordinaria
-plot(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Ne: Before")
-plot!(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Ne: Full")
-plot!(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Ne: MPA")
-plot!(sol_po_before, vars=(0,2), yscale=:log10, label= "Na: Before")
-plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Na: Full access")
-plot!(sol_po_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
+plot(sol_po_before, vars=(0,1), yscale=:log10,  label= "Ne (1996-2006)")
+plot!(sol_po_before, vars=(0,2), yscale=:log10,  label= "Na (1996-2006)")
+plot!(sol_po_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
+plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Na (Full access)")
+plot!(sol_po_mpa, vars=(0,1), yscale=:log10, label= "Ne (MPA)")
+plot!(sol_po_mpa, vars=(0,2), yscale=:log10,  label= "Na (MPA)")
 title!("'Patella ordinaria'")
 xlabel!("t (days)")
 ylabel!("LOG10(N) (Nº individuals)")
+savefig("SLC_po_N_Before_Full_MPA_.png")
 
-plot(sol_po_before, vars=(0,3), label= "Sa: Before")
-plot!(sol_po_full, vars=(0,3), label= "Sa: Full access")
-plot!(sol_po_mpa, vars=(0,3),  label= "Sa: MPA")
+plot(sol_po_before, vars=(0,3), label= "Sa (1996-2006)")
+plot!(sol_po_full, vars=(0,3), label= "Sa (Full access)")
+plot!(sol_po_mpa, vars=(0,3),  label= "Sa (MPA)")
 title!("'Patella ordinaria'")
 xlabel!("t (days)")
 ylabel!("Sa (mm)")
 ylims!(55,57)
+savefig("SLC_po_S_Before_Full_MPA_.png")
+
 
 #Patella ordinaria
 plot(sol_pa_before, vars=(0,1), yscale=:log10, label= "Ne: Before")
@@ -298,6 +301,7 @@ plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na: MPA")
 title!("'Patella aspera'")
 xlabel!("t (days)")
 ylabel!("LOG10(N) (Nº individuals)")
+savefig("SLC_pa_N_Before_Full_MPA_.png")
 
 
 plot(sol_pa_before, vars=(0,3), label= "Sa: Before")
@@ -314,6 +318,10 @@ ylims!(55,56.5)
 plot(sol_po_full, vars=(0,2), label= "Full access: 'Patella ordinaria")
 plot!(sol_pa_full, vars=(0,2),  label= "Full access: 'Patella aspera")
 ylims!(0,2000)
+
 plot(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
 plot!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
 ylims!(0,2000)
+
+#Abuncances of spp A vs Abundances of spp B
+
