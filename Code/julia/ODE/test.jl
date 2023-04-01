@@ -162,7 +162,6 @@ K = 64_000  # for 6.4 km2 per site.
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
 
-
 function nofishing!(du, u, p, t)
   # Change these parameters if you change the model
   nsites = 1
