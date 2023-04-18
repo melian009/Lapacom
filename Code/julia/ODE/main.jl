@@ -205,14 +205,12 @@ end
 
 # conversion rates between stages
 # average oocytes per year per adult
-```Oocyte values ​are for Patella ordinaria only. 
-It needs to include the values ​​for the other species.```
 avg_oocytes = mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 reggs = reggs / 500 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
-d = [0.001, 0.001, 0.001, 0.001, 0.000322]
+d = [0.001, 0.001, 0.001, 0.001, 0.000322]  # TODO: use empirical values for example it is XXX per year for P. ordinaria. The rate per day would be XXX/356.
 size_growth_rate = 0.32 / 365
 distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Float64.(Matrix(distance_df)[:, 1:end-1])
@@ -223,6 +221,55 @@ K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
+
+"""
+
+Estimates the `size at first maturity` by constructing a linear line between `maximum size` and average size before and after protection (These values come from empirical data).
+
+Reproduction capacity depends on size where at maximum size, reproduction is 100% and at size at first maturity it is 50%.
+
+NOTE The function only implements the calculations for P. ordinaria. Write a new function fo P. aspera.
+
+## Data
+
+
+### Size at first maturity
+
+Size at first Maturity bef/after [P. ordinaria,P. aspera]  = [33.4/37.4, 34.6/37.5]
+
+### Average size
+
+Before (1996-2006): FULL ACCESS.  # Use this for before
+Patella apera = 43.53mm
+Patella ordinaria = 46.26mm
+
+Only MPA  # Use this for after
+After (2007-2017)
+Patella aspera = 50.61mm
+Patella ordinaria = 49.25mm
+
+## The model
+
+Let's represent size at first maturity by "M" and the average body size by "A". To establish the relationship between the two sizes, we can use a simple linear equation:
+
+M = kA + b
+
+where "k" is the proportionality constant and "b" is a constant term.
+
+We have two sets of values, one for the time before fishing protection (M₁/A₁ = 33.4/46.26) and one for the time after fishing protection (M₂/A₂ = 37.4/49.25). To find the values of "k" and "b", we can set up two equations:
+
+33.4 = k * 46.26 + b
+37.4 = k * 49.25 + b
+Solving this system of linear equations gives us values of "k" and "b".
+
+M ≈ 1.34A - 28.06
+"""
+function calculate_size_at_first_maturity(current_avg_size)
+  M = 1.34 * (current_avg_size) - 28.06
+end
+
+"Return the reproduction capacity (between 0 and 1) given the current average size and size at first maturity and maximum size"
+reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
 function nsites!(du, u, p, t)
   nsites = 8
@@ -243,7 +290,10 @@ function nsites!(du, u, p, t)
     dispersal_probs2[site] = 0.0
     # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
-    du[site, stage] = (reproductive_cycle(t) * r[stage] * u[site, prev_stage]) -
+    Saverage = du[site, 6]  # 6 is the index of average size
+    Smaturity = calculate_size_at_first_maturity(Saverage)
+
+    du[site, stage] = (reproductive_cycle(t) * r[stage] * u[site, prev_stage] * reproduction_capacity(Saverage, Smaturity, size_max)) -  # What does the last term do? We use it to reduce the reproductive capacity of the adults based on their size. At max size, 100% of them reproduce. At "size at first maturity" size, only 50% of them reproduce. Make a ramp function that calculates the fraction of the adults that reproduce given the mean size of the individuals. For this, we will also need to have another equation (`calculate_size_at_first_maturity`) that calculates the "size at the first maturity" because its a function of the mean size of the individuals. For that, we use a linear relationship between mean size and size at the first maturity before/after introducing fishing protection.
                       (r[stage+1] * u[site, stage]) -
                       (d[stage] * u[site, stage]) +
                       (sum(dispersal_probs1 .* u[:, stage])) -
