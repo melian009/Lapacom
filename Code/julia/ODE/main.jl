@@ -215,7 +215,7 @@ size_growth_rate = 0.32 / 365
 distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Float64.(Matrix(distance_df)[:, 1:end-1])
 distance_matrix = distance_matrix[1:nsites, 1:nsites]
-exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use empirical values
+exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use fitted values. See below.
 size_max = 56.0
 K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
@@ -360,7 +360,7 @@ function nsites!(du, u, p, t)
   end
 end
 
-tspan_general = (1.0, 3000.0)
+tspan_general = (0.0, 3000.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
 sol_general = solve(prob_general)
 
@@ -447,6 +447,16 @@ plot(p5, p7, p6, p8) # Pop 2, juvenile and adult
 plot(p1, p2, p5, p6) # Pop 1 vs pop 2, juvenile
 plot(p3, p4, p7, p8) # Pop 1 vs pop 2, adults
 
+### 3.3 n sites TODO
+
+fn = function (p)
+  prob1 = remake(prob_general; p=p)
+  sol = solve(prob1, Tsit5(); saveat=tspan_2)
+  [sol[1, end], sol[2, end], sol[4, end], sol[5, end]]
+end
+
+bounds_n = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1e4, 1e5], [1e4, 1e5], [55.0, 55.0], [55.0, 55.0]]
+
 ### -------------------------------
 ### 4. Data fitting
 ### --------------------------------
@@ -484,13 +494,6 @@ function estimate_E_across_sites(initial_sizes, sizeₘₐₓ, size_growth_rate)
     p = 0.4872
     prob = ODEProblem(sizeonly!, u0, tspan, p)
 
-    # sol = solve(prob,Tsit5())
-
-    # data = fill(initial_size[1], 60)
-    # t = 1:60
-    # cost_function = build_loss_objective(prob,Tsit5(),L2Loss(t,data), maxiters=10000,verbose=false)
-    # result = optimize(cost_function, 0.0, 1.0)
-
     loss_func(sol) = (initial_sizes[site] - sol[end])^2
     cost_function = build_loss_objective(prob, Tsit5(), loss_func, maxiters=10000, verbose=false)
     result = optimize(cost_function, 0.0, 1.0)
@@ -501,8 +504,11 @@ end
 
 estimated_E = estimate_E_across_sites(initial_size, sizeₘₐₓ, size_growth_rate)
 
-histogram(estimated_E, bins=30, legend=false, color="black", xlabel="Exploitation", ylabel="Number of Sites")
-Plots.savefig("dist_E.pdf")
+fig = Figure()
+ax = Axis(fig)
+p = hist!(ax, estimated_E, bins=30, color=:black, xlabel="Exploitation", ylabel="Number of Sites")
+
+save("figs/estimated_exploration_rate_per_site.pdf", p)
 
 ### -------------------------------
 ### 0. Testing functions
