@@ -12,125 +12,111 @@ using CSV
 using DiffEqParamEstim
 using Optim
 
-### ------------------------------------------------------------------------------------------------
-### Model formulation for Complex Life Cycle (CLC) for a Single Site (One Site)
-### ------------------------------------------------------------------------------------------------
 
-"""
-Variables:
-  - N_e: Egg Abundance
-  - N_t: Trochophore Abundance
-  - N_v: Veliger Abundance
-  - N_j: Juvenile Abundance
-  - N_a: Adult Abundance
-  - Sₐ: Adult Size
-Parameters:
-  - r: intrinsic growth rate
-  - g: instant conversion rate of eggs turning into adult
-  - d: death rate
-  - E: exploitation rate
-  - K: carrying capacity
-  - X: Reproductive Cycle
-"""
+#=
+Formulation of 3 types of  life cicle for one site:
 
-## Starting the model
+- Simple Life Cicle:
+    Population dynamic model:
 
-#=    Simple life cycle: equations for one Site
+    dNa/dt = X * r * Ne * ((K - Na)/K) - da*Na - H * (1 - X) * Na
+    
+- Complex Life Cicle:
 
-    function single_site_S_X!(du, u, p, t)
-      Nⱼ, Nₐ, Sₐ = u
-      r, g, dⱼ, dₐ, Exp, K, size_growth_rate, size_max, X, rate = p
-      du[1] = dNⱼ = (X(t) * r * Nₐ * (Sₐ/sizeₘₐₓ)*((K - Nₐ) / K)) - (dⱼ * Nⱼ) - (g * Nⱼ)
-      du[2] = dNₐ = (g * Nⱼ) - (dₐ * Nₐ) - (Exp(t,rate) * Nₐ)
-      du[3] = dSₐ = size_growth_rate * Sₐ * (1 - Sₐ / (sizeₘₐₓ * (1 - Exp(t,rate))))
-    end
+    Population dynamic models:
+
+    - Two stages: Larvae/Egg & Adults.
+
+    dNe/dt = X * r * Na - gEA * Na - de * Na
+    dNa/dt = r * Na * ((K-Na)/K) - da * Na - (1-X) * H * Na
+
+    - Five stages: Eggs, Veliger, Trocophore, Juvenile & Adults.
+
+    dNe/dt = X * r * Ne - get * Ne - de * Ne
+    dNt/dt = get * Ne - gtv * Nt - dt * Ne
+    dNv/dt = gtv * Nt * ((K-Nv)/K) - gvj * Nv - dv * Nv
+    dNj/dt = gvj * Nv * ((K-Nj)/K) - gja * Nj - dj * Nj
+    dNa/dt = gja * Nj * ((K-Na)/K) - da * Na - H * (1 - X) * Na
+
+    Metapopulation dynamic models 
+    - Two stages: Larvae/Egg & Adults.
+
+    dNa/dt = X * r * Na - gEA * Na - de * Na + sum(pkl*Nek) - Nel*sum(plk)
+    dNa/dt = r * Na * ((K-Na)/K) - da * Na - (1-X) * H * Na
+
+    - Five stages: Eggs, Veliger, Trocophore, Juvenile & Adults.
+
+    dNe/dt = X * r * Ne - get * Ne - de * Ne + sum(pkl*Nek) - Nel*sum(plk)
+    dNt/dt = get * Ne - gtv * Nt - dt * Ne + sum(pkl*Ntk) - Ntl*sum(plk)
+    dNv/dt = gtv * Nt * ((K-Nv)/K) - gvj * Nv - dv * Nv + sum(pkl*Nvk) - Nvl*sum(plk)
+    dNj/dt = gvj * Nv * ((K-Nj)/K) - gja * Nj - dj * Nj
+    dNa/dt = gja * Nj * ((K-Na)/K) - da * Na - H * (1 - X) * Na
+
+ 
+ 
+ 
+ 
+ 
+ 
+    Metacommunity dynamic model:
+
+    dNe(i)/dt = X * r(i) * Na(i) - gEA * Na(i) - de(i) * Ne(i)
+    dNa(i)/dt = gEA * Na(i) * ((K - (Na(i) + Na(i + 1))/K) - dA(i) * Na(i) - (1-X) * H(i) * Na(i)
+    dSa(i)/dt = gamma * Sa(i) * (1 - (Sa(i)/(Smax-Smax * H(i) * X)))
+    
+    where i = nº of species == ["Patella ordinaria", "Patella aspera"]
+
+Parameters and variables:
+ - Ne = eggs abundance
+ - Na = adults abuncance
+ - Sa = adults size (Average sizes Before MPS+FULL = [46.44,44.45])
+ - r = population growth rate [9.17,5.03]
+ - K = carrying capacity (k =1e^4)
+ - X = Reproductive period [1,0] 
+ - (1-X) = Exploitation periosd [1,0]
+ - H = Exploitation rate (H = [0.639,0.57])
+ - gEA = instant conversion rate of life stages (EA = Eggs to Adults) (gEA = 0.006)
+ - de = natural mortality rate or death rate for eggs (de = [de_po,de_pa]) # Note: this value needs to be defined.
+ - da = natural mortality rate or death rate for adults (da = [0.55,0.59]) # Note: empirical estimated values
+ - Smax = maximum adult size estimated (56.0mm) # Note: Empirical value from the sample analized
+ - gamma = adult growth rate (gamma=[0.32,0.36] year^{-1})
+
+Empirical estimated mortalities (Z,d,F) and exploitation rates (E):
+
+ {Patella ordinaria} (Henriques, 2012)
+
+ - Natural Mortality rate (d) was 0.55 year^{-1}
+ - Fishing mortality rate (F) was 1.24 year^{−1} 
+ - Total mortality rate (Z=d+F) was 1.79 year^{−1}; 
+ - Exploitation rate (E=F/Z) was 0.693. 
+
+ {Patella aspera} (Sousa, 2017)
+
+ - Natural mortality (d) was 0.59 year^{-1};
+ - Fishing mortality (F) was 0.79 year^{-1};
+ - Total mortality (Z=d+F) was 1.38 year^{-1};
+ - Exploitation rate (E=F/Z) was 0.57. 
+
+ For numerical simulation use these rates (d and E).
+
+Average sizes before and after marine protected area implementations
+
+ Before (1996-2006): FULL ACCESS.
+ Patella apera = 43.53mm
+ Patella ordinaria = 46.26mm
+
+ After  (2007-2017): MPA+FULL
+ Patella aspera = 44.45mm
+ Patella ordinaria = 46.44mm
+
+ Only MPS (2007-2017)
+ Patella aspera = 50.61mm
+ Patella ordinaria = 49.25mm
+
+ Only Full Access (2007-2017) 
+
+ Patella aspera = 43.41mm
+ Patella ordinaria = 45.72mm
 =#
 
-# Complex Life Cycle: equations for one Site
-
-function CLC_OS!(du, u, p, t)
-  N_e, N_t, N_v, N_j, N_a, S_a = u
-  r, d, K, Exp, size_growth_rate, size_max, X, rate = p
-  # dN_e/dt    = [X    * r    * N_a * (S/S_max)      * ((K - N_A)/k)] - (d_e * N_e)  - (g_et * N_e)
-  du[1] = dN_e = (X(t) * r[1] * N_a * (S_a/size_max) * ((K * N_a)/K)) - (d[1] * N_e) - (r[2] * N_e)
-
-  # dN_t/dt    = (g_et * N_e) - (d_t * N_t) - (g_tv * N_t)
-  du[2] = dN_t = (r[2]* N_e) - (d[2] * N_t) - (r[3] * N_t)
-  
-  # dN_v/dt    = (g_tv * N_t) - (d_v * N_v) - (g_vj * N_v)
-  du[3] = dN_v = (r[3]* N_t) - (d[3] * N_v) - (r[4] * N_v)
-
-  #dN_j/dt     = (g_vj * N_v) - (d_j * N_j) - (g_ja * N_j)
-  du[4] = dN_j = (r[4] * N_v) - (d[4] * N_t) - (r[5] * N_j)
-  
-  #dN_a/dt     = (g_ja * N_j) - (d_a * N_a) - [(1 - X) * E * N_a] 
-  du[5] = dN_a = (r[5] * N_j) - (d[5] * N_a) - (Exp(t,rate) * N_a)
-
-  #dS_a/dt     = γ * S_a * [1 - (S_a / (Smax * (1 - X)))]
-  du[6] = dS_a = size_growth_rate * S_a * [1- S_a/(size_max * (1-Exp(t,rate)))]
-end
-
-## Model parameters definition:
-# Exploitation: equals to zero when organisms reproduce
-
-function Exp(t, rate)
-  if (t % 365) / 365 < 0.42
-    return rate
-  else
-    return 0.00
-    end
-end
-
-# Captures the reproductive cycle are equals to zero when fishing and to one when organisms reproduce
-
-function X(t)
-  if (t % 365) / 365 >= 0.42
-    return 1.0
-  else
-    return 0.00
-  end
-end
-
-
-# Conversion rates between stages
-
-# Average oocytes per year per adult
-
-avg_oocytes = mean([92098, 804183]) #804.000 huevos para una talla 58mm 
-
-# conversion rate of adults to eggs.
-
-reggs = avg_oocytes / (365 * 0.42) 
-
-reggs = reggs / 10000 
-
-r=reggs #Eggs population intrinsic growth rate
-
-# because the rate is too high to be handled
-# = [r: 385.613eggs, g_et: 0.7d, g_tv: 1.3d, g_vj: 4d + 3d (7d), g_ja:730]
-r = [reggs,          0.998611,   0.971057,   0.683772,           0.00629]
-
-# natural death rates per life stage.
-# = [d_e,   d_t,   t_v,   d_j,   d_a]
-d = [0.001, 0.001, 0.001, 0.001, 0.000322]
-
-size_growth_rate = 0.32/365 # γ 
-
-exploitation_rates = rand(0.001:0.001:0.003)  # E: use empirical values
-
-size_max = 56.0
-K = 64_000  # for 6.4 km2 per site.
-
-p_general =[r, d, K, Exp, size_growth_rate, size_max, X, exploitation_rates]
-
-# Initial abundances of each life state and size.
-u0 = [20000.0, 20000.0, 20000.0, 20000.0, 20000.0, 40.0]
-u0_ = convert(Float64, u0)
-
-tspan_0 = (0,365*2) # Simulation for 2 years time range
-tspan_0_ = convert(Tuple{Float64,Float64}, tspan_0)
-
-
-prob_CLC_1= ODEProblem(CLC_OS!, u0, tspan_0_, p_general) 
-sol_CLC_1 = solve(prob0_CLC_1, Tsit5())
 
