@@ -9,7 +9,7 @@ using Statistics
 using DataFrames
 using CSV
 using DiffEqParamEstim
-using Optim
+# using Optim
 
 ## [x]: exploitation stops during certain months of the year. Implement time varying E.
 ## TODO: From topography, set distance between two sites to infinite, if there is land/another site between them
@@ -205,7 +205,7 @@ end
 
 # conversion rates between stages
 # average oocytes per year per adult
-avg_oocytes = mean([92098, 804183])
+avg_oocytes = 385_613 #mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 reggs = reggs / 500 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
@@ -221,6 +221,39 @@ K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
+
+## I flatten the parameters and then return them back in the original shape inside `nsites!`. This is because to run Sensitivity analysis (`gsa`), I have to pass flat bounds list.
+function flatten_p(p)
+  flat_p = Real[]
+  for p_list in p
+    if typeof(p_list) <: Real
+      push!(flat_p, p_list)
+    else
+      for p in p_list
+        push!(flat_p, p)
+      end
+    end
+  end
+  return flat_p
+end
+
+p_general_flat = flatten_p(p_general)
+
+function restructure_flat_p(flat_params, original_shape)
+  nested_params = []
+  start_idx = 1
+  for p_list in original_shape
+    if typeof(p_list) <: Real
+      push!(nested_params, flat_params[start_idx])
+      start_idx += 1
+    else
+      end_idx = start_idx + length(p_list) - 1
+      push!(nested_params, reshape(eltype(p_list).(flat_params[start_idx:end_idx]), size(p_list)))
+      start_idx = end_idx + 1
+    end
+  end
+  return nested_params
+end
 
 """
 
@@ -271,7 +304,10 @@ end
 "Return the reproduction capacity (between 0 and 1) given the current average size and size at first maturity and maximum size"
 reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
+# TODO: dispersal rates of Trochophores should be a fraction of Eggs. Multiply the distance matrix by a factor.
 function nsites!(du, u, p, t)
+  original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], [0.002, 0.001, 0.002, 0.001, 0.001, 0.002, 0.002, 0.002], 56.0, 64000, [0.1, 0.1, 0.1]]
+  p = restructure_flat_p(p, original_shape)
   nsites = 8
   nlifestages = 5
 
@@ -361,7 +397,7 @@ function nsites!(du, u, p, t)
 end
 
 tspan_general = (0.0, 3000.0)
-prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general)
+prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
 sol_general = solve(prob_general)
 
 # Plot
@@ -449,13 +485,29 @@ plot(p3, p4, p7, p8) # Pop 1 vs pop 2, adults
 
 ### 3.3 n sites TODO
 
-fn = function (p)
+fn = function(p)
   prob1 = remake(prob_general; p=p)
-  sol = solve(prob1, Tsit5(); saveat=tspan_2)
+  sol = solve(prob1)
   [sol[1, end], sol[2, end], sol[4, end], sol[5, end]]
 end
 
-bounds_n = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1e4, 1e5], [1e4, 1e5], [55.0, 55.0], [55.0, 55.0]]
+distance_mat_bounds = Array{Float64}[]
+for ind in eachindex(distance_matrix)
+  entry = [distance_matrix[ind], distance_matrix[ind] + 0.001]
+  push!(distance_mat_bounds, entry)
+end
+bounds_n = [
+  [0.0, 6], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
+  [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
+  [0.0, 0.1],
+  distance_mat_bounds...,
+  [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
+  [16.0, 76.0],
+  [20000, 90000],
+  [0.0, 0.2], [0.0, 0.2], [0.0, 0.2]
+]
+
+m = gsa(fn, Sobol(), bounds_n, samples=100)
 
 ### -------------------------------
 ### 4. Data fitting
