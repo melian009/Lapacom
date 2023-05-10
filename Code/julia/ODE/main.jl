@@ -9,7 +9,7 @@ using Statistics
 using DataFrames
 using CSV
 using DiffEqParamEstim
-# using Optim
+using Optim
 
 ## [x]: exploitation stops during certain months of the year. Implement time varying E.
 ## [x] From topography, set distance between two sites to infinite, if there is land/another site between them
@@ -221,7 +221,9 @@ migraation_probs_df = CSV.read("migration_probabilites_among_sites.csv", DataFra
 mig_probs = Float64.(Matrix(migraation_probs_df)[:, 1:end-1])
 mig_probs = mig_probs[1:nsites, 1:nsites]
 
-exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use fitted values. See below.
+MPA = [false, false, false, true, false, false, false, false]  # protected areas where fishing is never allowed.
+
+exploitation_rates = [0.436795998061044, 0.43767209156532155, 0.4603254055329175, 0.0, 0.40337922500828566, 0.5105131417482706, 0.4799123913754184, 0.47959950031955256]  # the 4th value (Desertas) is 0.0 because it is a fully protected area and no fishing happens there.
 size_max = 56.0
 K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
@@ -310,7 +312,6 @@ end
 reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
 # TODO: dispersal rates of Trochophores should be a fraction of Eggs. Multiply the distance matrix by a factor.
-# TODO: Site Desertas is MPA, meaning that there is no fishing there.
 function nsites!(du, u, p, t)
   original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], [0.002, 0.001, 0.002, 0.001, 0.001, 0.002, 0.002, 0.002], 56.0, 64000, [0.1, 0.1, 0.1], [0.0 0.8 0.0 0.0 0.0 0.0 0.2 0.8; 0.0 0.0 0.2 0.0 0.0 0.2 0.5 0.0; 0.0 0.6 0.0 0.4 0.2 0.4 0.8 0.0; 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.2 0.8 0.8 0.0 1.0 0.6 0.0; 0.0 0.4 0.8 0.6 0.2 0.0 0.6 0.0; 0.0 0.8 0.4 0.2 0.2 0.4 0.0 0.0; 0.8 0.6 0.0 0.0 0.0 0.0 0.0 0.0]]
   p = restructure_flat_p(p, original_shape)
@@ -539,7 +540,7 @@ species_size_range = combine(dfy, :total_length_mm .=> [maximum, minimum, mean, 
 sizeₘₐₓ = maximum(species_size_range.total_length_mm_maximum)
 sizeₘᵢₙ = minimum(species_size_range.total_length_mm_minimum)
 initial_size = species_size_range.total_length_mm_median
-size_growth_rate = 0.2  # It has minimal effect
+size_growth_rate = 0.32 / 365  # It has minimal effect
 
 function estimate_E_across_sites(initial_sizes, sizeₘₐₓ, size_growth_rate)
   sizeonly!(size, E, t) = size_growth_rate * size * (1 - size / (sizeₘₐₓ - (sizeₘₐₓ * E)))
