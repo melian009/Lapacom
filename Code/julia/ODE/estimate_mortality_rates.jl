@@ -10,7 +10,7 @@
 
 using Optim
 
-adult_mortality_rate = 0.1175
+adult_mortality_rate = 0.1175  # P. ordinaria
 
 # Initial guess for B
 B0 = [0.1]

@@ -12,7 +12,7 @@ using DiffEqParamEstim
 # using Optim
 
 ## [x]: exploitation stops during certain months of the year. Implement time varying E.
-## TODO: From topography, set distance between two sites to infinite, if there is land/another site between them
+## [x] From topography, set distance between two sites to infinite, if there is land/another site between them
 ## [x]: Empirically estimate the rate at which individuals from one stage turn into another one:
 ## Conversion rates for the given number of days is as follows:
 # 730: 0.00629
@@ -31,7 +31,7 @@ using DiffEqParamEstim
 # 2. adults spawn 92,098 to 804,183 oocytes per year during the spawning season.
 #   Appearance rate of eggs: #oocytes/365 in a sin function (to account for spawning season). Note that adults do not turn into eggs (they live many steps.)
 ## [x]: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days. Growth rate is 0.32 per year, which is 0.32/365 per day.
-## [ ] TODO: Estimate exploitation rates given average sizes and a single pool model.
+## [x] Estimate exploitation rates given average sizes and a single pool model.
 #=
 Example of adding if statements in the ODE system
 
@@ -217,11 +217,9 @@ distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Float64.(Matrix(distance_df)[:, 1:end-1])
 distance_matrix = distance_matrix[1:nsites, 1:nsites]
 migraation_probs_df = CSV.read("migration_probabilites_among_sites.csv", DataFrame)
+# Modify distances (migration probs) by movement prob. which are rough estimates based on the land shape and oceanic currents
 mig_probs = Float64.(Matrix(migraation_probs_df)[:, 1:end-1])
 mig_probs = mig_probs[1:nsites, 1:nsites]
-# Modify distances (migration probs) by movement prob. which are rough estimates based on the land shape and oceanic currents
-# distance_matrix = distance_matrix .* (1 .+ (1 .- mig_probs))
-# distance_matrix[findall(x -> x ==0, mig_probs)] .= 0
 
 exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use fitted values. See below.
 size_max = 56.0
@@ -264,46 +262,45 @@ function restructure_flat_p(flat_params, original_shape)
 end
 
 """
+  Estimates the `size at first maturity` by constructing a linear line between `maximum size` and average size before and after protection (These values come from empirical data).
 
-Estimates the `size at first maturity` by constructing a linear line between `maximum size` and average size before and after protection (These values come from empirical data).
+  Reproduction capacity depends on size where at maximum size, reproduction is 100% and at size at first maturity it is 50%.
 
-Reproduction capacity depends on size where at maximum size, reproduction is 100% and at size at first maturity it is 50%.
+  NOTE The function only implements the calculations for P. ordinaria. Write a new function fo P. aspera.
 
-NOTE The function only implements the calculations for P. ordinaria. Write a new function fo P. aspera.
-
-## Data
+  ## Data
 
 
-### Size at first maturity
+  ### Size at first maturity
 
-Size at first Maturity bef/after [P. ordinaria,P. aspera]  = [33.4/37.4, 34.6/37.5]
+  Size at first Maturity bef/after [P. ordinaria,P. aspera]  = [33.4/37.4, 34.6/37.5]
 
-### Average size
+  ### Average size
 
-Before (1996-2006): FULL ACCESS.  # Use this for before
-Patella apera = 43.53mm
-Patella ordinaria = 46.26mm
+  Before (1996-2006): FULL ACCESS.  # Use this for before
+  Patella apera = 43.53mm
+  Patella ordinaria = 46.26mm
 
-Only MPA  # Use this for after
-After (2007-2017)
-Patella aspera = 50.61mm
-Patella ordinaria = 49.25mm
+  Only MPA  # Use this for after
+  After (2007-2017)
+  Patella aspera = 50.61mm
+  Patella ordinaria = 49.25mm
 
-## The model
+  ## The model
 
-Let's represent size at first maturity by "M" and the average body size by "A". To establish the relationship between the two sizes, we can use a simple linear equation:
+  Let's represent size at first maturity by "M" and the average body size by "A". To establish the relationship between the two sizes, we can use a simple linear equation:
 
-M = kA + b
+  M = kA + b
 
-where "k" is the proportionality constant and "b" is a constant term.
+  where "k" is the proportionality constant and "b" is a constant term.
 
-We have two sets of values, one for the time before fishing protection (M₁/A₁ = 33.4/46.26) and one for the time after fishing protection (M₂/A₂ = 37.4/49.25). To find the values of "k" and "b", we can set up two equations:
+  We have two sets of values, one for the time before fishing protection (M₁/A₁ = 33.4/46.26) and one for the time after fishing protection (M₂/A₂ = 37.4/49.25). To find the values of "k" and "b", we can set up two equations:
 
-33.4 = k * 46.26 + b
-37.4 = k * 49.25 + b
-Solving this system of linear equations gives us values of "k" and "b".
+  33.4 = k * 46.26 + b
+  37.4 = k * 49.25 + b
+  Solving this system of linear equations gives us values of "k" and "b".
 
-M ≈ 1.34A - 28.06
+  M ≈ 1.34A - 28.06
 """
 function calculate_size_at_first_maturity(current_avg_size)
   M = 1.34 * (current_avg_size) - 28.06
@@ -313,8 +310,9 @@ end
 reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
 # TODO: dispersal rates of Trochophores should be a fraction of Eggs. Multiply the distance matrix by a factor.
+# TODO: Site Desertas is MPA, meaning that there is no fishing there.
 function nsites!(du, u, p, t)
-  original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], [0.002, 0.001, 0.002, 0.001, 0.001, 0.002, 0.002, 0.002], 56.0, 64000, [0.1, 0.1, 0.1]]
+  original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], [0.002, 0.001, 0.002, 0.001, 0.001, 0.002, 0.002, 0.002], 56.0, 64000, [0.1, 0.1, 0.1], [0.0 0.8 0.0 0.0 0.0 0.0 0.2 0.8; 0.0 0.0 0.2 0.0 0.0 0.2 0.5 0.0; 0.0 0.6 0.0 0.4 0.2 0.4 0.8 0.0; 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.2 0.8 0.8 0.0 1.0 0.6 0.0; 0.0 0.4 0.8 0.6 0.2 0.0 0.6 0.0; 0.0 0.8 0.4 0.2 0.2 0.4 0.0 0.0; 0.8 0.6 0.0 0.0 0.0 0.0 0.0 0.0]]
   p = restructure_flat_p(p, original_shape)
   nsites = 8
   nlifestages = 5
