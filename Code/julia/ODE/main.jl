@@ -311,12 +311,12 @@ end
 "Return the reproduction capacity (between 0 and 1) given the current average size and size at first maturity and maximum size"
 reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
-# TODO: dispersal rates of Trochophores should be a fraction of Eggs. Multiply the distance matrix by a factor.
 function nsites!(du, u, p, t)
   original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], [0.002, 0.001, 0.002, 0.001, 0.001, 0.002, 0.002, 0.002], 56.0, 64000, [0.1, 0.1, 0.1], [0.0 0.8 0.0 0.0 0.0 0.0 0.2 0.8; 0.0 0.0 0.2 0.0 0.0 0.2 0.5 0.0; 0.0 0.6 0.0 0.4 0.2 0.4 0.8 0.0; 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.2 0.8 0.8 0.0 1.0 0.6 0.0; 0.0 0.4 0.8 0.6 0.2 0.0 0.6 0.0; 0.0 0.8 0.4 0.2 0.2 0.4 0.0 0.0; 0.8 0.6 0.0 0.0 0.0 0.0 0.0 0.0]]
   p = restructure_flat_p(p, original_shape)
   nsites = 8
   nlifestages = 5
+  reduce_trochophore_dispersals = 0.2 # dispersal rates of Trochophores should be a fraction of Eggs. This factor is by how much it is reduced.
 
   r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs = p
   for site in 1:nsites
@@ -353,13 +353,13 @@ function nsites!(du, u, p, t)
     # immigration
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
-    dispersal_probs1 = dispersal_probs1 .* mig_probs[:, site]
+    dispersal_probs1 = dispersal_probs1 .* mig_probs[:, site] .* reduce_trochophore_dispersals
     # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
 
     # emigration
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
     dispersal_probs2[site] = 0.0
-    dispersal_probs2 = dispersal_probs2 .* mig_probs[site, :]
+    dispersal_probs2 = dispersal_probs2 .* mig_probs[site, :] .* reduce_trochophore_dispersals
     # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
     du[site, stage] = (r[stage] * u[site, prev_stage]) -
@@ -401,7 +401,7 @@ function nsites!(du, u, p, t)
   end
 end
 
-tspan_general = (0.0, 3000.0)
+tspan_general = (0.0, 10000.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
 sol_general = solve(prob_general)
 
