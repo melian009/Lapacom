@@ -212,15 +212,23 @@ r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
 d = [0.99 / 365, 0.717 / 365, 0.392 / 365, 0.315 / 365, 0.000322]  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = 0.32 / 365
+
 distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Float64.(Matrix(distance_df)[:, 1:end-1])
 distance_matrix = distance_matrix[1:nsites, 1:nsites]
+migraation_probs_df = CSV.read("migration_probabilites_among_sites.csv", DataFrame)
+mig_probs = Float64.(Matrix(migraation_probs_df)[:, 1:end-1])
+mig_probs = mig_probs[1:nsites, 1:nsites]
+# Modify distances (migration probs) by movement prob. which are rough estimates based on the land shape and oceanic currents
+# distance_matrix = distance_matrix .* (1 .+ (1 .- mig_probs))
+# distance_matrix[findall(x -> x ==0, mig_probs)] .= 0
+
 exploitation_rates = rand(0.001:0.001:0.003, nsites)  # TODO: use fitted values. See below.
 size_max = 56.0
 K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
-p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α]
+p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
 
 ## I flatten the parameters and then return them back in the original shape inside `nsites!`. This is because to run Sensitivity analysis (`gsa`), I have to pass flat bounds list.
 function flatten_p(p)
@@ -311,19 +319,23 @@ function nsites!(du, u, p, t)
   nsites = 8
   nlifestages = 5
 
-  r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α = p
+  r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs = p
   for site in 1:nsites
 
     # Stages 1 Egg
     stage = 1
     prev_stage = 5
 
+    # immigration
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
+    dispersal_probs1 = dispersal_probs1 .* mig_probs[:, site]
     # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
 
+    # emigration
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
     dispersal_probs2[site] = 0.0
+    dispersal_probs2 = dispersal_probs2 .* mig_probs[site, :]
     # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
     Saverage = du[site, 6]  # 6 is the index of average size
@@ -339,12 +351,16 @@ function nsites!(du, u, p, t)
     stage = 2
     prev_stage = 1
 
+    # immigration
     dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
     dispersal_probs1[site] = 0.0
+    dispersal_probs1 = dispersal_probs1 .* mig_probs[:, site]
     # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
 
+    # emigration
     dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
     dispersal_probs2[site] = 0.0
+    dispersal_probs2 = dispersal_probs2 .* mig_probs[site, :]
     # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
 
     du[site, stage] = (r[stage] * u[site, prev_stage]) -
@@ -357,19 +373,9 @@ function nsites!(du, u, p, t)
     stage = 3
     prev_stage = 2
 
-    dispersal_probs1 = (exp(-α[stage]) ./ distance_matrix[:, site])
-    dispersal_probs1[site] = 0.0
-    # dispersal_probs1 = dispersal_probs1 ./ sum(dispersal_probs1)
-
-    dispersal_probs2 = (exp(-α[stage]) ./ distance_matrix[site, :])
-    dispersal_probs2[site] = 0.0
-    # dispersal_probs2 = dispersal_probs2 ./ sum(dispersal_probs2)
-
     du[site, stage] = (r[stage] * u[site, prev_stage] * ((K - u[site, stage]) / K)) -
                       (r[stage+1] * u[site, stage]) -
-                      (d[stage] * u[site, stage]) +
-                      (sum(dispersal_probs1 .* u[:, stage])) -
-                      (u[site, stage] * sum(dispersal_probs2))
+                      (d[stage] * u[site, stage])
 
     # stage 4 Juvenile
     stage = 4
