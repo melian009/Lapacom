@@ -32,19 +32,7 @@ using Optim
 #   Appearance rate of eggs: #oocytes/365 in a sin function (to account for spawning season). Note that adults do not turn into eggs (they live many steps.)
 ## [x]: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days. Growth rate is 0.32 per year, which is 0.32/365 per day.
 ## [x] Estimate exploitation rates given average sizes and a single pool model.
-#=
-Example of adding if statements in the ODE system
 
-function fun(du,u,p,t)
-  if u[1] <30
-      du[1] = (0.04*u[1] + 5)*u[1] + 150 - u[2] - p[5]
-      du[2] = p[1]*(p[2]*u[1]-u[2])
-  else
-      u[1] = p[3]
-      u[2] = u[2] + p[4]
-  end
-end
-=#
 
 
 #=
@@ -221,9 +209,7 @@ migraation_probs_df = CSV.read("migration_probabilites_among_sites.csv", DataFra
 mig_probs = Float64.(Matrix(migraation_probs_df)[:, 1:end-1])
 mig_probs = mig_probs[1:nsites, 1:nsites]
 
-MPA = [false, false, false, true, false, false, false, false]  # protected areas where fishing is never allowed.
-
-exploitation_rates = [0.436795998061044, 0.43767209156532155, 0.4603254055329175, 0.0, 0.40337922500828566, 0.5105131417482706, 0.4799123913754184, 0.47959950031955256]  # the 4th value (Desertas) is 0.0 because it is a fully protected area and no fishing happens there.
+exploitation_rates = [0.436795998061044, 0.43767209156532155, 0.4603254055329175, 0.0, 0.40337922500828566, 0.5105131417482706, 0.4799123913754184, 0.47959950031955256]  # the 4th value (Desertas) is 0.0 because it is a fully protected area and no fishing happens there. These values are estimated based on the average size of the limpets at each site. See the text below.
 size_max = 56.0
 K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
