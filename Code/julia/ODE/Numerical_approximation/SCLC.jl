@@ -17,24 +17,74 @@ import ForwardDiff.jacobian
 #=
 Formulation of the simple life cicle for one site:
 
-    Metapopulation dynamic model:
+ Population dynamic:
 
-    dNe/dt = X * r * Na - gEA * Na - de * Na
-    dNa/dt = gEA * Ne * ((K-Ne)/K) - da * Na - (1-X) * H * Na
-    dSa/dt = gamma * Sa * (1-(Sa/(Smax - Smax * H * X)))
+    Simple Life cicle with only one class of population (only one class): Na + Sa
 
-    Metacommunity dynamic model:
+    dNa/dt = X * r * Ne * R * (K - Na/K) - da * Na - (1 - X) * H * Na - da * Na
+    +
+    dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
 
-    dNe(i)/dt = X * r(i) * Na(i) - gEA * Na(i) - de(i) * Ne(i)
-    dNa(i)/dt = gEA * Na(i) * ((K - (Na(i) + Na(i + 1))/K) - dA(i) * Na(i) - (1-X) * H(i) * Na(i)
-    dSa(i)/dt = gamma * Sa(i) * (1 - (Sa(i)/(Smax-Smax * H(i) * X)))
+    Simple Life Cicle formulation that presents two clases of adult abundances:
+    inmature and mature adults: Na, Nm + Sa
+
+    dNa/dt = X * r * Ne * R * (K - Na/K) - gAM * Na - da * Na
+    dNm/dt = gAM * Na * (K - (Na + Nm)/K) - (1 - X) * H * Nm - da * Nm
+    +
+    dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
+
+Formulation for complex life cicles for one site: different numbers of clases.
+
+  Population dinamic:
+
+    Complex Life Cicle with 2 clases of population: Ne, Na + Sa
+    
+    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
+    dNa/dt = gEA * Ne * (K - Na/K) - (1 - X) * H * Na - da * Na
+    +
+    dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
+
+    Complex Life Cicle with 3 clases of population: Ne, Na, Nm + Sa
+
+    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
+    dNa/dt = gEA * Ne * (K - Na/K) - gAM * Na - da * Na
+    dNm/dt = gAM * Na * (K - Nm/K) - (1 - X) * H * Nm - da * Nm
+    +
+    dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
+
+    Complex Life Cicle with 5 clases of population: Ne, Nt, Nv, Nj, Na + Sa
+
+    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
+    dNt/dt = gET * Ne - gTV * Nt - dt * dNt
+    dNv/dt = gTV * Nt * (K - Nv/K) - gVJ * Nv - dv * Nv
+    dNj/dt = gVJ * Nv * (K - Nj/K) - gJA * Nj - dj * Nj
+    dNa/dt = gJA * Nj * (K - Na/K) - (1 - X) * H * Na - da * Na
+    +
+    dSa/dt = gamma * Sa * (1 - ( Sa / (Smax - Smax * H * X)))
+
+    Complex Life Cicle with 6 clases of population: Ne, Nt, Nv, Nj, Na, Nm + Sa
+
+    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
+    dNt/dt = gET * Ne - gTV * Nt - dt * dNt
+    dNv/dt = gTV * Nt * (K - Nv/K) - gVJ * Nv - dv * Nv
+    dNj/dt = gVJ * Nv * (K - Nj/K) - gJA * Nj - dj * Nj
+    dNa/dt = gJA * Nj * (K - Na/K) - gAM * Na - da * Na
+    dNm/dt = gAM * Na * (K - (Na + Nm)/K) - (1 - X) * H * Na - da * Na
+    +
+    dSa/dt = gamma * Sa * (1 - ( Sa / (Smax - Smax * H * X)))
+
  where i = nº of species == ["Patella ordinaria", "Patella aspera"]
 
 Parameters and variables:
  - Ne = eggs abundance
- - Na = adults abuncance
+ - Nt = trocophore abuncance
+ - Nv = veliger abuncance
+ - Nj = juvenile abuncance
+ - Na = adults abuncance (when Nm is in the equations, Na means non matured adults)
+ - Nm = matured adult abundaces
  - Sa = adults size (Average sizes Before MPS+FULL = [46.44,44.45])
  - r = population growth rate [9.17,5.03]
+ - R = reproductive capacity
  - K = carrying capacity (k =1e^4)
  - X = Reproductive period [1,0] 
  - (1-X) = Exploitation periosd [1,0]
@@ -83,245 +133,64 @@ Average sizes before and after marine protected area implementations
  Patella ordinaria = 45.72mm
 =#
 
-# Metapopulation dynamic model 
-function SLC_metapop_before!(du, u, p, t)
+# Full access scenario
+
+function SLC!(du, u, p, t)
+   Na, Sa = u
+   r, R, K, H, X, da, Smax = p
+  du[1] = dNa = X(t) * r * Na * R * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da[i] * Na) 
+  du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 - H[i])))
+end
+
+function aSLC!(du, u, p, t)
+  Na,Nm, Sa = u
+  r, R, K, H, X, da, Smax = p
+ du[1] = dNa = X(t) * r * Na * R * (K - Na/K) - (da * Na) 
+ du[2] = dNm = gAM * Na * (K - (Na + Nm)/K) - (1 - X(t)) * H * Nm - (da * Nm) 
+ du[3] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 - H)))
+end
+
+function SCLC!(du, u, p, t)
   Ne, Na, Sa = u
-   i, r, K, H, X,da, Smax, gamma = p
-  du[1] = dNa = X(t) * r[i]* Ne * ((K - Na) / K) - (da[i] * Na) - (H[i] * Na)
-  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
+   r, R, K, H, X, gEA, de, da, Smax, gamma = p
+  du[1] = dNe = X(t) * r * Na * R - (de * Ne) - (gEA * Ne)
+  du[2] = dNa = gEA * Ne * (K - Na/K) - (da * Na) - ((1 - X(t))* H * Na)
+  du[3] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H)))
 end
 
-function SLC_metapop_FULL!(du, u, p, t)
-    Ne, Na, Sa = u
-     i, r, K, H, X, da, Smax, gamma = p
-    du[1] = dNa = X(t) * r[i] * Ne * ((K - Na) / K) - (da[i] * Na) - ((1 - X(t))* H[i] * Na)
-    du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H[i])))
-end
-
-function SLC_metapop_MPA!(du, u, p, t)
+function aSCLC!(du, u, p, t)
   Ne, Na, Sa = u
-   i, r, K, X, da, Smax, gamma = p
-  du[1] = dNa = X(t)* r[i] * Ne * ((K - Na) / K) - (da[i] * Na)
-  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax))
+   r, R, K, H, X, gEA,gAM, de, da, Smax, gamma = p
+  du[1] = dNe = X(t) * r * Na * R - (de * Ne) - (gEA * Ne)
+  du[2] = dNa = gEA * Ne * (K - Ne/K) - gAM * Na - da * Na 
+  du[3] = dNm = gAM * Na * (K - (Na + Nm)/K) - (1 - X(t)) * H * Nm - (da * Nm) 
+  du[4] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H)))
 end
 
-#Exploitation period/rate implamantation  X=0
-
-# Reproductive Cycle (X=1)
-
-function rep(t)
-  if (t % 365) / 365 >= 0.42
-    return 1.0 # Reproductive Cycle
-  else
-    return 0.0 # Exploitation Cycle
-  end
+function CLC!(du, u, p, t)
+  Ne, Nt, Nv, Nj, Na, Sa = u
+   r,R,K, H, X, gET, gTV, gVJ, gJA, de, da, Smax, gamma = p
+  du[1] = dNe = X(t) * r * Na * R- de * Ne - gEA * Ne
+  du[2] = dNt = gET * Ne - gTV*Nt - dt * Nt
+  du[3] = dNv = gTV * Nt * (K - Nt/K) - gVJ * Nv - dv * Nv
+  du[4] = dNj = gVJ * Nv * (K - Nj/K) - gJA * Nj - da * Na
+  du[5] = dNa = gJA * Nj * (K - Na / K) - da * Na - (1 - X(t)) * H * Na
+  du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
-
-# Population Growth rate estimation (r=reggs):
-
-oocytes_po = 385613                  # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = 73029                   # Average: Patella aspera (nº of Eggs)
-oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
-reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
-
-re = reggs / 500     # Population growth rate
-Kt = 640000          # Carrying capacity
-rates = [0.639,0.57] # Exploitation rate (H)
-rates2 = [0.02,0.01]
-gEA = 0.006          # Instant conversion between stages.
-da_ = [0.55,0.59]    # Natural mortality rate for adults
-Sm = 56              # Maximum size for adults
-gammas = [0.32,0.36] # Adult growth rate
-i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
-
-#de_ = [de_po,de_pe] # Not estimated values. Need to be calculated by numerical aproximation
-
-#= Numerical aproximation: jacobian matrix determination for Full acces SLC metapopulation model
-
-@variables Na, Ne , Sa, r, K, rate, Exp, X, g, de, da, Smax, gamma
-
-# Symbolics.jacobian([f1(y1,y2), f2(y1,y2)],[y1, y2])
-
-J = Symbolics.jacobian([(X * r * Na) - (de * Ne) - (g * Ne),
- (g * Ne * ((K - Ne) / K)) - (da * Na) - ((1 - X) * rate * Na), 
- gamma * Sa * (1 - (Sa / (Smax * (1 - rate*(1-X)))))],
- [Sa])
- expand(J)
-
-# Cálculo del determinante
-Det_J = det(J)
-#Simplificación del determinante
-M = Symbolics.simplify(Det_J)
-
-# Depejamos Ne del Det_J sabiendo que para que se produzcan huevos X = 1.
-Ne = 
-
-Ne = K/2*(1-((de*da+g*de)/r*g))
-
-#Despejamos de del determinante
-
-de=((2*K*g)/(K*(da+g)))*((K/2)-Ne)
-=#
-
-# En base a la cantidad de huevos promedio que pone cada especie,
-# definimos una capacidad de carga de huevos común para ambas metapoblaciones (KTotal).
-#=
-KTotal=oocytes_pa+oocytes_po
-
-# Para "Patella ordinaria".
-# Calculamos la cantidad de huevos que mueren de una poblacion inicial promedio.
-
-Ne_po=oocytes_po
-
-dNe_po=((2*KTotal*gEA)/(KTotal*(da_[1]+gEA)))*((KTotal/2)-Ne_po)
-
-# Calculamos la proporción de huevo muertos en relación al total de huevos iniciales que consideramos.
-de_po =abs(dNe_po/Ne_po)
-
-# Repetimos el mismo procedimiento para la otra especie: "Patella asera".
-
-Ne_pa=oocytes_pa
-
-dNe_pa=((2*KTotal*gEA)/(KTotal*(da_[2]+gEA)))*((KTotal/2)-Ne_pa)
-
-de_pa =abs(dNe_pa/Ne_pa)
-
-# Definimos un vector que engloba ambos ratios de mortalidad de huevos para el periodo reproductivo.
-
-de_=(de_po,de_pa)
-=#
-
-# Before and after
-# Full acces:     i,    r,  K,  H,     X,   g,   de,  da,  Smax, gamma = p
-P_sol_po_full = [i[1], re, Kt, rates, rep, da_, Sm, gammas] # "Patella ordinaria" 
-P_sol_pa_full = [i[2], re, Kt, rates, rep, da_, Sm, gammas] # "Patella aspera" 
-# After
-#MPA:            i,    r,  K,  X,  da, Smax, gamma = p
-P_sol_po_mpa = [i[1], re, Kt, rep,da_, Sm, gammas] # "Patella ordinaria" 
-P_sol_pa_mpa = [i[2], re, Kt, rep,da_, Sm, gammas] # "Patella aspera" 
-
-
-# Initial populations abundance and mean size  for the simulations
-# Before:
-# Full access (1996-2006)
-u0_po_before = [1e4, 1e4, 46.26]    # Patella ordinaria 
-u0_pa_before = [1e4, 1e4, 43.53]    # Patella aspera
-
-# After:
-# FULL + MPA  (2007-2017)
-u0_po = [1e4, 1e4, 33.4]    # Patella ordinaria 
-u0_pa = [1e4, 1e4, 34.6]    # Patella aspera
-
-#Full access (2007-2017)
-u0_po_full = [1e4, 1e4, 43.41]    # Patella ordinaria 
-u0_pa_full = [1e4, 1e4, 45.72]    # Patella aspera
-
-#MPA (2007-2017
-u0_po_mpa = [1e4, 1e4, 49.25] #Patella ordinaria 
-u0_pa_mpa = [1e4, 1e4, 50.61] #Patella aspera
-
-
-tspan = (1, 3000) # Temporal ranges for simulations: 2 years.
-
-
-
-
-
-
-
-#Simulation for "Patella ordinaria"
-
-#Before
-prob_po_before = ODEProblem(SLC_metapop_before!, u0_po_before, tspan, P_sol_po_full) 
-sol_po_before = solve(prob_po_before, Tsit5())
-Plots.plot(sol_po_before)
-#After:
-#Full Acces
-prob_po_full = ODEProblem(SLC_metapop_FULL!, u0_po_full, tspan, P_sol_po_full) 
-sol_po_full = solve(prob_po_full, Tsit5())
-
-#MPA
-prob_po_mpa = ODEProblem(SLC_metapop_MPA!, u0_po_mpa, tspan, P_sol_po_mpa) 
-sol_po_mpa = solve(prob_po_mpa, Tsit5())
-
-
-# Simulation for "Patella aspera"
-#Before:
-prob_pa_before = ODEProblem(SLC_metapop_before!, u0_pa_before, tspan, P_sol_pa_full)
-sol_pa_before = solve(prob_pa_before,Tsit5())
-
-# After:
-# Full Acces
-prob_pa_full = ODEProblem(SLC_metapop_FULL!, u0_pa_full, tspan, P_sol_pa_full)
-sol_pa_full = solve(prob_pa_full,Tsit5())
-
-# MPA
-prob_pa_mpa = ODEProblem(SLC_metapop_MPA!, u0_pa_mpa, tspan, P_sol_pa_mpa)
-sol_pa_mpa = solve(prob_pa_mpa,Tsit5())
-
-
-
-
-#Plots
-#Patella ordinaria
-Plots.plot(sol_po_before, vars=(0,1), yscale=:log10,  label= "Na (1996-2006)")
-Plots.plot!(sol_po_full, vars=(0,1), yscale=:log10, label= "Na (Full access)")
-Plots.plot!(sol_po_mpa, vars=(0,1), yscale=:log10,  label= "Na (MPA)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
-Plots.xlims!(0,3000)
-
-#savefig!("SLC_po_N_Before_Full_MPA_.png")
-
-Plots.plot(sol_po_before, vars=(0,3), label= "Sa (1996-2006)")
-Plots.plot!(sol_po_full, vars=(0,3), label= "Sa (Full access)")
-Plots.plot!(sol_po_mpa, vars=(0,3),  label= "Sa (MPA)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("Sa (mm)")
-Plots.ylims!(55,57)
-# savefig!("SLC_po_S_Before_Full_MPA_.png")
-
-
-#Patella ordinaria
-Plots.plot(sol_pa_before, vars=(0,2), yscale=:log10,  label= "Na (1996-2006)")
-Plots.plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na (Full access)")
-Plots.plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na (MPA)")
-Plots.title!("'Patella aspera'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
-#savefig!("SLC_pa_N_Before_Full_MPA_.png")
-
-
-Plots.plot(sol_pa_before, vars=(0,3), label= "Sa: Before")
-Plots.plot!(sol_pa_full, vars=(0,3), label= "Sa: Full access")
-Plots.plot!(sol_pa_mpa, vars=(0,3),  label= "Sa: MPA")
-Plots.title!("'Patella aspera'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("Sa (mm)")
-Plots.ylims!(55,56.5)
-#savefig!("SLC_pa_S_Before_Full_MPA_.png")
-
-
-
-
-
-Plots.plot(sol_po_full, vars=(0,2), label= "Full access: 'Patella ordinaria")
-Plots.plot!(sol_pa_full, vars=(0,2),  label= "Full access: 'Patella aspera")
-Plots.ylims!(0,2000)
-savefig!("SLC_Adults_Full_access.png")
-
-
-Plots.plot(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
-Plots.plot!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
-Plots.ylims!(0,2000)
-savefig!("SLC_Adults_MPS.png")
-
-Plots.plot(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
-Plots.plot!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
-Plots.ylims!(0,2000)
-savefig!("SLC_Adults_Full_access.png")
-#Abuncances of spp A vs Abundances of spp B
-
+function aCLC!(du, u, p, t)
+  Ne, Nt, Nv, Nj, Na, Sa = u
+   r, R, K, H, X, gET, gTV, gVJ, gJA, de, da, Smax, gamma = p
+  du[1] = dNe = X(t) * r * Na * R(Sa,Smax) - de * Ne - gEA * Ne
+  du[2] = dNt = gET * Ne - gTV*Nt - dt * Nt
+  du[3] = dNv = gTV * Nt * (K - Nt/K) - gVJ * Nv - dv * Nv
+  du[4] = dNj = gVJ * Nv * (K - Nj/K) - gJA * Nj - da * Na
+  du[5] = dNa = gJA * Nv * (K - Na/K) - gAM * Na - da * Na 
+  du[6] = dNm = gAM * Na * (K - (Na + Nm)/K) - (1 - X(t)) * H * Nm - (da * Nm) 
+  du[7] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
+end
+
+function R(Sa,Smax)
+  Smat = 1.34 * Sa - 28.06
+  R = min(max(0.5(1 + (Sa - Smaturity)/(Smax - Smaturity)), 0), 1)
+end
