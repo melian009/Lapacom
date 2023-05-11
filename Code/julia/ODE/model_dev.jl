@@ -195,10 +195,9 @@ end
 # average oocytes per year per adult
 avg_oocytes = 385_613 # This is the actual mean. mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-# reggs = reggs / 500 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
-d = [0.99 / 365, 0.717 / 365, 0.392 / 365, 0.315 / 365, 0.000322]  # see estimate_mortality_rates.jl for how these values were estimated.
+d = [0.999 / 365, 0.585 / 365, 0.343 / 365, 0.201 / 365, 0.000322]  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = 0.32 / 365
 
 distance_df = CSV.read("distance_matrix.csv", DataFrame)

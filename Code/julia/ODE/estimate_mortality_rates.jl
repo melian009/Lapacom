@@ -24,6 +24,12 @@ exp_decay(stage, A, B) = A .* exp(-B .* (5 .- stage))
 # Objective function to minimize
 function objective(B)
   mortality_rates = exp_decay.(stages, adult_mortality_rate, B[1])
+  # Check if any mortality rate is greater than 1
+  for rate in mortality_rates
+    if rate > 1
+      return Inf  # Return a large penalty
+    end
+  end
   mean_mortality_rate = sum(mortality_rates) / length(stages)
   return (mean_mortality_rate - 0.55)^2
 end
@@ -33,13 +39,15 @@ end
 result = optimize(objective, B0)
 
 # Get the optimal value of B
-B_opt = Optim.minimizer  # = -0.6026855468750002
+B_opt = Optim.minimizer  # = -0.5353292301297188
 
 # Death rates: 
 # Stage d
-# 1 1.309211754648921
-# 2 0.7165836397346279
-# 3 0.3922147130988946
-# 4 0.2146747045860786
+# 1 0.999999975120952
+# 2 0.585476487339919
+# 3 0.34278272575599816
+# 4 0.20069123118943133
 # 5 0.1175
 
+# theoretically, there should only be a single value of B that minimizes the function and meets the constraints of maintaining the mean mortality rate at 0.55. This is because the exponential function is strictly decreasing (if B > 0) or increasing (if B < 0), so it will not have local minima or maxima -- only a global minimum or maximum.
+# In our specific problem, we are minimizing the squared difference between the mean mortality rate and the target value (0.55). This objective function forms a parabola in the B-dimension, and parabolas have a unique minimum (in the case of a convex parabola, which is our case here).
