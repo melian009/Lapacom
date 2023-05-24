@@ -11,8 +11,6 @@ using CSV
 using DiffEqParamEstim
 using Optim
 
-## [x]: exploitation stops during certain months of the year. Implement time varying E.
-## [x] From topography, set distance between two sites to infinite, if there is land/another site between them
 ## [x]: Empirically estimate the rate at which individuals from one stage turn into another one:
 ## Conversion rates for the given number of days is as follows:
 # 730: 0.00629
@@ -20,17 +18,15 @@ using Optim
 # 0.7: 0.998611
 # 1.3: 0.971057
 # 7: 0.4820525
-# In the ODEs, the unit of left side is individuals per day. This means that each time step is one day. The rate of the right side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the followin equation: 0.01 = r^t, where I replace t with the time between stages.
-## [x]: Create another version of model where there are five life stages instead of two. In this system, the probability to migrate decreases exponentially. $1/d \times e^{-\gamma}$.
-## [x]: Check how to add all equations in a loop instead of writing by hand.
+# In the ODEs, the unit of left side is individuals per day. This means that each time step is one day. The rate of the right side are calculated such that after the given time between life stages, 99% of the individuals from one stage are converted to the next stage. To that end, I solve the following equation: 0.01 = r^t, where I replace t with the time between stages.
 # [x]: Modify the equations according to the following facts:
 # 1. adults live 7 to 10 years, depending on their size. 
 #   Age in days ranges between 2555 to 3650.
 #   Actual age is (size * max age) / max size. If actual age < min age, actual age = min age. This is difficult to include in the ODE. We can ignore it and use an average age: 3102 days.
-#   death probability of adults da =  1 / age. 1/3102 = 0.000322.
+#   death probability of adults da =  1 / age. so 1/3102 = 0.000322.
 # 2. adults spawn 92,098 to 804,183 oocytes per year during the spawning season.
 #   Appearance rate of eggs: #oocytes/365 in a sin function (to account for spawning season). Note that adults do not turn into eggs (they live many steps.)
-## [x]: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days. Growth rate is 0.32 per year, which is 0.32/365 per day.
+## [x]: estimate `size_growth_rate` by knowing juvenile average size and adult average size and dividing their difference by 730 days. Limpets 0.32 cm per year, which is 0.32/365 cm per day. To calculate the size_growth_rate, see estimate_size_growth_rate.jl.
 ## [x] Estimate exploitation rates given average sizes and a single pool model.
 
 
@@ -42,8 +38,7 @@ Five simplifying assumptions:
 2. The number of oocytes. We use the mean number of oocytes laid per adult per year.
 3. Dispersal potential of trochophore and veliger. Eggs disperse passively, T and V can disperse actively.
 4. Juveniles homing. Eggs have a global pool. Once they are released, they travel with the currents to the ocean. In the ocean they develop and actively migrate back to different sites. This is like the "lottery model".
-5. Exploitation. Five months of exploitation, seven months rest. There is no reproduction during the exploitation time. NOTE that adults continueously keep growing.
-
+5. Exploitation. Seven months of exploitation (April to October), five months rest (November to March). There is no reproduction during the exploitation time. NOTE that adults continueously keep growing.
 =#
 
 ### ----------------------------------------------------------------
@@ -170,7 +165,7 @@ nlifestages = 5
 ## initial state of the system
 # Initial population sizes at each life stage per site
 # There are 100 individuals per m2. We assume 2 km2 per site -> 20k individuals per site.
-u0_general = [[1_800.0 for j in 1:nlifestages] for i in 1:nsites]
+u0_general = [[58_000.0 for j in 1:nlifestages] for i in 1:nsites]
 # Initial average sizes per site. Avg. size is between 45 to 51.
 for i in 1:nsites
   push!(u0_general[i], 48.0)  # TODO: how to initialize the avg sizes?
@@ -181,13 +176,13 @@ u0_general = reshape(reduce(vcat, u0_general), length(u0_general[1]), length(u0_
 ## defining model parameters
 
 """
-captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce
+captures the reproductive cycle and equals to zero when fishing and to one when organisms reproduce. Reproduction occurs between November and March (0.42 of the year).
 """
 function reproductive_cycle(t)
   if (t % 365) / 365 >= 0.42
-    return 1.0
-  else
     return 0.0
+  else
+    return 1.0
   end
 end
 
@@ -198,7 +193,7 @@ reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
 d = [0.999 / 365, 0.585 / 365, 0.343 / 365, 0.201 / 365, 0.000322]  # see estimate_mortality_rates.jl for how these values were estimated.
-size_growth_rate = 0.32 / 365
+size_growth_rate = 0.00014898749263737575
 
 distance_df = CSV.read("distance_matrix.csv", DataFrame)
 distance_matrix = Float64.(Matrix(distance_df)[:, 1:end-1])
@@ -208,14 +203,33 @@ migraation_probs_df = CSV.read("migration_probabilites_among_sites.csv", DataFra
 mig_probs = Float64.(Matrix(migraation_probs_df)[:, 1:end-1])
 mig_probs = mig_probs[1:nsites, 1:nsites]
 
-exploitation_rates = [0.436795998061044, 0.43767209156532155, 0.4603254055329175, 0.0, 0.40337922500828566, 0.5105131417482706, 0.4799123913754184, 0.47959950031955256]  # the 4th value (Desertas) is 0.0 because it is a fully protected area and no fishing happens there. These values are estimated based on the average size of the limpets at each site. See the text below.
+
+function exploitation_rate(size, site)
+  size_max = 56.0
+  min_size_for_fishing = 40
+  # exploitation_rates_max = [0.43679599501684097, 0.43767209022758713, 0.46032540377965536, 0.38748435785424035, 0.4033792240083418, 0.5105131408815863, 0.47991239051754064, 0.4795994994034682]  # These values are estimated based on the average size of the limpets at each site.
+  exploitation_rates_max = [0.980700696804078, 0.9807285958927162, 0.989105147959682, 0.9796381668584575, 0.9875759368524103, 0.9900648704172368, 0.9894851154977173, 0.9894795735668236] # These exploitation rates used Gompertz growth function instead of logistic.
+  exploitation_rates_max = exploitation_rates_max .- exploitation_rates_max[4]  # subtract the exploitation rate of Desertas from all sites because it is a fully protected area and no fishing happens there. This is to make sure that the exploitation rate of Desertas is zero and the exploitation rates of other sites are relative to Desertas.
+  if size <= min_size_for_fishing
+    return 0.0
+  else
+    slope = 1 / (size_max - min_size_for_fishing)
+    intercept = -min_size_for_fishing / (size_max - min_size_for_fishing)
+    E = slope * size + intercept
+    E = min(E, 1.0)
+    return E * exploitation_rates_max[site]
+  end
+end
+
 size_max = 56.0
 K = 64_000  # for 6.4 km2 per site.
 α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
-p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
+p_general = [r, d, size_growth_rate, distance_matrix, size_max, K, α, mig_probs]
 
-## I flatten the parameters and then return them back in the original shape inside `nsites!`. This is because to run Sensitivity analysis (`gsa`), I have to pass flat bounds list.
+"""
+I flatten the parameters and then return them back in the original shape inside `nsites!`. This is because to run Sensitivity analysis (`gsa`), I have to pass flat bounds list.
+"""
 function flatten_p(p)
   flat_p = Real[]
   for p_list in p
@@ -297,13 +311,13 @@ end
 reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
 function nsites!(du, u, p, t)
-  original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], [0.002, 0.001, 0.002, 0.001, 0.001, 0.002, 0.002, 0.002], 56.0, 64000, [0.1, 0.1, 0.1], [0.0 0.8 0.0 0.0 0.0 0.0 0.2 0.8; 0.0 0.0 0.2 0.0 0.0 0.2 0.5 0.0; 0.0 0.6 0.0 0.4 0.2 0.4 0.8 0.0; 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.2 0.8 0.8 0.0 1.0 0.6 0.0; 0.0 0.4 0.8 0.6 0.2 0.0 0.6 0.0; 0.0 0.8 0.4 0.2 0.2 0.4 0.0 0.0; 0.8 0.6 0.0 0.0 0.0 0.0 0.0 0.0]]
+  original_shape = Any[[5.846581865622962, 0.998611, 0.971057, 0.4820525, 0.00629], [0.001, 0.001, 0.001, 0.001, 0.000322], 0.0008767123287671233, [0.0 12.842542485919632 33.20921059959618 73.75112848881275 45.78816486689583 40.95386826936409 23.127098263365838 13.53847480618783; 12.842542485919632 0.0 31.551937191782326 74.4358482251258 50.57366923475108 43.525278937384996 18.68655292046152 19.67083747567315; 33.20921059959618 31.551937191782326 0.0 43.012716906931786 25.586975451710284 15.767470469506062 13.16139561432816 21.70783981938122; 73.75112848881275 74.43584822512581 43.012716906931786 0.0 32.56225153468865 33.114636105203594 56.164462942582226 60.38662955616323; 45.78816486689583 50.573669234751094 25.586975451710284 32.56225153468865 0.0 10.08940978792187 35.940503401029886 32.44536267645653; 40.95386826936408 43.525278937384996 15.767470469506062 33.114636105203594 10.08940978792187 0.0 27.21061174752855 27.454025172124666; 23.127098263365838 18.68655292046152 13.16139561432816 56.164462942582226 35.940503401029886 27.21061174752855 0.0 16.029653650497625; 13.53847480618783 19.67083747567315 21.70783981938122 60.38662955616323 32.44536267645653 27.454025172124666 16.029653650497625 0.0], 56.0, 64000, [0.1, 0.1, 0.1], [0.0 0.8 0.0 0.0 0.0 0.0 0.2 0.8; 0.0 0.0 0.2 0.0 0.0 0.2 0.5 0.0; 0.0 0.6 0.0 0.4 0.2 0.4 0.8 0.0; 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.2 0.8 0.8 0.0 1.0 0.6 0.0; 0.0 0.4 0.8 0.6 0.2 0.0 0.6 0.0; 0.0 0.8 0.4 0.2 0.2 0.4 0.0 0.0; 0.8 0.6 0.0 0.0 0.0 0.0 0.0 0.0]]
   p = restructure_flat_p(p, original_shape)
   nsites = 8
   nlifestages = 5
   reduce_trochophore_dispersals = 0.2 # dispersal rates of Trochophores should be a fraction of Eggs. This factor is by how much it is reduced.
 
-  r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs = p
+  r, d, size_growth_rate, distance_matrix, size_max, K, α, mig_probs = p
   for site in 1:nsites
 
     # Stages 1 Egg
@@ -325,11 +339,12 @@ function nsites!(du, u, p, t)
     Saverage = du[site, 6]  # 6 is the index of average size
     Smaturity = calculate_size_at_first_maturity(Saverage)
 
-    du[site, stage] = (reproductive_cycle(t) * r[stage] * u[site, prev_stage] * reproduction_capacity(Saverage, Smaturity, size_max)) -  # What does the last term do? We use it to reduce the reproductive capacity of the adults based on their size. At max size, 100% of them reproduce. At "size at first maturity" size, only 50% of them reproduce. Make a ramp function that calculates the fraction of the adults that reproduce given the mean size of the individuals. For this, we will also need to have another equation (`calculate_size_at_first_maturity`) that calculates the "size at the first maturity" because its a function of the mean size of the individuals. For that, we use a linear relationship between mean size and size at the first maturity before/after introducing fishing protection.
+    du[site, stage] = (reproductive_cycle(t) * r[stage] * u[site, prev_stage] * reproduction_capacity(Saverage, Smaturity, size_max)) -  
                       (r[stage+1] * u[site, stage]) -
                       (d[stage] * u[site, stage]) +
                       (sum(dispersal_probs1 .* u[:, stage])) -
                       (u[site, stage] * sum(dispersal_probs2))
+    # What does the last part of the first term do? We use it to reduce the reproductive capacity of the adults based on their size. At max size, 100% of them reproduce. At "size at first maturity" size, only 50% of them reproduce. Make a ramp function that calculates the fraction of the adults that reproduce given the mean size of the individuals. For this, we will also need to have another equation (`calculate_size_at_first_maturity`) that calculates the "size at the first maturity" because its a function of the mean size of the individuals. For that, we use a linear relationship between mean size and size at the first maturity before/after introducing fishing protection.
 
     # Stage 2 Trochophore
     stage = 2
@@ -372,21 +387,22 @@ function nsites!(du, u, p, t)
     stage = 5
     prev_stage = 4
     du[site, stage] = (r[stage] * u[site, prev_stage] * ((K - u[site, stage]) / K)) -
-                      ((reproductive_cycle(t) * exploitation_rates[site]) * u[site, stage]) -
+                      (((1 - reproductive_cycle(t)) * exploitation_rate(du[site, 6], site)) * u[site, stage]) -
                       (d[stage] * u[site, stage])
 
     # adult sizes
-    stage = 6
-    du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - u[site, nlifestages+1] / (size_max - (size_max * (reproductive_cycle(t) * exploitation_rates[site]))))
+    stage
+    # du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - (u[site, nlifestages+1] / (size_max - (size_max * ((1 - reproductive_cycle(t)) * exploitation_rate(du[site, 6], site))))))
+    du[site, stage] = size_growth_rate * u[site, nlifestages+1] * exp(-u[site, nlifestages+1] / (size_max - (size_max * ((1 - reproductive_cycle(t)) * exploitation_rate(du[site, 6], site)))))
   end
-  for i in 1:nsites
-    for j in 1:(nlifestages-1)
-      du[i, j] = max(du[i, j], 0.0)
-    end
-  end
+  # for i in 1:nsites
+  #   for j in 1:(nlifestages-1)
+  #     du[i, j] = max(du[i, j], 0.0)
+  #   end
+  # end
 end
 
-tspan_general = (0.0, 10000.0)
+tspan_general = (0.0, 3000.0)
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
 sol_general = solve(prob_general)
 
@@ -525,10 +541,11 @@ species_size_range = combine(dfy, :total_length_mm .=> [maximum, minimum, mean, 
 sizeₘₐₓ = maximum(species_size_range.total_length_mm_maximum)
 sizeₘᵢₙ = minimum(species_size_range.total_length_mm_minimum)
 initial_size = species_size_range.total_length_mm_median
-size_growth_rate = 0.32 / 365  # It has minimal effect
+size_growth_rate = 0.00014898749263737575  # It has minimal effect
 
 function estimate_E_across_sites(initial_sizes, sizeₘₐₓ, size_growth_rate)
   sizeonly!(size, E, t) = size_growth_rate * size * (1 - size / (sizeₘₐₓ - (sizeₘₐₓ * E)))
+  # sizeonly!(size, E, t) = size_growth_rate * size * exp(-size / (sizeₘₐₓ - (sizeₘₐₓ * E)))
   estimated_Es = zeros(length(initial_sizes))
   for site in 1:length(initial_sizes)
     u0 = initial_sizes[site]
@@ -545,7 +562,8 @@ function estimate_E_across_sites(initial_sizes, sizeₘₐₓ, size_growth_rate)
 end
 
 estimated_E = estimate_E_across_sites(initial_size, sizeₘₐₓ, size_growth_rate)
-
+# For the logistic growth model: [0.43679599501684097, 0.43767209022758713, 0.46032540377965536, 0.38748435785424035, 0.4033792240083418, 0.5105131408815863, 0.47991239051754064, 0.4795994994034682]
+# For the Gompertz growth model: [0.980700696804078, 0.9807285958927162, 0.989105147959682, 0.9796381668584575, 0.9875759368524103, 0.9900648704172368, 0.9894851154977173, 0.9894795735668236]
 fig = Figure()
 ax = Axis(fig)
 p = hist!(ax, estimated_E, bins=30, color=:black, xlabel="Exploitation", ylabel="Number of Sites")

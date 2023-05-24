@@ -12,7 +12,33 @@ using CSV
 
 include("load_params.jl")
 
-tspan_general = (0.0, 1000.0)
+start_year = 2006
+end_year = 2018
+nyears = end_year - start_year + 1
+ndays = nyears * 365.0
+tspan_general = (0.0, ndays)
+
 prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
 sol_general = solve(prob_general)
 
+# Saving the results
+df_general = DataFrame(sol_general)
+CSV.write("../figs/general.csv", df_general)
+
+
+# Plotting the results
+all_u = sol_general.u
+all_times = sol_general.t
+# site_names = distance_df.site
+site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+for stage in 1:5
+  fig = Figure()
+  ax1 = Axis(fig[1, 1])
+  lines!(ax1, all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
+  ax1.title = "N for stage: $(stage)"
+  for site in 2:nsites#2:8
+    lines!(ax1, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
+  end
+  fig[1, 2] = Legend(fig, ax1, "Site")
+  save("../figs/stage=$stage.pdf", fig)
+end

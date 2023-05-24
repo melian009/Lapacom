@@ -5,7 +5,7 @@ nlifestages = 5
 ## initial state of the system
 # Initial population sizes at each life stage per site
 # There are 100 individuals per m2. We assume 2 km2 per site -> 20k individuals per site.
-u0_general = [[1_800.0 for j in 1:nlifestages] for i in 1:nsites]
+u0_general = [[58_000 for j in 1:nlifestages] for i in 1:nsites]
 # Initial average sizes per site. Avg. size is between 45 to 51.
 for i in 1:nsites
   push!(u0_general[i], 48.0)  # TODO: how to initialize the avg sizes?
@@ -30,10 +30,9 @@ end
 # average oocytes per year per adult
 avg_oocytes = 385_613 # This is the actual mean. mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-# reggs = reggs / 500 # because the rate is too high to be handled
 r = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
-d = [0.99 / 365, 0.717 / 365, 0.392 / 365, 0.315 / 365, 0.000322]  # see estimate_mortality_rates.jl for how these values were estimated.
+d = [0.999 / 365, 0.585 / 365, 0.343 / 365, 0.201 / 365, 0.000322]  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = 0.32 / 365
 
 distance_df = CSV.read(joinpath(datadir, "distance_matrix.csv"), DataFrame)
@@ -44,10 +43,12 @@ migraation_probs_df = CSV.read(joinpath(datadir, "migration_probabilites_among_s
 mig_probs = Float64.(Matrix(migraation_probs_df)[:, 1:end-1])
 mig_probs = mig_probs[1:nsites, 1:nsites]
 
-exploitation_rates = [0.436795998061044, 0.43767209156532155, 0.4603254055329175, 0.0, 0.40337922500828566, 0.5105131417482706, 0.4799123913754184, 0.47959950031955256]  # the 4th value (Desertas) is 0.0 because it is a fully protected area and no fishing happens there. These values are estimated based on the average size of the limpets at each site. See the text below.
+# exploitation_rates = [0.436795998061044, 0.43767209156532155, 0.4603254055329175, 0.38748435327632225, 0.40337922500828566, 0.5105131417482706, 0.4799123913754184, 0.47959950031955256]  # These values are estimated based on the average size of the limpets at each site. See the text below.
+exploitation_rates = [0.9880685477383748, 0.9880947574980841, 0.9891331673866427, 0.9874718910553065, 0.9875900832783625, 0.9900632400512024, 0.9894700088322096, 0.9894645471975891] # These values are estimated based on the average size of the limpets at each site. See the text below. These second exploitation rates used Gompertz growth function instead of logistic.
+exploitation_rates = exploitation_rates .- exploitation_rates[4]  # subtract the exploitation rate of Desertas from all sites because it is a fully protected area and no fishing happens there. This is to make sure that the exploitation rate of Desertas is zero and the exploitation rates of other sites are relative to Desertas.
 size_max = 56.0
 K = 64_000  # for 6.4 km2 per site.
-α = [0.1, 0.1, 0.1]  # dispersion factor for Egg, Trochophore, and Veliger
+α = [1, 1, 1]  # dispersion factor for Egg, Trochophore, and Veliger
 # Since we do not have any info about site size, dispersion is only a function of dispersion factor and distance.
 p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
 
@@ -215,9 +216,9 @@ function nsites!(du, u, p, t)
     stage = 6
     du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - u[site, nlifestages+1] / (size_max - (size_max * (reproductive_cycle(t) * exploitation_rates[site]))))
   end
-  for i in 1:nsites
-    for j in 1:(nlifestages-1)
-      du[i, j] = max(du[i, j], 0.0)
-    end
-  end
+  # for i in 1:nsites
+  #   for j in 1:(nlifestages-1)
+  #     du[i, j] = max(du[i, j], 0.0)
+  #   end
+  # end
 end
