@@ -11,7 +11,6 @@ using CSV
 using DiffEqParamEstim
 using Optim
 using Symbolics
-using Plots
 import ForwardDiff.jacobian
 
 #=
@@ -144,7 +143,7 @@ function SLC!(du, u, p, t)
   du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da[i] * Na) 
   du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
-
+#=
 function aSLC!(du, u, p, t)
   Na,Nm, Sa = u
   r, K, H, X, da, Smax = p
@@ -155,7 +154,7 @@ function aSLC!(du, u, p, t)
  du[2] = dNm = gAM * Na * (K - (Na + Nm)/K) - (1 - X(t)) * H * Nm - (da * Nm) 
  du[3] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 - H)))
 end
-
+=#
 function SCLC!(du, u, p, t)
   Ne, Na, Sa = u
    r, K, H, X, gEA, de, da, Smax, gamma = p
@@ -166,7 +165,7 @@ function SCLC!(du, u, p, t)
   du[2] = dNa = gEA * Ne * (K - Na/K) - (da * Na) - ((1 - X(t))* H * Na)
   du[3] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H)))
 end
-
+#=
 function aSCLC!(du, u, p, t)
   Ne, Na, Sa = u
    r, K, H, X, gEA,gAM, de, da, Smax, gamma = p
@@ -178,7 +177,7 @@ function aSCLC!(du, u, p, t)
   du[3] = dNm = gAM * Na * (K - (Na + Nm)/K) - (1 - X(t)) * H * Nm - (da * Nm) 
   du[4] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H)))
 end
-
+=#
 function CLC!(du, u, p, t)
   Ne, Nt, Nv, Nj, Na, Sa = u
   i, r, K, H, X, g ,de, dt, dv, dj, da, Smax, gamma = p
@@ -193,7 +192,7 @@ function CLC!(du, u, p, t)
   du[6] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
-
+#=
 function aCLC!(du, u, p, t)
   Ne, Nt, Nv, Nj, Na, Sa = u
    r, K, H, X, gET, gTV, gVJ, gJA, de, dt, dv,dj, da, Smax, gamma = p
@@ -208,7 +207,7 @@ function aCLC!(du, u, p, t)
   du[6] = dNm = gAM * Na * (K - (Na + Nm)/K) - (1 - X(t)) * H * Nm - (da * Nm) 
   du[7] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
-
+=#
 # Reproductive Cycle (X=1)
 
 function rep(t)
