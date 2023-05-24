@@ -84,7 +84,7 @@ Parameters and variables:
  - Sa = adults size (Average sizes Before MPS+FULL = [46.44,44.45])
  - r = population growth rate [9.17,5.03]
  - R = reproductive capacity
- - K = carrying capacity (k =1e^4)
+ - K = carrying capacity (k = 1e^4)
  - X = Reproductive period [1,0] 
  - (1-X) = Exploitation periosd [1,0]
  - H = Exploitation rate (H = [0.639,0.57])
