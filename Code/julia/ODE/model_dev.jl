@@ -398,8 +398,8 @@ function nsites!(du, u, p, t)
 
     # adult sizes
     stage = 6
-    # du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - (u[site, nlifestages+1] / (size_max - (size_max * ((1 - reproductive_cycle(t)) * exploitation_rate(du[site, 6], site))))))
-    du[site, stage] = size_growth_rate * u[site, nlifestages+1] * exp(-u[site, nlifestages+1] / (size_max - (size_max * ((1 - reproductive_cycle(t)) * exploitation_rates[site]))))
+    du[site, stage] = size_growth_rate * u[site, nlifestages+1] * (1 - (u[site, nlifestages+1] / (size_max - (size_max * ((1 - reproductive_cycle(t)) * exploitation_rates[site])))))
+    # du[site, stage] = size_growth_rate * u[site, nlifestages+1] * exp(-u[site, nlifestages+1] / (size_max - (size_max * ((1 - reproductive_cycle(t)) * exploitation_rates[site]))))
   end
   # for i in 1:nsites
   #   for j in 1:(nlifestages-1)

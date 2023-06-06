@@ -42,3 +42,13 @@ for stage in 1:5
   fig[1, 2] = Legend(fig, ax1, "Site")
   save("../figs/stage=$stage.pdf", fig)
 end
+
+# Changes in body size
+stage = 6
+fig, ax, plt = lines(all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
+ax.title = "Body size"
+for site in 2:nsites
+  lines!(ax, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
+end
+fig[1, 2] = Legend(fig, ax, "Site")
+save("../figs/body_sizes.pdf", fig)
