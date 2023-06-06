@@ -136,12 +136,12 @@ Average sizes before and after marine protected area implementations
 
 function SLC!(du, u, p, t)
    Na, Sa = u
-   r, K, H, X, da, Smax = p
+   i, r, K, H, X, da, Smax, gamma = p
    Saverage = du[2]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
   du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da[i] * Na) 
-  du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 - H[i])))
+  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 #=
 function aSLC!(du, u, p, t)
@@ -157,13 +157,13 @@ end
 =#
 function SCLC!(du, u, p, t)
   Ne, Na, Sa = u
-   r, K, H, X, gEA, de, da, Smax, gamma = p
+   i,r, K, H, X, gEA, de, da, Smax, gamma = p
    Saverage = du[4]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNe = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) - (de * Ne) - (gEA * Ne)
-  du[2] = dNa = gEA * Ne * (K - Na/K) - (da * Na) - ((1 - X(t))* H * Na)
-  du[3] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H)))
+  du[1] = dNe = X(t) * r[i] * Na * Rep_cap(Saverage, Smaturity, Smax) - (de * Ne) - (gEA * Ne)
+  du[2] = dNa = gEA * Ne * (K - Na/K) - (da * Na) - ((1 - X(t))* H[i] * Na)
+  du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H[i])))
 end
 #=
 function aSCLC!(du, u, p, t)
@@ -258,17 +258,40 @@ gammas = [0.32,0.36] # Adult growth rate
 
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
 
-p_po=[i[1],re[1], Kt, rates[1], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
-# p_pa=[i[2],re[1], Kt, rates[2], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
+
+p_SCLC_po = [i[1],re[1], Kt, rates[1], rep, da, Sm, gammas[1]]
+p_SCLC_pa = [i[2],re[2], Kt, rates[2], rep, da, Sm, gammas[2]]
+
+
+p_SLC_po = [i[1],re[1], Kt, rates[1], rep, gEA, de, da, Sm, gammas[1]]
+p_SLC_pa = [i[2],re[2], Kt, rates[2], rep, gEA, de, da, Sm, gammas[2]]
+
+
+
+
+p_CLC_po = [i[1],re[1], Kt, rates[1], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
+p_CLC_pa = [i[2],re[1], Kt, rates[2], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
 t_span= (1,3000) # Temporal ranges for simulations: 2 years.
  
-u0_po_full = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria 
-u0_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
+u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
+u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
+
+u0_SCLC_po_full = [1e4, 1e4, 43.41]    # Patella ordinaria 
+u0_SCLC_pa_full = [1e4, 1e4, 45.72]    # Patella aspera
+
+u0_CLC_po_full = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria 
+u0_CLC_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
 
 
-prob_po_full = ODEProblem(CLC!, u0_po_full, t_span, p_po) 
-sol_po_full = solve(prob_po_full, Tsit5())
+prob_SLC_full = ODEProblem(SLC!, u0_SLC_po_full, t_span, p_SCL_po) 
+sol_SLC_full = solve(prob_SLC_full, Tsit5())
+
+prob_SCLC_full = ODEProblem(SCLC!, u0_SCLC_po_full, t_span, p_SCLC_po) 
+sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
+
+prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
+sol_CLC_full = solve(prob_CLC_full, Tsit5())
 
 
 # prob_pa_full = ODEProblem(CLC!, u0_pa_full, t_span, p_po) 
@@ -308,3 +331,34 @@ Plots.xlabel!("t (days)")
 Plots.ylabel!("LOG10(N) (Nº individuals)")
 savefig!("CLC_SS_pa_N_Full_access.png")
 =#
+
+
+Exp_lim = 0.9999                 # Exploitation max limit 
+m=0.0559                         # Interval of exploitation values 
+Expl= 0:m:Exp_lim                # Expoitation values for plotting
+tspan = (0.0, 365*2)                # Time value 
+u0 = [1e3,1e2,40]                # Initial conditions of N_e, N_a, S_a
+
+N_et_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
+N_at_1 = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
+S_at_1 = zeros(Float64,size(Expl)) # Void vector to array the size of adults for diferent exploitation values
+c = 0                              # C is the position of the vector N_et, N_at and S_at
+
+for n = 0:m:Exp_lim
+  function Et(t)
+  if modf(t)[1] < 0.5         # 50% of the adult population is exploited
+    return 0.0
+  else
+    return n                    #For an exploitation value equal to 1, the mathematical result is erratic because the size equation will present a denominator division equal to 0
+  end
+ end
+ p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ
+ prob_1 = ODEProblem(single_site!, u0, tspan, p_1)
+ sol_1 = solve(prob_1, Tsit5())
+ c=c+1
+
+ N_et_1[c,] = sol_1[1,end]
+ N_at_1[c,] = sol_1[2,end]
+ S_at_1[c,] = sol_1[3,end]
+
+end
