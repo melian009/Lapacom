@@ -1,0 +1,59 @@
+using Pkg
+Pkg.activate(".")
+using LinearAlgebra
+using DifferentialEquations
+# using GlobalSensitivity
+using CairoMakie
+using Statistics
+using DataFrames
+using CSV
+# using DiffEqParamEstim
+# using Optim
+
+e_factors = [0.1, 0.5, 1.0, 2.0, 10.0, 100.0]
+
+for factor in e_factors
+  include("load_params.jl")
+  exploitation_rates = exploitation_rates * factor
+  p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
+
+  start_year = 2006
+  end_year = 2018
+  nyears = end_year - start_year + 1
+  ndays = nyears * 365.0
+  tspan_general = (0.0, ndays)
+
+  prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
+  sol_general = solve(prob_general)
+
+  # Saving the results
+  df_general = DataFrame(sol_general)
+  CSV.write("../figs/general_e_factor=$(factor).csv", df_general)
+
+  # Plotting the results
+  all_u = sol_general.u
+  all_times = sol_general.t
+  # site_names = distance_df.site
+  site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+  for stage in 1:5
+    fig = Figure()
+    ax1 = Axis(fig[1, 1])
+    lines!(ax1, all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
+    ax1.title = "N for stage: $(stage)"
+    for site in 2:nsites#2:8
+      lines!(ax1, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
+    end
+    fig[1, 2] = Legend(fig, ax1, "Site")
+    save("../figs/stage=$(stage)_e_factor=$(factor).pdf", fig)
+  end
+
+  # Changes in body size
+  stage = 6
+  fig, ax, plt = lines(all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
+  ax.title = "Body size"
+  for site in 2:nsites
+    lines!(ax, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
+  end
+  fig[1, 2] = Legend(fig, ax, "Site")
+  save("../figs/body_sizes_e_factor=$(factor).pdf", fig)
+end
