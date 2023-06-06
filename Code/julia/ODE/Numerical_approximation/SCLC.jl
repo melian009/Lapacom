@@ -12,7 +12,7 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 import ForwardDiff.jacobian
-
+using Plots
 #=
 Formulation of the simple life cicle for one site:
 
@@ -141,7 +141,7 @@ function SLC!(du, u, p, t)
    Saverage = du[2]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da[i] * Na) 
+  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
   du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 
@@ -269,8 +269,6 @@ p_SCLC_po = [i[1],re[1], Kt, rates[1], rep, gEA, de_, da_, Sm, gammas[1]]
 p_SCLC_pa = [i[2],re[2], Kt, rates[2], rep, gEA, de_, da_, Sm, gammas[2]]
 
 
-
-
 p_CLC_po = [i[1],re[1], Kt, rates[1], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
 p_CLC_pa = [i[2],re[1], Kt, rates[2], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
@@ -300,24 +298,20 @@ sol_CLC_full = solve(prob_CLC_full, Tsit5())
 # sol_pa_full = solve(prob_pa_full, Tsit5())
 
 
-Plots.plot(sol_po_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Nt (Full access)")
-Plots.plot!(sol_po_full, vars=(0,3), yscale=:log10, label= "Nv (Full access)")
-Plots.plot!(sol_po_full, vars=(0,4), yscale=:log10, label= "Nj (Full access)")
-Plots.plot!(sol_po_full, vars=(0,5), yscale=:log10, label= "Na (Full access)")
+Plots.plot(sol_CLC_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,2), yscale=:log10, label= "Nt (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,3), yscale=:log10, label= "Nv (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,4), yscale=:log10, label= "Nj (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,5), yscale=:log10, label= "Na (Full access)")
 Plots.title!("'Patella ordinaria'")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("LOG10(N) (Nº individuals)")
-savefig!("CLC_SS_po_N_Full_access_log.png")
+#savefig!("CLC_SS_po_N_Full_access_log.png")
 
 
-Plots.plot(sol_po_full, vars=(0,1),  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), label= "Nt (Full access)")
-Plots.plot!(sol_po_full, vars=(0,3), label= "Nv (Full access)")
-Plots.plot!(sol_po_full, vars=(0,4), label= "Nj (Full access)")
-Plots.plot!(sol_po_full, vars=(0,5), label= "Na (Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
+plot(sol_CLC_full, vars=(0,6),  label= "Ne (Full access)")
+title!("'Patella ordinaria'")
+xlabel!("t (days)")
 Plots.ylabel!("N (Nº individuals)")
 savefig!("CLC_SS_po_N_Full_access.png")
 
