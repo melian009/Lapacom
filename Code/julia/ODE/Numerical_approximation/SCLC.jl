@@ -12,7 +12,7 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 import ForwardDiff.jacobian
-
+using Plots
 #=
 Formulation of the simple life cicle for one site:
 
@@ -141,7 +141,7 @@ function SLC!(du, u, p, t)
    Saverage = du[2]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da[i] * Na) 
+  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
   du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 
@@ -269,18 +269,17 @@ p_SCLC_po = [i[1],re[1], Kt, rates[1], rep, gEA, de_, da_, Sm, gammas[1]]
 p_SCLC_pa = [i[2],re[2], Kt, rates[2], rep, gEA, de_, da_, Sm, gammas[2]]
 
 
-
-
 p_CLC_po = [i[1],re[1], Kt, rates[1], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
 p_CLC_pa = [i[2],re[1], Kt, rates[2], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
-t_span= (1,3000) # Temporal ranges for simulations: 2 years.
+t_span= (1,30000) # Temporal ranges for simulations: 2 years.
  
 u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
 u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
 
 u0_SCLC_po_full = [1e4, 1e4, 43.41]    # Patella ordinaria 
 u0_SCLC_pa_full = [1e4, 1e4, 45.72]    # Patella aspera
+
 
 u0_CLC_po_full = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria 
 u0_CLC_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
@@ -300,24 +299,20 @@ sol_CLC_full = solve(prob_CLC_full, Tsit5())
 # sol_pa_full = solve(prob_pa_full, Tsit5())
 
 
-Plots.plot(sol_po_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Nt (Full access)")
-Plots.plot!(sol_po_full, vars=(0,3), yscale=:log10, label= "Nv (Full access)")
-Plots.plot!(sol_po_full, vars=(0,4), yscale=:log10, label= "Nj (Full access)")
-Plots.plot!(sol_po_full, vars=(0,5), yscale=:log10, label= "Na (Full access)")
+Plots.plot(sol_CLC_full, vars=(0,1),  label= "Ne (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,2), label= "Nt (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,3), label= "Nv (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,4), label= "Nj (Full access)")
+Plots.plot!(sol_CLC_full, vars=(0,5), label= "Na (Full access)")
 Plots.title!("'Patella ordinaria'")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("LOG10(N) (Nº individuals)")
-savefig!("CLC_SS_po_N_Full_access_log.png")
+#savefig!("CLC_SS_po_N_Full_access_log.png")
 
 
-Plots.plot(sol_po_full, vars=(0,1),  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), label= "Nt (Full access)")
-Plots.plot!(sol_po_full, vars=(0,3), label= "Nv (Full access)")
-Plots.plot!(sol_po_full, vars=(0,4), label= "Nj (Full access)")
-Plots.plot!(sol_po_full, vars=(0,5), label= "Na (Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
+plot(sol_CLC_full, vars=(0,6),  label= "Ne (Full access)")
+title!("'Patella ordinaria'")
+xlabel!("t (days)")
 Plots.ylabel!("N (Nº individuals)")
 savefig!("CLC_SS_po_N_Full_access.png")
 
@@ -338,33 +333,46 @@ savefig!("CLC_SS_pa_N_Full_access.png")
 Exp_lim = 0.9999                 # Exploitation max limit 
 m=0.0559                         # Interval of exploitation values 
 Expl= 0:m:Exp_lim                # Expoitation values for plotting
-tspan = (0.0, 365*2)             # Time value 
-u0 = [1e4,1e4,40]                # Initial conditions of N_e, N_a, S_a
+tspan = (0.0, 365*5)             # Time value 
+
+u0_CLC = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria 
+
 
 N_et_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
+N_tt_1 = zeros(Float64,size(Expl)) # Void vector to array number of trochophore for diferent exploitation values
+N_vt_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
+N_jt_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
 N_at_1 = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
 S_at_1 = zeros(Float64,size(Expl)) # Void vector to array the size of adults for diferent exploitation values
+
 c = 0                              # C is the position of the vector N_et, N_at and S_at
 
 for n = 0:m:Exp_lim
   
   function Et(t)
-  if modf(t)[1] < 0.5         # 50% of the adult population is exploited
+    if modf(t)[1] < 0.5         # 50% of the adult population is exploited
     return 0.0
   else
     return n                    #For an exploitation value equal to 1, the mathematical result is erratic because the size equation will present a denominator division equal to 0
   end
  end
 
- prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
+ p_CLC = [i[1],re[1], Kt, Et, rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
+ 
+ prob_CLC_full = ODEProblem(CLC!, u0_CLC, t_span, p_CLC_po) 
  sol_CLC_full = solve(prob_CLC_full, Tsit5())
- p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ
- prob_1 = ODEProblem(single_site!, u0, tspan, p_1)
- sol_1 = solve(prob_1, Tsit5())
  c=c+1
-
+ 
  N_et_1[c,] = sol_1[1,end]
- N_at_1[c,] = sol_1[2,end]
- S_at_1[c,] = sol_1[3,end]
+ N_tt_1[c,] = sol_1[2,end]
+ N_vt_1[c,] = sol_1[3,end]
+ N_jt_1[c,] = sol_1[4,end]
+ N_at_1[c,] = sol_1[5,end]
+ S_at_1[c,] = sol_1[6,end]
 
 end
+
+Plots.plot(sol_CLC_full, vars=(0,1),  label= "Ne (Full access)")
+Plots.title!("'Patella ordinaria'")
+Plots.xlabel!("t (days)")
+Plots.ylabel!("LOG10(N) (Nº individuals)")
