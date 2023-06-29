@@ -226,8 +226,8 @@ end
 
 # "Return the reproduction capacity (between 0 and 1) given the current average size
 #  and size at first maturity and maximum size".
-
 Rep_cap(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
+
 
 # Population Growth rate estimation (r=reggs):
 
@@ -329,50 +329,94 @@ Plots.ylabel!("LOG10(N) (Nº individuals)")
 savefig!("CLC_SS_pa_N_Full_access.png")
 =#
 
+```
+Analytical Aproximation of SLC in One Place.
 
-Exp_lim = 0.9999                 # Exploitation max limit 
-m=0.0559                         # Interval of exploitation values 
-Expl= 0:m:Exp_lim                # Expoitation values for plotting
-tspan = (0.0, 365*5)             # Time value 
+function SLC!(du, u, p, t)
+  Na, Sa = u
+  i, r, K, H, X, da, Smax, gamma = p
 
-u0_CLC = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria 
+  Saverage = du[2]
+  Smaturity = calculate_size_at_first_maturity(Saverage)
 
-
-N_et_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
-N_tt_1 = zeros(Float64,size(Expl)) # Void vector to array number of trochophore for diferent exploitation values
-N_vt_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
-N_jt_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
-N_at_1 = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
-S_at_1 = zeros(Float64,size(Expl)) # Void vector to array the size of adults for diferent exploitation values
-
-c = 0                              # C is the position of the vector N_et, N_at and S_at
-
-for n = 0:m:Exp_lim
-  
-  function Et(t)
-    if modf(t)[1] < 0.5         # 50% of the adult population is exploited
-    return 0.0
+ du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
+ du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
+end
+```
+using Statistics
+using Plots
+function X(t)
+  if (t % 365) / 365 >= 0.42
+      return 1.0 # Reproductive Cycle
   else
-    return n                    #For an exploitation value equal to 1, the mathematical result is erratic because the size equation will present a denominator division equal to 0
+      return 0.0 # Exploitation Cycle
   end
- end
-
- p_CLC = [i[1],re[1], Kt, Et, rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
- 
- prob_CLC_full = ODEProblem(CLC!, u0_CLC, t_span, p_CLC_po) 
- sol_CLC_full = solve(prob_CLC_full, Tsit5())
- c=c+1
- 
- N_et_1[c,] = sol_1[1,end]
- N_tt_1[c,] = sol_1[2,end]
- N_vt_1[c,] = sol_1[3,end]
- N_jt_1[c,] = sol_1[4,end]
- N_at_1[c,] = sol_1[5,end]
- S_at_1[c,] = sol_1[6,end]
-
 end
 
-Plots.plot(sol_CLC_full, vars=(0,1),  label= "Ne (Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
+function X(t)
+  if (t % 365) / 365 >= 0.42
+      return 1.0 # Reproductive Cycle
+  else
+      return 0.0 # Exploitation Cycle
+  end
+end
+
+function simulate_NS_values()
+  No = 10000.0    # Condición inicial de abundancia
+  So = 43.41      # Condición inicial de talla
+  r = 2515.4/500    # Tasa reproductiva
+  K = 640000.0    # Capacidad de carga
+  d = 0.55        # Mortalidad natural
+  Smax = 56.0     # Talla máxima
+  gamma = 0.34    # Tasa de crecimiento
+
+  t_max = 3000    # Tiempo máximo
+  step_size = 1   # Incremento de tiempo
+
+  H_values = 0.0:0.05:1.0  # Valores de H
+
+  NS_matrix = zeros(length(H_values), 3)   # Matriz para almacenar los valores seleccionados de N y S
+
+  for (i, H) in enumerate(H_values)
+      t_values = 0:step_size:t_max
+      Na_values = zeros(length(t_values))
+      Sa_values = zeros(length(t_values))
+
+      for (j, t) in enumerate(t_values)
+          X_val = X(t)
+          Saverage = mean(Sa_values[1:j])
+          Smaturity = 1.34 * Saverage - 28.06
+          R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
+
+          Na_values[j] = No * exp((X_val * r * R * K - d - H * (1 - X_val) * t))
+          Sa_values[j] = So * exp(gamma * t)
+      end
+
+      N_median = median(Na_values)
+      S_median = median(Sa_values)
+
+      NS_matrix[i, 1] = H
+      NS_matrix[i, 2] = N_median
+      NS_matrix[i, 3] = S_median
+
+      # Plot N vs time for each H
+      plot(t_values, Na_values, xlabel = "Time", ylabel = "N", label = "N vs Time", legend=:topleft)
+      title!("N values over time for H = $H")
+
+      # Plot S vs time for each H
+      plot(t_values, Sa_values, xlabel = "Time", ylabel = "S", label = "S vs Time", legend=:topleft)
+      title!("S values over time for H = $H")
+  end
+
+  return NS_matrix
+end
+
+NS_matrix = simulate_NS_values()
+
+# Plot S vs H
+plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
+title!("S values for different H")
+
+# Plot N vs H
+plot(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
+title!("N values for different H")
