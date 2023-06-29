@@ -370,7 +370,7 @@ function simulate_NS_values()
   Smax = 56.0     # Talla máxima
   gamma = 0.34    # Tasa de crecimiento
 
-  t_max = 3000    # Tiempo máximo
+  t_max = 365*2    # Tiempo máximo
   step_size = 1   # Incremento de tiempo
 
   H_values = 0.0:0.05:1.0  # Valores de H
