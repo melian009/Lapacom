@@ -4,7 +4,7 @@ Pkg.activate(".")
 using LinearAlgebra
 using DifferentialEquations
 using GlobalSensitivity
-using CairoMakie
+# using CairoMakie
 using Statistics
 using DataFrames
 using CSV
