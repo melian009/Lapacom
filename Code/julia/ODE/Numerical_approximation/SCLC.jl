@@ -3,7 +3,7 @@ using Pkg
 Pkg.activate(".")
 using LinearAlgebra
 using DifferentialEquations
-using GlobalSensitivity
+# using GlobalSensitivity
 # using CairoMakie
 using Statistics
 using DataFrames
@@ -13,10 +13,12 @@ using Optim
 using Symbolics
 import ForwardDiff.jacobian
 using Plots
-#=
-Formulation of the simple life cicle for one site:
 
- Population dynamic:
+
+#= 
+ Formulation of the simple life cicle for one site:
+
+  Population dynamic:
 
     Simple Life cicle with only one class of population (only one class): Na + Sa
 
@@ -32,7 +34,7 @@ Formulation of the simple life cicle for one site:
     +
     dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
 
-Formulation for complex life cicles for one site: different numbers of clases.
+ Formulation for complex life cicles for one site: different numbers of clases.
 
   Population dynamics:
 
@@ -43,14 +45,6 @@ Formulation for complex life cicles for one site: different numbers of clases.
     +
     dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
 
-    Complex Life Cicle with 3 clases of population: Ne, Na, Nm + Sa
-
-    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
-    dNa/dt = gEA * Ne * (K - Na/K) - gAM * Na - da * Na
-    dNm/dt = gAM * Na * (K - Nm/K) - (1 - X) * H * Nm - da * Nm
-    +
-    dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
-
     Complex Life Cicle with 5 clases of population: Ne, Nt, Nv, Nj, Na + Sa
 
     dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
@@ -58,17 +52,6 @@ Formulation for complex life cicles for one site: different numbers of clases.
     dNv/dt = gTV * Nt * (K - Nv/K) - gVJ * Nv - dv * Nv
     dNj/dt = gVJ * Nv * (K - Nj/K) - gJA * Nj - dj * Nj
     dNa/dt = gJA * Nj * (K - Na/K) - (1 - X) * H * Na - da * Na
-    +
-    dSa/dt = gamma * Sa * (1 - ( Sa / (Smax - Smax * H * X)))
-
-    Complex Life Cicle with 6 clases of population: Ne, Nt, Nv, Nj, Na, Nm + Sa
-
-    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
-    dNt/dt = gET * Ne - gTV * Nt - dt * dNt
-    dNv/dt = gTV * Nt * (K - Nv/K) - gVJ * Nv - dv * Nv
-    dNj/dt = gVJ * Nv * (K - Nj/K) - gJA * Nj - dj * Nj
-    dNa/dt = gJA * Nj * (K - Na/K) - gAM * Na - da * Na
-    dNm/dt = gAM * Na * (K - (Na + Nm)/K) - (1 - X) * H * Na - da * Na
     +
     dSa/dt = gamma * Sa * (1 - ( Sa / (Smax - Smax * H * X)))
 
@@ -132,7 +115,7 @@ Average sizes before and after marine protected area implementations
  Patella ordinaria = 45.72mm
 =#
 
-# Full access scenario
+# Full access scenarios
 
 function SLC!(du, u, p, t)
    Na, Sa = u
@@ -343,15 +326,6 @@ function SLC!(du, u, p, t)
  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 ```
-using Statistics
-using Plots
-function X(t)
-  if (t % 365) / 365 >= 0.42
-      return 1.0 # Reproductive Cycle
-  else
-      return 0.0 # Exploitation Cycle
-  end
-end
 
 function X(t)
   if (t % 365) / 365 >= 0.42
@@ -362,20 +336,20 @@ function X(t)
 end
 
 function simulate_NS_values()
-  No = 10000.0    # Condición inicial de abundancia
-  So = 43.41      # Condición inicial de talla
-  r = 2515.4/500    # Tasa reproductiva
-  K = 640000.0    # Capacidad de carga
-  d = 0.55        # Mortalidad natural
-  Smax = 56.0     # Talla máxima
-  gamma = 0.34    # Tasa de crecimiento
+  No = 10000.0    # Initial abuncance
+  So = 43.41      # Initial size
+  r = 2515.4/500    # Reproductve rate
+  K = 640000.0    # Carrying capacity
+  d = 0.55        # Natual mortality
+  Smax = 56.0     # Mamimum size
+  gamma = 0.34    # Growth rate
 
-  t_max = 365*2    # Tiempo máximo
-  step_size = 1   # Incremento de tiempo
+  t_max = 365*2    # End time for the simulation
+  step_size = 1   # Time intervales (days)
 
-  H_values = 0.0:0.05:1.0  # Valores de H
+  H_values = 0.0:0.05:1.0  # Exploitatation rates
 
-  NS_matrix = zeros(length(H_values), 3)   # Matriz para almacenar los valores seleccionados de N y S
+  NS_matrix = zeros(length(H_values), 3)   # Output matrix for N, S and H estimated values
 
   for (i, H) in enumerate(H_values)
       t_values = 0:step_size:t_max
@@ -399,13 +373,6 @@ function simulate_NS_values()
       NS_matrix[i, 2] = N_median
       NS_matrix[i, 3] = S_median
 
-      # Plot N vs time for each H
-      plot(t_values, Na_values, xlabel = "Time", ylabel = "N", label = "N vs Time", legend=:topleft)
-      title!("N values over time for H = $H")
-
-      # Plot S vs time for each H
-      plot(t_values, Sa_values, xlabel = "Time", ylabel = "S", label = "S vs Time", legend=:topleft)
-      title!("S values over time for H = $H")
   end
 
   return NS_matrix

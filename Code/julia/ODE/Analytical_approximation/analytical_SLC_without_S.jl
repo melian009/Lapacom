@@ -12,7 +12,6 @@ using Statistics
 using DiffEqParamEstim
 using Optim
 using Plots
-using Plots.PlotMeasures
 using Symbolics
 # using SymPy
 # import ForwardDiff.jacobian
@@ -89,8 +88,8 @@ This is the inecuality for the adult abundances
  if  g * (r - E - d2)  > d1 * (E + d2) then Na > 0 & Ne > 0
 =#
 
-plot(Expl,Ne_,label="N (eggs)",colour="blue")
-plot!(Expl,Na_,label="N (adults)",colour="red")
+Plots.plot(Expl,Ne_,label="N (eggs)",colour="blue")
+Plots.plot!(Expl,Na_,label="N (adults)",colour="red")
 xlims!(0.0,1)
 ylims!(-1000,8500)
 xlabel!("Exploitation rate (E)")
@@ -141,10 +140,10 @@ for n = 0:m:Exp_lim
 end
 
 #Adult size plot by exploitation
-plot(Expl,N_et_1,label="NA: N (eggs)")
-plot!(Expl,N_at_1,label="NA: N (adults)")
-plot!(Expl,Ne_,label="AA: N (eggs)")
-plot!(Expl,Na_,label="AA: N (adults)")
+Plots.plot(Expl,N_et_1,label="NA: N (eggs)")
+Plots.plot!(Expl,N_at_1,label="NA: N (adults)")
+Plots.plot!(Expl,Ne_,label="AA: N (eggs)")
+Plots.plot!(Expl,Na_,label="AA: N (adults)")
 xlims!(0,1)
 ylims!(-1000,15000)
 xlabel!("Exploitation rate")
