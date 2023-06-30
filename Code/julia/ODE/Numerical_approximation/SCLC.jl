@@ -363,8 +363,8 @@ function simulate_NS_values()
           Sa_values[j] = Smax * (1 - H * (1 - X_val)) - So * exp(gamma * t)
       end
 
-      N_ = (Na_values)
-      S_ = max(Sa_values)
+      N_ = maximum(Na_values)
+      S_ = maximum(Sa_values)
 
       NS_matrix[i, 1] = H
       NS_matrix[i, 2] = N_
@@ -377,7 +377,7 @@ end
 NS_matrix = simulate_NS_values()
 
 # Graficar S vs H
-plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
+Plots.plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
 title!("Valores de S para diferentes H")
 
 # Graficar N vs H
