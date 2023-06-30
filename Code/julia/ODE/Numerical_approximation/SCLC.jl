@@ -369,12 +369,12 @@ function simulate_NS_values()
           Sa_values[j] = Smax * (1 - H * (1-X_val)) - So * exp(gamma * t)
       end
 
-      N_median = median(Na_values)
-      S_median = median(Sa_values)
+      N_ = max(Na_values)
+      S_ = max(Sa_values)
 
       NS_matrix[i, 1] = H
-      NS_matrix[i, 2] = N_median
-      NS_matrix[i, 3] = S_median
+      NS_matrix[i, 2] = N_
+      NS_matrix[i, 3] = S_
 
   end
 
