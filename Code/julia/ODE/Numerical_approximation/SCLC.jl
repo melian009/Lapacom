@@ -277,16 +277,17 @@ sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
 prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
 sol_CLC_full = solve(prob_CLC_full, Tsit5())
 
+N_a_ = [v[1] for v in sol_SLC_full.u]
+S_a_ = [v[2] for v in sol_SLC_full.u]
 
-Plots.plot(sol_SLC_full, vars=(0,1), yscale=:log10, label= "Ne (Full access)")
-Plots.plot!(sol_SLC_full, vars=(0,2), yscale=:log10, label= "Na(Full access)")
+Plots.plot(sol_SLC_full.t,N_a_,yscale=:log10, label= "Na (Full access)")
 Plots.title!("'Patella ordinaria'")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("LOG10(N) (Nº individuals)")
-#savefig!("CLC_SS_po_N_Full_access_log.png")
+#savefig!("SLC_SS_po_N_Full_access_log.png")
 
 
-Plots.plot(sol_CLC_full, vars=(0,6),  label= "Ne (Full access)")
+Plots.plot(sol_SLC_full.t,sol_SLC_full.u[1],  label= "Sa (Full access)")
 Plots.title!("'Patella ordinaria'")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("N (Nº individuals)")
