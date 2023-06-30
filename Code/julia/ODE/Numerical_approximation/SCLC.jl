@@ -12,11 +12,13 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 import ForwardDiff.jacobian
+using Plots
 
-#=
-Formulation of the simple life cicle for one site:
 
- Population dynamic:
+#= 
+ Formulation of the simple life cicle for one site:
+
+  Population dynamic:
 
     Simple Life cicle with only one class of population (only one class): Na + Sa
 
@@ -32,7 +34,7 @@ Formulation of the simple life cicle for one site:
     +
     dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
 
-Formulation for complex life cicles for one site: different numbers of clases.
+ Formulation for complex life cicles for one site: different numbers of clases.
 
   Population dynamics:
 
@@ -43,14 +45,6 @@ Formulation for complex life cicles for one site: different numbers of clases.
     +
     dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
 
-    Complex Life Cicle with 3 clases of population: Ne, Na, Nm + Sa
-
-    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
-    dNa/dt = gEA * Ne * (K - Na/K) - gAM * Na - da * Na
-    dNm/dt = gAM * Na * (K - Nm/K) - (1 - X) * H * Nm - da * Nm
-    +
-    dSa/dt = gamma * Sa * (1 - (Sa / (Smax - Smax * H * X)))
-
     Complex Life Cicle with 5 clases of population: Ne, Nt, Nv, Nj, Na + Sa
 
     dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
@@ -58,17 +52,6 @@ Formulation for complex life cicles for one site: different numbers of clases.
     dNv/dt = gTV * Nt * (K - Nv/K) - gVJ * Nv - dv * Nv
     dNj/dt = gVJ * Nv * (K - Nj/K) - gJA * Nj - dj * Nj
     dNa/dt = gJA * Nj * (K - Na/K) - (1 - X) * H * Na - da * Na
-    +
-    dSa/dt = gamma * Sa * (1 - ( Sa / (Smax - Smax * H * X)))
-
-    Complex Life Cicle with 6 clases of population: Ne, Nt, Nv, Nj, Na, Nm + Sa
-
-    dNe/dt = X * r * Na * R - gEA * Ne - de * Ne
-    dNt/dt = gET * Ne - gTV * Nt - dt * dNt
-    dNv/dt = gTV * Nt * (K - Nv/K) - gVJ * Nv - dv * Nv
-    dNj/dt = gVJ * Nv * (K - Nj/K) - gJA * Nj - dj * Nj
-    dNa/dt = gJA * Nj * (K - Na/K) - gAM * Na - da * Na
-    dNm/dt = gAM * Na * (K - (Na + Nm)/K) - (1 - X) * H * Na - da * Na
     +
     dSa/dt = gamma * Sa * (1 - ( Sa / (Smax - Smax * H * X)))
 
@@ -132,17 +115,17 @@ Average sizes before and after marine protected area implementations
  Patella ordinaria = 45.72mm
 =#
 
-# Full access scenario
+# Full access scenarios
 
 function SLC!(du, u, p, t)
    Na, Sa = u
-   i, r, K, H, X, da, Smax, gamma = p
+   r, K, H, da, Smax, gamma = p
 
    Saverage = du[2]
    Smaturity = calculate_size_at_first_maturity(Saverage)
-
-  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da[i] * Na) 
-  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
+   
+  du[1] = dNa = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax) * ((K - Na)/K) - (1 - X(t)) * H * Na - (da * Na) 
+  du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 - H)))
 end
 
 #=
@@ -159,13 +142,13 @@ end
 =#
 function SCLC!(du, u, p, t)
   Ne, Na, Sa = u
-   i,r, K, H, X, gEA, de, da, Smax, gamma = p
-   Saverage = du[4]
+   r, K, H, gEA, de, da, Smax, gamma = p
+   Saverage = du[3]
    Smaturity = calculate_size_at_first_maturity(Saverage)
-
-  du[1] = dNe = X(t) * r[i] * Na * Rep_cap(Saverage, Smaturity, Smax) - (de * Ne) - (gEA * Ne)
-  du[2] = dNa = gEA * Ne * (K - Na/K) - (da * Na) - ((1 - X(t))* H[i] * Na)
-  du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H[i])))
+   
+  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax) - (de * Ne) - (gEA * Ne)
+  du[2] = dNa = gEA * Ne * ((K - Na)/K) - (da * Na) - ((1 - X(t))* H * Na)
+  du[3] = dSa = gamma * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H)))
 end
 #=
 function aSCLC!(du, u, p, t)
@@ -182,16 +165,16 @@ end
 =#
 function CLC!(du, u, p, t)
   Ne, Nt, Nv, Nj, Na, Sa = u
-  i, r, K, H, X, g ,de, dt, dv, dj, da, Smax, gamma = p
+   r, K, H, g ,de, dt, dv, dj, da, Smax, gamma = p
    Saverage = du[6]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNe = X(t) * r[i] * Na * Rep_cap(Saverage,Smaturity,Smax) - de * Ne - g[1] * Ne
+  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax) .- de * Ne - g[1] * Ne
   du[2] = dNt = g[1] * Ne - g[2] * Nt - dt * Nt
-  du[3] = dNv = g[2] * Nt * (K - Nt/K) - g[3] * Nv - dv * Nv
-  du[4] = dNj = g[3] * Nv * (K - Nj/K) - g[4] * Nj - dj * Na
-  du[5] = dNa = g[4] * Nj * (K - Na / K) - da * Na - (1 - X(t)) * H[i] * Na
-  du[6] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
+  du[3] = dNv = g[2] * Nt * ((K - Nt)/K) - g[3] * Nv - dv * Nv
+  du[4] = dNj = g[3] * Nv * ((K - Nj)/K) - g[4] * Nj - dj * Na
+  du[5] = dNa = g[4] * Nj * ((K - Na )/ K) - da * Na - (1 - X(t)) * H * Na
+  du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
 #=
@@ -212,7 +195,7 @@ end
 =#
 # Reproductive Cycle (X=1)
 
-function rep(t)
+function X(t)
   if (t % 365) / 365 >= 0.42
     return 1.0 # Reproductive Cycle
   else
@@ -220,29 +203,28 @@ function rep(t)
   end
 end
 
-function calculate_size_at_first_maturity(Sav)
-  M = 1.34 * (Sav) - 28.06
+function calculate_size_at_first_maturity(current_avg_size)
+  M = 1.34 * (current_avg_size) - 28.06
 end
 
-# "Return the reproduction capacity (between 0 and 1) given the current average size
-#  and size at first maturity and maximum size".
+"Return the reproduction capacity (between 0 and 1) given the current average size and size at first maturity and maximum size"
+reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
-Rep_cap(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
 
 # Population Growth rate estimation (r=reggs):
 
-oocytes_po = 385613                  # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = 73029                   # Average: Patella aspera (nº of Eggs)
+oocytes_po = [385613.0]                # Average: Patella ordinaria (nº of Eggs)
+oocytes_pa = [73029.0]                   # Average: Patella aspera (nº of Eggs)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
 re = reggs / 500     # Population growth rate
 gs = [0.998611, 0.971057, 0.4820525, 0.00629]
 
-Kt = 640000          # Carrying capacity
+Kt = 640000.0        # Carrying capacity
 rates = [0.639,0.57] # Exploitation rate (H)
 
-gEA = 0.006          # Instant conversion between stages.
+gEA = 0.006         # Instant conversion between stages.
 
 # Natural mortality rates:
 # see estimate_mortality_rates.jl for how these values were estimated.
@@ -254,33 +236,33 @@ dj_ = 0.315 / 365
 da_ = 0.1175 / 365
 d_= [0.55,0.59]    # Natural mortality rate for speciesd
 
-Sm = 56              # Maximum size for adults
+Sm = 56.0             # Maximum size for adults
 
 gammas = [0.32,0.36] # Adult growth rate
 
-i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
+i = [1,2]           # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
 
 
-p_SLC_po = [i[1], re[1], Kt, rates[1], rep, da_, Sm, gammas[1]]
-p_SLC_pa = [i[2], re[2], Kt, rates[2], rep, da_, Sm, gammas[2]]
+p_SLC_po = [re[1], Kt, rates[1], d_[1], Sm, gammas[1]]
+p_SLC_pa = [re[2], Kt, rates[2], d_[2], Sm, gammas[2]]
 
 
-p_SCLC_po = [i[1],re[1], Kt, rates[1], rep, gEA, de_, da_, Sm, gammas[1]]
-p_SCLC_pa = [i[2],re[2], Kt, rates[2], rep, gEA, de_, da_, Sm, gammas[2]]
+p_SCLC_po = [re[1], Kt, rates[1], gEA, de_, da_, Sm, gammas[1]]
+p_SCLC_pa = [re[2], Kt, rates[2], gEA, de_, da_, Sm, gammas[2]]
 
 
 
+p_CLC_po = [re[1], Kt, rates[1], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
+p_CLC_pa = [re[2], Kt, rates[2], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
-p_CLC_po = [i[1],re[1], Kt, rates[1], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
-p_CLC_pa = [i[2],re[1], Kt, rates[2], rep, gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
-
-t_span= (1,3000) # Temporal ranges for simulations: 2 years.
+t_span= (0.0,3000.0) # Temporal ranges for simulations.
  
 u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
 u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
 
 u0_SCLC_po_full = [1e4, 1e4, 43.41]    # Patella ordinaria 
 u0_SCLC_pa_full = [1e4, 1e4, 45.72]    # Patella aspera
+
 
 u0_CLC_po_full = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria 
 u0_CLC_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
@@ -300,26 +282,19 @@ sol_CLC_full = solve(prob_CLC_full, Tsit5())
 # sol_pa_full = solve(prob_pa_full, Tsit5())
 
 
-Plots.plot(sol_po_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Nt (Full access)")
-Plots.plot!(sol_po_full, vars=(0,3), yscale=:log10, label= "Nv (Full access)")
-Plots.plot!(sol_po_full, vars=(0,4), yscale=:log10, label= "Nj (Full access)")
-Plots.plot!(sol_po_full, vars=(0,5), yscale=:log10, label= "Na (Full access)")
+Plots.plot(sol_SLC_full, vars=(0,1), yscale=:log10, label= "Ne (Full access)")
+Plots.plot!(sol_SLC_full, vars=(0,2), yscale=:log10, label= "Na(Full access)")
 Plots.title!("'Patella ordinaria'")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("LOG10(N) (Nº individuals)")
-savefig!("CLC_SS_po_N_Full_access_log.png")
+#savefig!("CLC_SS_po_N_Full_access_log.png")
 
 
-Plots.plot(sol_po_full, vars=(0,1),  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), label= "Nt (Full access)")
-Plots.plot!(sol_po_full, vars=(0,3), label= "Nv (Full access)")
-Plots.plot!(sol_po_full, vars=(0,4), label= "Nj (Full access)")
-Plots.plot!(sol_po_full, vars=(0,5), label= "Na (Full access)")
+Plots.plot(sol_CLC_full, vars=(0,6),  label= "Ne (Full access)")
 Plots.title!("'Patella ordinaria'")
 Plots.xlabel!("t (days)")
 Plots.ylabel!("N (Nº individuals)")
-savefig!("CLC_SS_po_N_Full_access.png")
+#savefig!("CLC_SS_po_N_Full_access.png")
 
 
 #=
@@ -334,37 +309,81 @@ Plots.ylabel!("LOG10(N) (Nº individuals)")
 savefig!("CLC_SS_pa_N_Full_access.png")
 =#
 
+```
+Analytical Aproximation of SLC in One Place.
 
-Exp_lim = 0.9999                 # Exploitation max limit 
-m=0.0559                         # Interval of exploitation values 
-Expl= 0:m:Exp_lim                # Expoitation values for plotting
-tspan = (0.0, 365*2)             # Time value 
-u0 = [1e4,1e4,40]                # Initial conditions of N_e, N_a, S_a
+function SLC!(du, u, p, t)
+  Na, Sa = u
+  i, r, K, H, X, da, Smax, gamma = p
 
-N_et_1 = zeros(Float64,size(Expl)) # Void vector to array number of eggs for diferent exploitation values
-N_at_1 = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
-S_at_1 = zeros(Float64,size(Expl)) # Void vector to array the size of adults for diferent exploitation values
-c = 0                              # C is the position of the vector N_et, N_at and S_at
+  Saverage = du[2]
+  Smaturity = calculate_size_at_first_maturity(Saverage)
 
-for n = 0:m:Exp_lim
-  
-  function Et(t)
-  if modf(t)[1] < 0.5         # 50% of the adult population is exploited
-    return 0.0
-  else
-    return n                    #For an exploitation value equal to 1, the mathematical result is erratic because the size equation will present a denominator division equal to 0
-  end
- end
-
- prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
- sol_CLC_full = solve(prob_CLC_full, Tsit5())
- p_1 = [0.6, 0.06, 0.05, 0.08, Et, 1e4, 0.2, 40] # r, g, dⱼ, dₐ, E, K, size_growth_rate, sizeₘₐₓ
- prob_1 = ODEProblem(single_site!, u0, tspan, p_1)
- sol_1 = solve(prob_1, Tsit5())
- c=c+1
-
- N_et_1[c,] = sol_1[1,end]
- N_at_1[c,] = sol_1[2,end]
- S_at_1[c,] = sol_1[3,end]
-
+ du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
+ du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
+```
+
+function X(t)
+  if (t % 365) / 365 >= 0.42
+      return 1.0 # Reproductive Cycle
+  else
+      return 0.0 # Exploitation Cycle
+  end
+end
+
+function simulate_NS_values()
+  No = 10000.0    # Initial abuncance
+  So = 43.41      # Initial size
+  r = 2515.4/500    # Reproductve rate
+  K = 640000.0    # Carrying capacity
+  d = 0.55        # Natual mortality
+  Smax = 56.0     # Mamimum size
+  gamma = 0.34    # Growth rate
+
+  t_max = 365*2    # End time for the simulation
+  step_size = 1   # Time intervales (days)
+
+  H_values = 0.0:0.05:1.0  # Exploitatation rates
+
+  NS_matrix = zeros(length(H_values), 3)   # Output matrix for N, S and H estimated values
+
+  for (i, H) in enumerate(H_values)
+      t_values = 0:step_size:t_max
+      Na_values = zeros(length(t_values))
+      Sa_values = zeros(length(t_values))
+
+      for (j, t) in enumerate(t_values)
+          X_val = X(t)
+          Saverage = mean(Sa_values[1:j])
+          Smaturity = 1.34 * Saverage - 28.06
+          R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
+          #Stability point (N=0,S=0)
+          #Na_values[j] = No * exp((X_val * r * R * K - d - H * (1 - X_val) * t))
+          #Sa_values[j] = So * exp(gamma * t)
+          #Stability Point (N=(X*R*r*K^2-d-H*(1-x)),S=(Smax*(1-H*(1-X))))
+          Na_values[j] = No * exp(X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) + X_val * r * R * (K^2) - d - H * (1 - X)
+          Sa_values[j] = Smax * (1 - H * (1-X_val)) - So * exp(gamma * t)
+      end
+
+      N_ = max(Na_values)
+      S_ = max(Sa_values)
+
+      NS_matrix[i, 1] = H
+      NS_matrix[i, 2] = N_
+      NS_matrix[i, 3] = S_
+
+  end
+
+  return NS_matrix
+end
+
+NS_matrix = simulate_NS_values()
+
+# Plot S vs H
+plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
+title!("S values for different H")
+
+# Plot N vs H
+plot(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
+title!("N values for different H")
