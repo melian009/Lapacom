@@ -213,8 +213,8 @@ reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverag
 
 # Population Growth rate estimation (r=reggs):
 
-oocytes_po = [385613.0]                # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = [73029.0]                   # Average: Patella aspera (nº of Eggs)
+oocytes_po = 385613.0                # Average: Patella ordinaria (nº of Eggs)
+oocytes_pa = 73029.0                   # Average: Patella aspera (nº of Eggs)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
@@ -276,10 +276,6 @@ sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
 
 prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
 sol_CLC_full = solve(prob_CLC_full, Tsit5())
-
-
-# prob_pa_full = ODEProblem(CLC!, u0_pa_full, t_span, p_po) 
-# sol_pa_full = solve(prob_pa_full, Tsit5())
 
 
 Plots.plot(sol_SLC_full, vars=(0,1), yscale=:log10, label= "Ne (Full access)")
