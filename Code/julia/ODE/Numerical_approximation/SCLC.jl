@@ -324,29 +324,30 @@ function SLC!(du, u, p, t)
 end
 ```
 
+
 function X(t)
   if (t % 365) / 365 >= 0.42
-      return 1.0 # Reproductive Cycle
+      return 1.0 # Ciclo reproductivo
   else
-      return 0.0 # Exploitation Cycle
+      return 0.0 # Ciclo de explotación
   end
 end
 
 function simulate_NS_values()
-  No = 10000.0    # Initial abuncance
-  So = 43.41      # Initial size
-  r = 2515.4/500    # Reproductve rate
-  K = 640000.0    # Carrying capacity
-  d = 0.55        # Natual mortality
-  Smax = 56.0     # Mamimum size
-  gamma = 0.34    # Growth rate
+  No = 10000.0    # Abundancia inicial
+  So = 43.41      # Tamaño inicial
+  r = 2515.4/500    # Tasa reproductiva
+  K = 640000.0    # Capacidad de carga
+  d = 0.55        # Mortalidad natural
+  Smax = 56.0     # Tamaño máximo
+  gamma = 0.34    # Tasa de crecimiento
 
-  t_max = 365*2    # End time for the simulation
-  step_size = 1   # Time intervales (days)
+  t_max = 365*2    # Tiempo final de la simulación
+  step_size = 1   # Intervalo de tiempo (días)
 
-  H_values = 0.0:0.05:1.0  # Exploitatation rates
+  H_values = 0.0:0.05:1.0  # Tasas de explotación
 
-  NS_matrix = zeros(length(H_values), 3)   # Output matrix for N, S and H estimated values
+  NS_matrix = zeros(length(H_values), 3)   # Matriz de salida para los valores estimados de N, S y H
 
   for (i, H) in enumerate(H_values)
       t_values = 0:step_size:t_max
@@ -358,21 +359,16 @@ function simulate_NS_values()
           Saverage = mean(Sa_values[1:j])
           Smaturity = 1.34 * Saverage - 28.06
           R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
-          #Stability point (N=0,S=0)
-          #Na_values[j] = No * exp((X_val * r * R * K - d - H * (1 - X_val) * t))
-          #Sa_values[j] = So * exp(gamma * t)
-          #Stability Point (N=(X*R*r*K^2-d-H*(1-x)),S=(Smax*(1-H*(1-X))))
-          Na_values[j] = No * exp(X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) + X_val * r * R * (K^2) - d - H * (1 - X)
-          Sa_values[j] = Smax * (1 - H * (1-X_val)) - So * exp(gamma * t)
+          Na_values[j] = No * exp((X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) * t) + X_val * r * R * (K^2) - d - H * (1 - X_val)
+          Sa_values[j] = Smax * (1 - H * (1 - X_val)) - So * exp(gamma * t)
       end
 
-      N_ = max(Na_values)
+      N_ = (Na_values)
       S_ = max(Sa_values)
 
       NS_matrix[i, 1] = H
       NS_matrix[i, 2] = N_
       NS_matrix[i, 3] = S_
-
   end
 
   return NS_matrix
@@ -380,10 +376,10 @@ end
 
 NS_matrix = simulate_NS_values()
 
-# Plot S vs H
+# Graficar S vs H
 plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
-title!("S values for different H")
+title!("Valores de S para diferentes H")
 
-# Plot N vs H
+# Graficar N vs H
 plot(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
-title!("N values for different H")
+title!("Valores de N para diferentes H")
