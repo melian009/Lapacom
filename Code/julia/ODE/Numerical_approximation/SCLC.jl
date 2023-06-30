@@ -3,8 +3,8 @@ using Pkg
 Pkg.activate(".")
 using LinearAlgebra
 using DifferentialEquations
-# using GlobalSensitivity
-# using CairoMakie
+using GlobalSensitivity
+using CairoMakie
 using Statistics
 using DataFrames
 using CSV
@@ -124,7 +124,7 @@ function SLC!(du, u, p, t)
    Saverage = du[2]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
+  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * ((K - Na)/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
   du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 
@@ -147,7 +147,7 @@ function SCLC!(du, u, p, t)
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
   du[1] = dNe = X(t) * r[i] * Na * Rep_cap(Saverage, Smaturity, Smax) - (de * Ne) - (gEA * Ne)
-  du[2] = dNa = gEA * Ne * (K - Na/K) - (da * Na) - ((1 - X(t))* H[i] * Na)
+  du[2] = dNa = gEA * Ne * ((K - Na)/K) - (da * Na) - ((1 - X(t))* H[i] * Na)
   du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H[i])))
 end
 #=
@@ -171,9 +171,9 @@ function CLC!(du, u, p, t)
 
   du[1] = dNe = X(t) * r[i] * Na * Rep_cap(Saverage,Smaturity,Smax) - de * Ne - g[1] * Ne
   du[2] = dNt = g[1] * Ne - g[2] * Nt - dt * Nt
-  du[3] = dNv = g[2] * Nt * (K - Nt/K) - g[3] * Nv - dv * Nv
-  du[4] = dNj = g[3] * Nv * (K - Nj/K) - g[4] * Nj - dj * Na
-  du[5] = dNa = g[4] * Nj * (K - Na / K) - da * Na - (1 - X(t)) * H[i] * Na
+  du[3] = dNv = g[2] * Nt * ((K - Nt)/K) - g[3] * Nv - dv * Nv
+  du[4] = dNj = g[3] * Nv * ((K - Nj)/K) - g[4] * Nj - dj * Na
+  du[5] = dNa = g[4] * Nj * ((K - Na )/ K) - da * Na - (1 - X(t)) * H[i] * Na
   du[6] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
@@ -361,9 +361,12 @@ function simulate_NS_values()
           Saverage = mean(Sa_values[1:j])
           Smaturity = 1.34 * Saverage - 28.06
           R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
-
-          Na_values[j] = No * exp((X_val * r * R * K - d - H * (1 - X_val) * t))
-          Sa_values[j] = So * exp(gamma * t)
+          #Stability point (N=0,S=0)
+          #Na_values[j] = No * exp((X_val * r * R * K - d - H * (1 - X_val) * t))
+          #Sa_values[j] = So * exp(gamma * t)
+          #Stability Point (N=(X*R*r*K^2-d-H*(1-x)),S=(Smax*(1-H*(1-X))))
+          Na_values[j] = No * exp(X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) + X_val * r * R * (K^2) - d - H * (1 - X)
+          Sa_values[j] = Smax * (1 - H * (1-X_val)) - So * exp(gamma * t)
       end
 
       N_median = median(Na_values)
