@@ -12,7 +12,7 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 import ForwardDiff.jacobian
-using Plots
+using GLMakie
 
 
 #= 
@@ -271,40 +271,54 @@ u0_CLC_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
 prob_SLC_full = ODEProblem(SLC!, u0_SLC_po_full, t_span, p_SLC_po) 
 sol_SLC_full = solve(prob_SLC_full, Tsit5())
 
+tS = sol_SLC_full.t
+NaS = [u[1] for u in sol_SLC_full.u]
+SaS = [u[2] for u in sol_SLC_full.u]
+figS = Figure()
+lines(tS,NaS, label = "Na (Full access)",xlabel = "t (days)", ylabel = "N (Nº individuals)", title = "SLC for 'Patella ordinaria'")
+xlims!(extrema(tS))
+ylims!(extrema(NaS))
+#save("CLC_SS_po_N_Full_access.png", fig1, dpi = 300)
+
+
 prob_SCLC_full = ODEProblem(SCLC!, u0_SCLC_po_full, t_span, p_SCLC_po) 
 sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
+
+tSC = sol_SCLC_full.t
+NeSC = [u[1] for u in sol_SCLC_full.u]
+NaSC = [u[2] for u in sol_SCLC_full.u]
+SaSC = [u[3] for u in sol_SCLC_full.u]
+
+figSC = Figure()
+lines!(tC, NeC, yscale = :log10, label = "Ne (Full access)", 
+      xlabel = "t (days)", ylabel = "LOG10(N) (Nº individuals)", title = "SCLC for 'Patella ordinaria'")
+lines!(tC, NaC, yscale = :log10, label = "Na (Full access)")
+xlims!(extrema(tS))
+ylims!(extrema(NeS))
+#save("CLC_SS_po_N_Full_access_log.png", figSC, dpi = 300)
 
 prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
 sol_CLC_full = solve(prob_CLC_full, Tsit5())
 
-N_a_ = [v[1] for v in sol_SLC_full.u]
-S_a_ = [v[2] for v in sol_SLC_full.u]
+tC = sol_CLC_full.t
+NeC = [u[1] for u in sol_CLC_full.u]
+NtC = [u[2] for u in sol_CLC_full.u]
+NvC = [u[3] for u in sol_CLC_full.u]
+NjC = [u[4] for u in sol_CLC_full.u]
+NaC = [u[5] for u in sol_CLC_full.u]
+SaC = [u[6] for u in sol_CLC_full.u]
 
-Plots.plot(sol_SLC_full.t,N_a_,yscale=:log10, label= "Na (Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
-#savefig!("SLC_SS_po_N_Full_access_log.png")
+figC = Figure()
+
+lines(tC, NeC, yscale = :log10, label = "Ne (Full access)", 
+      xlabel = "t (days)", ylabel = "LOG10(N) (Nº individuals)", title = "CLC for 'Patella ordinaria'")
+lines!(tC, NtC, yscale = :log10, label = "Nt (Full access)")
+lines!(tC ,NvC, yscale = :log10, label = "Nv (Full access)")
+lines!(tC, NjC, yscale = :log10, label = "Nj (Full access)")
+lines!(tC, NaC, yscale = :log10, label = "Na (Full access)")
+#save("CLC_SS_po_N_Full_access_log.png", fig3, dpi = 300)
 
 
-Plots.plot(sol_SLC_full.t,sol_SLC_full.u[1],  label= "Sa (Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("N (Nº individuals)")
-#savefig!("CLC_SS_po_N_Full_access.png")
-
-
-#=
-Plots.plot(sol_pa_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Nt (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,3), yscale=:log10, label= "Nv (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,4), yscale=:log10, label= "Nj (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,5), yscale=:log10, label= "Na (Full access)")
-Plots.title!("'aatella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
-savefig!("CLC_SS_pa_N_Full_access.png")
-=#
 
 ```
 Analytical Aproximation of SLC in One Place.
@@ -374,9 +388,9 @@ end
 NS_matrix = simulate_NS_values()
 
 # Graficar S vs H
-Plots.plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
+lines(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
 title!("Valores de S para diferentes H")
 
 # Graficar N vs H
-plot(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
+lines(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
 title!("Valores de N para diferentes H")

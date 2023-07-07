@@ -5,14 +5,12 @@ using LinearAlgebra
 # using OrdinaryDiffEq
 using DifferentialEquations
 using GlobalSensitivity
-#using CairoMakie
+using CairoMakie
 using Statistics
 using DataFrames
-# using CSV
+using CSV
 using DiffEqParamEstim
 using Optim
-using Plots
-using Plots.PlotMeasures
 
 
 

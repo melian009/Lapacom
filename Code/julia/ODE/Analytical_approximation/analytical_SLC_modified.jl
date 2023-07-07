@@ -1,20 +1,18 @@
 using Pkg
 using ForwardDiff
-# Pkg.activate(".")
+Pkg.activate(".")
 using LinearAlgebra
-# using OrdinaryDiffEq
+using OrdinaryDiffEq
 using DifferentialEquations
 using GlobalSensitivity
-# using CairoMakie
+using CairoMakie
 using Statistics
-# using DataFrames
-# using CSV
+using DataFrames
+using CSV
 using DiffEqParamEstim
 using Optim
-using Plots
-#using Plots.PlotMeasures
+using GLMakie
 using Symbolics
-# using SymPy
 import ForwardDiff.jacobian
 
 
@@ -90,8 +88,8 @@ This is the inecuality for the adult abundances
  if  g * (r - E - d2)  > d1 * (E + d2) then Na > 0 & Ne > 0
 =#
 
-Plots.plot(Expl,Ne_,label="N (eggs)",colour="blue")
-Plots.plot!(Expl,Na_,label="N (adults)",colour="red")
+lines(Expl,Ne_,label="N (eggs)",colour="blue")
+lines!(Expl,Na_,label="N (adults)",colour="red")
 xlims!(0.0,1)
 ylims!(-1000,8500)
 xlabel!("Exploitation rate (E)")
@@ -142,10 +140,10 @@ for n = 0:m:Exp_lim
 end
 
 #Adult size plot by exploitation
-Plots.plot(Expl,N_et_1,label="NA: N (eggs)")
-Plots.plot!(Expl,N_at_1,label="NA: N (adults)")
-Plots.plot!(Expl,Ne_,label="NA: N (adults)")
-Plots.plot!(Expl,Na_,label="NA: N (adults)")
+lines(Expl,N_et_1,label="NA: N (eggs)")
+lines!(Expl,N_at_1,label="NA: N (adults)")
+lines!(Expl,Ne_,label="NA: N (adults)")
+lines!(Expl,Na_,label="NA: N (adults)")
 xlims!(0,1)
 ylims!(-1000,15000)
 xlabel!("Exploitation rate")
@@ -227,7 +225,7 @@ for n = 0:m:Exp_lim
 end
 
 #Adult size plot by exploitation
-Plots.plot(Expl,Sa_,label="NA: N (adults)")
+lines(Expl,Sa_,label="NA: N (adults)")
 xlims!(0,1)
 xlabel!("Exploitation rate")
 ylabel!("N (nº individuals)") 
