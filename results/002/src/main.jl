@@ -16,6 +16,7 @@ for factor in e_factors
   include("load_params.jl")
   exploitation_rates = exploitation_rates * factor
   p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
+  p_general_flat = flatten_p(p_general)
 
   start_year = 2006
   end_year = 2018
@@ -57,3 +58,62 @@ for factor in e_factors
   fig[1, 2] = Legend(fig, ax, "Site")
   save("../figs/body_sizes_e_factor=$(factor).pdf", fig)
 end
+
+## Plot mean population size vs exploitation rate
+site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+lifestage_names = ["Eggs", "Trochophore", "Veliger", "Juvenile", "Adult", "Adult Body Size"]
+
+fig_all = Figure(resolution=(600, 2400))
+
+for lifestage in 1:6
+  # Variable to hold each site's mean population size for each e_factor
+  sites_mean_pop_size = zeros(Float64, 8, length(e_factors))
+
+  # Iterate through e_factors
+  for (i, e_factor) in enumerate(e_factors)
+      filename = "../figs/general_e_factor=$(e_factor).csv"
+
+      # Load the CSV file into a DataFrame
+      df = CSV.File(filename) |> DataFrame
+
+      # Iterate through sites
+      for site in 1:8
+          # Create index for the site's relevant column in the flat matrix
+          index = ((lifestage-1) * 8 + site) + 1  # +1 to account for the time column
+
+          # Calculate the mean population size for the site and store it
+          sites_mean_pop_size[site, i] = mean(df[:, index])
+      end
+  end
+
+  # Save the plot for each lifestage separately.
+  # Create the line plot
+  fig = Figure(resolution = (600, 400))
+  ax = Axis(fig[1, 1], xlabel = "Exploitation rate", ylabel = "Mean Population Size", title = lifestage_names[lifestage])
+
+  for site in 1:8
+    lines!(ax, e_factors, sites_mean_pop_size[site, :], label=site_names[site])
+  end
+
+  # Add a legend
+  leg = Legend(fig[1, 2], ax)
+  fig[1, 1] = ax
+  # axislegend(ax, "Site $(1:8)", position = :rt)
+
+  save("../figs/exploitation_vs_population_size_lifestage=$(lifestage).pdf", fig)
+
+  # Save all life stages in the same plot
+  # Create the line plot in a new subplot
+  ax = Axis(fig_all[lifestage, 1], xlabel="Exploitation rate", ylabel="Mean Population Size", title=lifestage_names[lifestage])
+
+  for site in 1:8
+    lines!(ax, e_factors, sites_mean_pop_size[site, :], label=site_names[site])
+  end
+
+  # Add a legend
+  leg = Legend(fig_all[lifestage, 2], ax)
+  fig_all[lifestage, 1] = ax
+end
+
+# Save the figure
+save("../figs/exploitation_vs_population_size_all_lifestages.pdf", fig_all)
