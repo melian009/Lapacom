@@ -15,6 +15,12 @@ import ForwardDiff.jacobian
 using GLMakie
 
 
+#Pkg.add("CairoMakie") 
+#Pkg.add("DataFrames") 
+#Pkg.add("CSV")  
+#Pkg.add("DiffEqParamEstim") 
+#Pkg.add("Optim") 
+#Pkg.add("GLMakie")
 #= 
  Formulation of the simple life cicle for one site:
 
@@ -169,11 +175,11 @@ function CLC!(du, u, p, t)
    Saverage = du[6]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax) .- de * Ne - g[1] * Ne
+  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax)- de * Ne - g[1] * Ne
   du[2] = dNt = g[1] * Ne - g[2] * Nt - dt * Nt
   du[3] = dNv = g[2] * Nt * ((K - Nt)/K) - g[3] * Nv - dv * Nv
   du[4] = dNj = g[3] * Nv * ((K - Nj)/K) - g[4] * Nj - dj * Na
-  du[5] = dNa = g[4] * Nj * ((K - Na )/ K) - da * Na - (1 - X(t)) * H * Na
+  du[5] = dNa = g[4] * Nj * ((K - Na)/ K) - da * Na - (1 - X(t)) * H * Na
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
@@ -255,7 +261,11 @@ p_SCLC_pa = [re[2], Kt, rates[2], gEA, de_, da_, Sm, gammas[2]]
 p_CLC_po = [re[1], Kt, rates[1], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
 p_CLC_pa = [re[2], Kt, rates[2], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
-t_span= (0.0,3000.0) # Temporal ranges for simulations.
+start_year = 2006
+end_year = 2018
+nyears = end_year - start_year + 1
+ndays = nyears * 365.0
+t_span_ = (0.0, ndays) # Temporal ranges for simulations.
  
 u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
 u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
@@ -278,7 +288,7 @@ figS = Figure()
 lines(tS,NaS, label = "Na (Full access)",xlabel = "t (days)", ylabel = "N (Nº individuals)", title = "SLC for 'Patella ordinaria'")
 xlims!(extrema(tS))
 ylims!(extrema(NaS))
-#save("CLC_SS_po_N_Full_access.png", fig1, dpi = 300)
+save("SLC_SS_po_N_Full_access.png", figS, dpi = 300)
 
 
 prob_SCLC_full = ODEProblem(SCLC!, u0_SCLC_po_full, t_span, p_SCLC_po) 
@@ -290,12 +300,11 @@ NaSC = [u[2] for u in sol_SCLC_full.u]
 SaSC = [u[3] for u in sol_SCLC_full.u]
 
 figSC = Figure()
-lines!(tC, NeC, yscale = :log10, label = "Ne (Full access)", 
-      xlabel = "t (days)", ylabel = "LOG10(N) (Nº individuals)", title = "SCLC for 'Patella ordinaria'")
+lines!(tC, NeC, yscale = :log10, label = "Ne (Full access)", xlabel = "t (days)", ylabel = "LOG10(N) (Nº individuals)", title = "SCLC for 'Patella ordinaria'")
 lines!(tC, NaC, yscale = :log10, label = "Na (Full access)")
 xlims!(extrema(tS))
 ylims!(extrema(NeS))
-#save("CLC_SS_po_N_Full_access_log.png", figSC, dpi = 300)
+save("CLC_SS_po_N_Full_access_log.png", figSC, dpi = 300)
 
 prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
 sol_CLC_full = solve(prob_CLC_full, Tsit5())
