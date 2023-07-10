@@ -35,7 +35,7 @@ for factor in e_factors
   all_u = sol_general.u
   all_times = sol_general.t
   # site_names = distance_df.site
-  site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+  site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
   for stage in 1:5
     fig = Figure()
     ax1 = Axis(fig[1, 1])
@@ -60,7 +60,7 @@ for factor in e_factors
 end
 
 ## Plot mean population size vs exploitation rate
-site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
 lifestage_names = ["Eggs", "Trochophore", "Veliger", "Juvenile", "Adult", "Adult Body Size"]
 
 fig_all = Figure(resolution=(600, 2400))

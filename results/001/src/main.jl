@@ -30,7 +30,7 @@ CSV.write("../figs/general.csv", df_general)
 all_u = sol_general.u
 all_times = sol_general.t
 # site_names = distance_df.site
-site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
 for stage in 1:5
   fig = Figure()
   ax1 = Axis(fig[1, 1])
