@@ -1,3 +1,4 @@
 {
-  "workbench.colorTheme": "Visual Studio Dark"
+  "workbench.colorTheme": "Visual Studio Dark",
+  "julia.executablePath": "C:\\Users\\miste\\AppData\\Local\\Programs\\Julia-1.9.2\\bin\\julia.exe"
 }
