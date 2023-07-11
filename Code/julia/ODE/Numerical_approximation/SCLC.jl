@@ -311,7 +311,7 @@ save("SCLC_N_Full_access.png", fig2, dpi = 300)
 
 fig3 = Figure()
 ax3 = Axis(fig3[1, 1])
-lines!(ax3, sol_SCLC_full.t, [u[3] for u in sol_SCLC_full.u], yscale=:log10, label="Sa")
+lines!(ax3, sol_SCLC_full.t, [u[3] for u in sol_SCLC_full.u], yscale=:log10, label="Sa",)
 save("SCLC_S_Full_access.png", fig3, dpi = 300)
 
 
@@ -325,7 +325,8 @@ sol_CLC_full = solve(prob_CLC_full, Tsit5())
 
 fig4 = Figure()
 ax4 = Axis(fig4[1, 1])
-lines!(ax4, sol_CLC_full.t, [u[1] for u in sol_CLC_full.u], yscale=:log10, label="Ne")
+lines!(ax4, sol_CLC_full.t, [u[1] for u in sol_CLC_full.u], yscale=:log10, label="Ne",
+ xlabel = "time", ylabel = "Na (nº of individuals)")
 lines!(ax4, sol_CLC_full.t, [u[2] for u in sol_CLC_full.u], yscale=:log10, label="Nt")
 lines!(ax4, sol_CLC_full.t, [u[3] for u in sol_CLC_full.u], yscale=:log10, label="Nv")
 lines!(ax4, sol_CLC_full.t, [u[4] for u in sol_CLC_full.u], yscale=:log10, label="Nj")
@@ -335,7 +336,8 @@ save("CLC_N_Full_access.png", fig4, dpi = 300)
 
 fi5 = Figure()
 ax5 = Axis(fig5[1, 1])
-lines!(ax5, sol_CLC_full.t, [u[6] for u in sol_CLC_full.u], yscale=:log10, label="Sa")
+lines!(ax5, sol_CLC_full.t, [u[6] for u in sol_CLC_full.u], yscale=:log10, label="Sa",
+xlabel = "time", ylabel = "Sa (mm)")
 save("CLC_S_Full_access.png", fig4, dpi = 300)
 
 ```
@@ -409,9 +411,10 @@ NS_matrix = simulate_NS_values()
 FIG1 = Figure()
 AX1 = Axis(FIG1[1, 1])
 lines!(AX1,NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S")
-
+save("AA_SLC_S.png", FIG1, dpi = 300)
 
 # Graficar N vs H
-FIG1 = Figure()
+FIG2 = Figure()
 AX2 = Axis(FIG2[1, 1])
 lines!(AX2,NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N")
+save("AA_SLC_N.png", FIG1, dpi = 300)
