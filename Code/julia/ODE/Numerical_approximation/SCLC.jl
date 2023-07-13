@@ -265,7 +265,7 @@ start_year = 2006
 end_year = 2018
 nyears = end_year - start_year + 1
 ndays = nyears * 365.0
-t_span_ = (0.0, ndays) # Temporal ranges for simulations.
+t_span = (0.0, ndays) # Temporal ranges for simulations.
  
 u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
 u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
