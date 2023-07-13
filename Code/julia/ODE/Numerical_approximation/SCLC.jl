@@ -15,6 +15,12 @@ import ForwardDiff.jacobian
 using GLMakie
 
 
+#Pkg.add("CairoMakie") 
+#Pkg.add("DataFrames") 
+#Pkg.add("CSV")  
+#Pkg.add("DiffEqParamEstim") 
+#Pkg.add("Optim") 
+#Pkg.add("GLMakie")
 #= 
  Formulation of the simple life cicle for one site:
 
@@ -169,11 +175,11 @@ function CLC!(du, u, p, t)
    Saverage = du[6]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax) .- de * Ne - g[1] * Ne
+  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax)- de * Ne - g[1] * Ne
   du[2] = dNt = g[1] * Ne - g[2] * Nt - dt * Nt
   du[3] = dNv = g[2] * Nt * ((K - Nt)/K) - g[3] * Nv - dv * Nv
   du[4] = dNj = g[3] * Nv * ((K - Nj)/K) - g[4] * Nj - dj * Na
-  du[5] = dNa = g[4] * Nj * ((K - Na )/ K) - da * Na - (1 - X(t)) * H * Na
+  du[5] = dNa = g[4] * Nj * ((K - Na)/ K) - da * Na - (1 - X(t)) * H * Na
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
@@ -255,7 +261,11 @@ p_SCLC_pa = [re[2], Kt, rates[2], gEA, de_, da_, Sm, gammas[2]]
 p_CLC_po = [re[1], Kt, rates[1], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
 p_CLC_pa = [re[2], Kt, rates[2], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
-t_span= (0.0,3000.0) # Temporal ranges for simulations.
+start_year = 2006
+end_year = 2018
+nyears = end_year - start_year + 1
+ndays = nyears * 365.0
+t_span_ = (0.0, ndays) # Temporal ranges for simulations.
  
 u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
 u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
@@ -268,57 +278,67 @@ u0_CLC_po_full = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria
 u0_CLC_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
 
 
+
+#SLC
 prob_SLC_full = ODEProblem(SLC!, u0_SLC_po_full, t_span, p_SLC_po) 
 sol_SLC_full = solve(prob_SLC_full, Tsit5())
 
-tS = sol_SLC_full.t
-NaS = [u[1] for u in sol_SLC_full.u]
-SaS = [u[2] for u in sol_SLC_full.u]
-figS = Figure()
-lines(tS,NaS, label = "Na (Full access)",xlabel = "t (days)", ylabel = "N (Nº individuals)", title = "SLC for 'Patella ordinaria'")
-xlims!(extrema(tS))
-ylims!(extrema(NaS))
-#save("CLC_SS_po_N_Full_access.png", fig1, dpi = 300)
+
+fig1 = Figure()
+ax1 = Axis(fig1[1, 1])
+lines!(ax1, sol_SLC_full.t, [u[1] for u in sol_SLC_full.u], yscale=:log10, label="Na")
+save("SLC_N_Full_access.png", fig1, dpi = 300)
+
+fig11 = Figure()
+ax11 = Axis(fig11[1, 1])
+lines!(ax11, sol_SLC_full.t, [u[2] for u in sol_SLC_full.u], yscale=:log10, label="Sa")
+save("SLC_S_Full_access.png", fig11, dpi = 300)
 
 
+
+
+
+
+# SCLC
 prob_SCLC_full = ODEProblem(SCLC!, u0_SCLC_po_full, t_span, p_SCLC_po) 
 sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
 
-tSC = sol_SCLC_full.t
-NeSC = [u[1] for u in sol_SCLC_full.u]
-NaSC = [u[2] for u in sol_SCLC_full.u]
-SaSC = [u[3] for u in sol_SCLC_full.u]
+fig2 = Figure()
+ax2 = Axis(fig2[1, 1])
+lines!(ax2, sol_SCLC_full.t, [u[1] for u in sol_SCLC_full.u], yscale=:log10, label="Ne")
+lines!(ax2, sol_SCLC_full.t, [u[2] for u in sol_SCLC_full.u], yscale=:log10, label="Na")
+save("SCLC_N_Full_access.png", fig2, dpi = 300)
 
-figSC = Figure()
-lines!(tC, NeC, yscale = :log10, label = "Ne (Full access)", 
-      xlabel = "t (days)", ylabel = "LOG10(N) (Nº individuals)", title = "SCLC for 'Patella ordinaria'")
-lines!(tC, NaC, yscale = :log10, label = "Na (Full access)")
-xlims!(extrema(tS))
-ylims!(extrema(NeS))
-#save("CLC_SS_po_N_Full_access_log.png", figSC, dpi = 300)
+fig3 = Figure()
+ax3 = Axis(fig3[1, 1])
+lines!(ax3, sol_SCLC_full.t, [u[3] for u in sol_SCLC_full.u], yscale=:log10, label="Sa",)
+save("SCLC_S_Full_access.png", fig3, dpi = 300)
 
+
+
+
+#CLC
 prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
 sol_CLC_full = solve(prob_CLC_full, Tsit5())
 
-tC = sol_CLC_full.t
-NeC = [u[1] for u in sol_CLC_full.u]
-NtC = [u[2] for u in sol_CLC_full.u]
-NvC = [u[3] for u in sol_CLC_full.u]
-NjC = [u[4] for u in sol_CLC_full.u]
-NaC = [u[5] for u in sol_CLC_full.u]
-SaC = [u[6] for u in sol_CLC_full.u]
-
-figC = Figure()
-
-lines(tC, NeC, yscale = :log10, label = "Ne (Full access)", 
-      xlabel = "t (days)", ylabel = "LOG10(N) (Nº individuals)", title = "CLC for 'Patella ordinaria'")
-lines!(tC, NtC, yscale = :log10, label = "Nt (Full access)")
-lines!(tC ,NvC, yscale = :log10, label = "Nv (Full access)")
-lines!(tC, NjC, yscale = :log10, label = "Nj (Full access)")
-lines!(tC, NaC, yscale = :log10, label = "Na (Full access)")
-#save("CLC_SS_po_N_Full_access_log.png", fig3, dpi = 300)
 
 
+fig4 = Figure()
+ax4 = Axis(fig4[1, 1])
+lines!(ax4, sol_CLC_full.t, [u[1] for u in sol_CLC_full.u], yscale=:log10, label="Ne",
+ xlabel = "time", ylabel = "Na (nº of individuals)")
+lines!(ax4, sol_CLC_full.t, [u[2] for u in sol_CLC_full.u], yscale=:log10, label="Nt")
+lines!(ax4, sol_CLC_full.t, [u[3] for u in sol_CLC_full.u], yscale=:log10, label="Nv")
+lines!(ax4, sol_CLC_full.t, [u[4] for u in sol_CLC_full.u], yscale=:log10, label="Nj")
+lines!(ax4, sol_CLC_full.t, [u[5] for u in sol_CLC_full.u], yscale=:log10, label="Na")
+save("CLC_N_Full_access.png", fig4, dpi = 300)
+
+
+fi5 = Figure()
+ax5 = Axis(fig5[1, 1])
+lines!(ax5, sol_CLC_full.t, [u[6] for u in sol_CLC_full.u], yscale=:log10, label="Sa",
+xlabel = "time", ylabel = "Sa (mm)")
+save("CLC_S_Full_access.png", fig4, dpi = 300)
 
 ```
 Analytical Aproximation of SLC in One Place.
@@ -356,7 +376,7 @@ function simulate_NS_values()
   t_max = 365*2    # Tiempo final de la simulación
   step_size = 1   # Intervalo de tiempo (días)
 
-  H_values = 0.0:0.05:1.0  # Tasas de explotación
+  H_values = 0:0.5:100  # Tasas de explotación
 
   NS_matrix = zeros(length(H_values), 3)   # Matriz de salida para los valores estimados de N, S y H
 
@@ -388,9 +408,13 @@ end
 NS_matrix = simulate_NS_values()
 
 # Graficar S vs H
-lines(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
-title!("Valores de S para diferentes H")
+FIG1 = Figure()
+AX1 = Axis(FIG1[1, 1])
+lines!(AX1,NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S")
+save("AA_SLC_S.png", FIG1, dpi = 300)
 
 # Graficar N vs H
-lines(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
-title!("Valores de N para diferentes H")
+FIG2 = Figure()
+AX2 = Axis(FIG2[1, 1])
+lines!(AX2,NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N")
+save("AA_SLC_N.png", FIG1, dpi = 300)
