@@ -12,9 +12,15 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 import ForwardDiff.jacobian
-using Plots
+using GLMakie
 
 
+#Pkg.add("CairoMakie") 
+#Pkg.add("DataFrames") 
+#Pkg.add("CSV")  
+#Pkg.add("DiffEqParamEstim") 
+#Pkg.add("Optim") 
+#Pkg.add("GLMakie")
 #= 
  Formulation of the simple life cicle for one site:
 
@@ -169,11 +175,11 @@ function CLC!(du, u, p, t)
    Saverage = du[6]
    Smaturity = calculate_size_at_first_maturity(Saverage)
 
-  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax) .- de * Ne - g[1] * Ne
+  du[1] = dNe = X(t) * r * Na * reproduction_capacity(Saverage, Smaturity, Smax)- de * Ne - g[1] * Ne
   du[2] = dNt = g[1] * Ne - g[2] * Nt - dt * Nt
   du[3] = dNv = g[2] * Nt * ((K - Nt)/K) - g[3] * Nv - dv * Nv
   du[4] = dNj = g[3] * Nv * ((K - Nj)/K) - g[4] * Nj - dj * Na
-  du[5] = dNa = g[4] * Nj * ((K - Na )/ K) - da * Na - (1 - X(t)) * H * Na
+  du[5] = dNa = g[4] * Nj * ((K - Na)/ K) - da * Na - (1 - X(t)) * H * Na
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - X(t))))
 end
 
@@ -213,8 +219,8 @@ reproduction_capacity(Saverage, Smaturity, Smax) = min(max(0.5 * (1.0 + (Saverag
 
 # Population Growth rate estimation (r=reggs):
 
-oocytes_po = [385613.0]                # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = [73029.0]                   # Average: Patella aspera (nº of Eggs)
+oocytes_po = 385613.0                # Average: Patella ordinaria (nº of Eggs)
+oocytes_pa = 73029.0                   # Average: Patella aspera (nº of Eggs)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
@@ -255,7 +261,11 @@ p_SCLC_pa = [re[2], Kt, rates[2], gEA, de_, da_, Sm, gammas[2]]
 p_CLC_po = [re[1], Kt, rates[1], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[1]]
 p_CLC_pa = [re[2], Kt, rates[2], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
-t_span= (0.0,3000.0) # Temporal ranges for simulations.
+start_year = 2006
+end_year = 2018
+nyears = end_year - start_year + 1
+ndays = nyears * 365.0
+t_span = (0.0, ndays) # Temporal ranges for simulations.
  
 u0_SLC_po_full = [1e4, 43.41]    # Patella ordinaria 
 u0_SLC_pa_full = [1e4, 45.72]    # Patella aspera
@@ -268,46 +278,67 @@ u0_CLC_po_full = [1e4, 1e4, 1e4, 1e4, 1e4, 43.41]    # Patella ordinaria
 u0_CLC_pa_full = [1e4, 1e4, 1e4, 1e4, 1e4, 45.72]    # Patella aspera
 
 
+
+#SLC
 prob_SLC_full = ODEProblem(SLC!, u0_SLC_po_full, t_span, p_SLC_po) 
 sol_SLC_full = solve(prob_SLC_full, Tsit5())
 
+
+fig1 = Figure()
+ax1 = Axis(fig1[1, 1])
+lines!(ax1, sol_SLC_full.t, [u[1] for u in sol_SLC_full.u], yscale=:log10, label="Na")
+save("SLC_N_Full_access.png", fig1, dpi = 300)
+
+fig11 = Figure()
+ax11 = Axis(fig11[1, 1])
+lines!(ax11, sol_SLC_full.t, [u[2] for u in sol_SLC_full.u], yscale=:log10, label="Sa")
+save("SLC_S_Full_access.png", fig11, dpi = 300)
+
+
+
+
+
+
+# SCLC
 prob_SCLC_full = ODEProblem(SCLC!, u0_SCLC_po_full, t_span, p_SCLC_po) 
 sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
 
+fig2 = Figure()
+ax2 = Axis(fig2[1, 1])
+lines!(ax2, sol_SCLC_full.t, [u[1] for u in sol_SCLC_full.u], yscale=:log10, label="Ne")
+lines!(ax2, sol_SCLC_full.t, [u[2] for u in sol_SCLC_full.u], yscale=:log10, label="Na")
+save("SCLC_N_Full_access.png", fig2, dpi = 300)
+
+fig3 = Figure()
+ax3 = Axis(fig3[1, 1])
+lines!(ax3, sol_SCLC_full.t, [u[3] for u in sol_SCLC_full.u], yscale=:log10, label="Sa",)
+save("SCLC_S_Full_access.png", fig3, dpi = 300)
+
+
+
+
+#CLC
 prob_CLC_full = ODEProblem(CLC!, u0_CLC_po_full, t_span, p_CLC_po) 
 sol_CLC_full = solve(prob_CLC_full, Tsit5())
 
 
-# prob_pa_full = ODEProblem(CLC!, u0_pa_full, t_span, p_po) 
-# sol_pa_full = solve(prob_pa_full, Tsit5())
+
+fig4 = Figure()
+ax4 = Axis(fig4[1, 1])
+lines!(ax4, sol_CLC_full.t, [u[1] for u in sol_CLC_full.u], yscale=:log10, label="Ne",
+ xlabel = "time", ylabel = "Na (nº of individuals)")
+lines!(ax4, sol_CLC_full.t, [u[2] for u in sol_CLC_full.u], yscale=:log10, label="Nt")
+lines!(ax4, sol_CLC_full.t, [u[3] for u in sol_CLC_full.u], yscale=:log10, label="Nv")
+lines!(ax4, sol_CLC_full.t, [u[4] for u in sol_CLC_full.u], yscale=:log10, label="Nj")
+lines!(ax4, sol_CLC_full.t, [u[5] for u in sol_CLC_full.u], yscale=:log10, label="Na")
+save("CLC_N_Full_access.png", fig4, dpi = 300)
 
 
-Plots.plot(sol_SLC_full, vars=(0,1), yscale=:log10, label= "Ne (Full access)")
-Plots.plot!(sol_SLC_full, vars=(0,2), yscale=:log10, label= "Na(Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
-#savefig!("CLC_SS_po_N_Full_access_log.png")
-
-
-Plots.plot(sol_CLC_full, vars=(0,6),  label= "Ne (Full access)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("N (Nº individuals)")
-#savefig!("CLC_SS_po_N_Full_access.png")
-
-
-#=
-Plots.plot(sol_pa_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Nt (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,3), yscale=:log10, label= "Nv (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,4), yscale=:log10, label= "Nj (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,5), yscale=:log10, label= "Na (Full access)")
-Plots.title!("'aatella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
-savefig!("CLC_SS_pa_N_Full_access.png")
-=#
+fi5 = Figure()
+ax5 = Axis(fig5[1, 1])
+lines!(ax5, sol_CLC_full.t, [u[6] for u in sol_CLC_full.u], yscale=:log10, label="Sa",
+xlabel = "time", ylabel = "Sa (mm)")
+save("CLC_S_Full_access.png", fig4, dpi = 300)
 
 ```
 Analytical Aproximation of SLC in One Place.
@@ -324,29 +355,30 @@ function SLC!(du, u, p, t)
 end
 ```
 
+
 function X(t)
   if (t % 365) / 365 >= 0.42
-      return 1.0 # Reproductive Cycle
+      return 1.0 # Ciclo reproductivo
   else
-      return 0.0 # Exploitation Cycle
+      return 0.0 # Ciclo de explotación
   end
 end
 
 function simulate_NS_values()
-  No = 10000.0    # Initial abuncance
-  So = 43.41      # Initial size
-  r = 2515.4/500    # Reproductve rate
-  K = 640000.0    # Carrying capacity
-  d = 0.55        # Natual mortality
-  Smax = 56.0     # Mamimum size
-  gamma = 0.34    # Growth rate
+  No = 10000.0    # Abundancia inicial
+  So = 43.41      # Tamaño inicial
+  r = 2515.4/500    # Tasa reproductiva
+  K = 640000.0    # Capacidad de carga
+  d = 0.55        # Mortalidad natural
+  Smax = 56.0     # Tamaño máximo
+  gamma = 0.34    # Tasa de crecimiento
 
-  t_max = 365*2    # End time for the simulation
-  step_size = 1   # Time intervales (days)
+  t_max = 365*2    # Tiempo final de la simulación
+  step_size = 1   # Intervalo de tiempo (días)
 
-  H_values = 0.0:0.05:1.0  # Exploitatation rates
+  H_values = 0:0.5:100  # Tasas de explotación
 
-  NS_matrix = zeros(length(H_values), 3)   # Output matrix for N, S and H estimated values
+  NS_matrix = zeros(length(H_values), 3)   # Matriz de salida para los valores estimados de N, S y H
 
   for (i, H) in enumerate(H_values)
       t_values = 0:step_size:t_max
@@ -358,21 +390,16 @@ function simulate_NS_values()
           Saverage = mean(Sa_values[1:j])
           Smaturity = 1.34 * Saverage - 28.06
           R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
-          #Stability point (N=0,S=0)
-          #Na_values[j] = No * exp((X_val * r * R * K - d - H * (1 - X_val) * t))
-          #Sa_values[j] = So * exp(gamma * t)
-          #Stability Point (N=(X*R*r*K^2-d-H*(1-x)),S=(Smax*(1-H*(1-X))))
-          Na_values[j] = No * exp(X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) + X_val * r * R * (K^2) - d - H * (1 - X)
-          Sa_values[j] = Smax * (1 - H * (1-X_val)) - So * exp(gamma * t)
+          Na_values[j] = No * exp((X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) * t) + X_val * r * R * (K^2) - d - H * (1 - X_val)
+          Sa_values[j] = Smax * (1 - H * (1 - X_val)) - So * exp(gamma * t)
       end
 
-      N_ = max(Na_values)
-      S_ = max(Sa_values)
+      N_ = maximum(Na_values)
+      S_ = maximum(Sa_values)
 
       NS_matrix[i, 1] = H
       NS_matrix[i, 2] = N_
       NS_matrix[i, 3] = S_
-
   end
 
   return NS_matrix
@@ -380,10 +407,14 @@ end
 
 NS_matrix = simulate_NS_values()
 
-# Plot S vs H
-plot(NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S", label = "S vs H", legend=:topleft)
-title!("S values for different H")
+# Graficar S vs H
+FIG1 = Figure()
+AX1 = Axis(FIG1[1, 1])
+lines!(AX1,NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S")
+save("AA_SLC_S.png", FIG1, dpi = 300)
 
-# Plot N vs H
-plot(NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N", label = "N vs H", legend=:topleft)
-title!("N values for different H")
+# Graficar N vs H
+FIG2 = Figure()
+AX2 = Axis(FIG2[1, 1])
+lines!(AX2,NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N")
+save("AA_SLC_N.png", FIG1, dpi = 300)

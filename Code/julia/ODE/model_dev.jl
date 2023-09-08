@@ -416,7 +416,7 @@ sol_general = solve(prob_general)
 all_u = sol_general.u
 all_times = sol_general.t
 # site_names = distance_df.site
-site_names = ["Porto Moniz", "Pacl do Mar", "Funchal", "Desertas", "Canidal", "Santa Cruz", "Ribeira Brava", "So Vicente"]
+site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
 for stage in 1:5
   fig = Figure()
   ax1 = Axis(fig[1, 1])
@@ -477,7 +477,7 @@ end
 
 bounds_2 = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1e4, 1e5], [1e4, 1e5], [55.0, 55.0], [55.0, 55.0]]
 
-m = gsa(f2, Sobol(), bounds_2, N=10000)
+m = gsa(f2, Sobol(), bounds_2, N=100, batch=true)
 
 param_names = ["r", "g", "dⱼ", "dₐ", "size_growth_rate", "mₒᵤₜ₁", "mₒᵤₜ₂", "E₁", "E₂", "K₁", "K₂", "sizeₘₐₓ₁", "sizeₘₐₓ₂"]
 
@@ -495,31 +495,75 @@ plot(p5, p7, p6, p8) # Pop 2, juvenile and adult
 plot(p1, p2, p5, p6) # Pop 1 vs pop 2, juvenile
 plot(p3, p4, p7, p8) # Pop 1 vs pop 2, adults
 
-### 3.3 n sites TODO
+### 3.3 n sites
 
-fn = function(p)
+lifestage = 5
+
+# for factor in e_factors
+factor = 1.0
+
+exploitation_rates = exploitation_rates_org * factor
+p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
+p_general_flat = flatten_p(p_general)
+
+start_year = 2006
+end_year = 2018
+nyears = end_year - start_year + 1
+ndays = nyears * 365.0
+tspan_general = (0.0, ndays)
+
+prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
+# sol_general = solve(prob_general)
+
+fn = function (p)
   prob1 = remake(prob_general; p=p)
   sol = solve(prob1)
-  [sol[1, end], sol[2, end], sol[4, end], sol[5, end]]
+  indices = (lifestage - 1) * 8 .+ (1:8)  # 8 sites
+  [mean(sol[indices[1], :]), mean(sol[indices[2], :]), mean(sol[indices[3], :]), mean(sol[indices[4], :]), mean(sol[indices[5], :]), mean(sol[indices[6], :]), mean(sol[indices[7], :]), mean(sol[indices[8], :])] # mean population size for each site across all times.
 end
 
-distance_mat_bounds = Array{Float64}[]
+mig_probs_bounds = Array{Float64}[]
+for ind in eachindex(mig_probs)
+  entry = [mig_probs[ind], mig_probs[ind] + 0.001]
+  push!(mig_probs_bounds, entry)
+end
+distance_matrix_bounds = Array{Float64}[]
 for ind in eachindex(distance_matrix)
   entry = [distance_matrix[ind], distance_matrix[ind] + 0.001]
-  push!(distance_mat_bounds, entry)
+  push!(distance_matrix_bounds, entry)
 end
 bounds_n = [
   [0.0, 6], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
   [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
   [0.0, 0.1],
-  distance_mat_bounds...,
+  distance_matrix_bounds...,
   [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
   [16.0, 76.0],
   [20000, 90000],
-  [0.0, 0.2], [0.0, 0.2], [0.0, 0.2]
+  [0.0, 0.2], [0.0, 0.2], [0.0, 0.2],
+  mig_probs_bounds...
 ]
 
-m = gsa(fn, Sobol(), bounds_n, samples=100)
+output = "../figs/sensitivity_results_lifestage=$(lifestage)_e_factor=$(factor).jld2"
+isfile(output) ? load(output, "results") : m = gsa(fn, Sobol(), bounds_n, samples=100, batch=true) && save(output, "results", m)
+
+# Plot the results
+for site in 1:8
+  param_names = ["r", "d", "size_growth_rate", "distance_matrix", "exploitation_rates", "size_max", "K", "α", "mig_probs"]
+  important_parameter_indices = vcat(collect(1:5), # r for all life stages
+    vcat(6:10), # d for all life stages
+    vcat(76:83), # exploitation rates for all sites. (10+64+1):(10+64+1+8)
+    vcat(86:88), # α
+  )
+  important_parameter_names = ["r1", "r2", "r3", "r4", "r5", "d1", "d2", "d3", "d4", "d5", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "α1", "α2", "α3"]  ## Bar plot
+  normalized_mST = m.ST ./ sum(m.ST, dims=2)
+  sensitivity_indices = normalized_mST[site, important_parameter_indices]
+
+  f = Figure()
+  ax = Axis(f[1, 1], ylabel="Sensitivity index - total effect", xlabel="Parameter", xticks=(1:length(important_parameter_names), important_parameter_names))
+  bars = barplot!(ax, 1:length(important_parameter_names), sensitivity_indices, color=:black)
+  save("../figs/sensitivity_indices_barplot_total_effect_site=$(site)_lifestage=$(lifestage)_e_factor=$(factor).pdf", f)
+end
 
 ### -------------------------------
 ### 4. Data fitting

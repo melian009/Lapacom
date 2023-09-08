@@ -11,7 +11,7 @@ using CSV
 using DiffEqParamEstim
 using Optim
 using Symbolics
-using Plots
+using GLMakie
 import ForwardDiff.jacobian
 
 #=
@@ -269,67 +269,67 @@ sol_pa_mpa = solve(prob_pa_mpa,Tsit5())
 
 #Plots
 #Patella ordinaria
-Plots.plot(sol_po_before, vars=(0,1), yscale=:log10,  label= "Ne (1996-2006)")
-Plots.plot!(sol_po_before, vars=(0,2), yscale=:log10,  label= "Na (1996-2006)")
-Plots.plot!(sol_po_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_po_full, vars=(0,2), yscale=:log10, label= "Na (Full access)")
-Plots.plot!(sol_po_mpa, vars=(0,1), yscale=:log10, label= "Ne (MPA)")
-Plots.plot!(sol_po_mpa, vars=(0,2), yscale=:log10,  label= "Na (MPA)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
+lines(sol_po_before, vars=(0,1), yscale=:log10,  label= "Ne (1996-2006)")
+lines!(sol_po_before, vars=(0,2), yscale=:log10,  label= "Na (1996-2006)")
+lines!(sol_po_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
+lines!(sol_po_full, vars=(0,2), yscale=:log10, label= "Na (Full access)")
+lines!(sol_po_mpa, vars=(0,1), yscale=:log10, label= "Ne (MPA)")
+lines!(sol_po_mpa, vars=(0,2), yscale=:log10,  label= "Na (MPA)")
+title!("'Patella ordinaria'")
+xlabel!("t (days)")
+ylabel!("LOG10(N) (Nº individuals)")
 savefig!("SLC_po_N_Before_Full_MPA_.png")
 
-Plots.plot(sol_po_before, vars=(0,3), label= "Sa (1996-2006)")
-Plots.plot!(sol_po_full, vars=(0,3), label= "Sa (Full access)")
-Plots.plot!(sol_po_mpa, vars=(0,3),  label= "Sa (MPA)")
-Plots.title!("'Patella ordinaria'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("Sa (mm)")
-Plots.ylims!(55,57)
+lines(sol_po_before, vars=(0,3), label= "Sa (1996-2006)")
+lines!(sol_po_full, vars=(0,3), label= "Sa (Full access)")
+lines!(sol_po_mpa, vars=(0,3),  label= "Sa (MPA)")
+title!("'Patella ordinaria'")
+xlabel!("t (days)")
+ylabel!("Sa (mm)")
+ylims!(55,57)
 savefig!("SLC_po_S_Before_Full_MPA_.png")
 
 
 #Patella ordinaria
-Plots.plot(sol_pa_before, vars=(0,1), yscale=:log10,  label= "Ne (1996-2006)")
-Plots.plot!(sol_pa_before, vars=(0,2), yscale=:log10,  label= "Na (1996-2006)")
-Plots.plot!(sol_pa_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
-Plots.plot!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na (Full access)")
-Plots.plot!(sol_pa_mpa, vars=(0,1), yscale=:log10, label= "Ne (MPA)")
-Plots.plot!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na (MPA)")
-Plots.title!("'Patella aspera'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("LOG10(N) (Nº individuals)")
+lines(sol_pa_before, vars=(0,1), yscale=:log10,  label= "Ne (1996-2006)")
+lines!(sol_pa_before, vars=(0,2), yscale=:log10,  label= "Na (1996-2006)")
+lines!(sol_pa_full, vars=(0,1), yscale=:log10,  label= "Ne (Full access)")
+lines!(sol_pa_full, vars=(0,2), yscale=:log10, label= "Na (Full access)")
+lines!(sol_pa_mpa, vars=(0,1), yscale=:log10, label= "Ne (MPA)")
+lines!(sol_pa_mpa, vars=(0,2), yscale=:log10,  label= "Na (MPA)")
+title!("'Patella aspera'")
+xlabel!("t (days)")
+ylabel!("LOG10(N) (Nº individuals)")
 savefig!("SLC_pa_N_Before_Full_MPA_.png")
 
 
-Plots.plot(sol_pa_before, vars=(0,3), label= "Sa: Before")
-Plots.plot!(sol_pa_full, vars=(0,3), label= "Sa: Full access")
-Plots.plot!(sol_pa_mpa, vars=(0,3),  label= "Sa: MPA")
-Plots.title!("'Patella aspera'")
-Plots.xlabel!("t (days)")
-Plots.ylabel!("Sa (mm)")
-Plots.ylims!(55,56.5)
+lines(sol_pa_before, vars=(0,3), label= "Sa: Before")
+lines!(sol_pa_full, vars=(0,3), label= "Sa: Full access")
+lines!(sol_pa_mpa, vars=(0,3),  label= "Sa: MPA")
+title!("'Patella aspera'")
+xlabel!("t (days)")
+ylabel!("Sa (mm)")
+ylims!(55,56.5)
 savefig!("SLC_pa_S_Before_Full_MPA_.png")
 
 
 
 
 
-Plots.plot(sol_po_full, vars=(0,2), label= "Full access: 'Patella ordinaria")
-Plots.plot!(sol_pa_full, vars=(0,2),  label= "Full access: 'Patella aspera")
-Plots.ylims!(0,2000)
+lines(sol_po_full, vars=(0,2), label= "Full access: 'Patella ordinaria")
+lines!(sol_pa_full, vars=(0,2),  label= "Full access: 'Patella aspera")
+ylims!(0,2000)
 savefig!("SLC_Adults_Full_access.png")
 
 
-Plots.plot(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
-Plots.plot!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
-Plots.ylims!(0,2000)
+lines(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
+ines!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
+ylims!(0,2000)
 savefig!("SLC_Adults_MPS.png")
 
-Plots.plot(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
-Plots.plot!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
-Plots.ylims!(0,2000)
+lines(sol_po_mpa, vars=(0,2),  label= "MPA: 'Patella ordinaria")
+lines!(sol_pa_mpa, vars=(0,2),  label= "MPA: 'Patella aspera'")
+ylims!(0,2000)
 savefig!("SLC_Adults_Full_access.png")
 #Abuncances of spp A vs Abundances of spp B
 
