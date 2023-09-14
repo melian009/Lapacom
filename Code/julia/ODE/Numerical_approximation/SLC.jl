@@ -85,25 +85,25 @@ Average sizes before and after marine protected area implementations
 
 # Metapopulation dynamic model 
 function SLC_metapop_before!(du, u, p, t)
-  Ne, Na, Sa = u
-   i, r, K, H, X, g, de,da, Smax, gamma = p
-  du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
+  Na, Sa = u
+   i, r, K, H, X, g, da, Smax, gamma = p
+  #du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
   du[2] = dNa = (g * Ne * ((K - Ne) / K)) - (da[i] * Na) - (H[i] * Na)
   du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 
 function SLC_metapop_FULL!(du, u, p, t)
-    Ne, Na, Sa = u
-     i, r, K, H, X, g, de,da, Smax, gamma = p
-    du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
+    Na, Sa = u
+     i, r, K, H, X, g, da, Smax, gamma = p
+    #du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
     du[2] = dNa = (g * Ne * ((K - Ne) / K)) - (da[i] * Na) - ((1 - X(t))* H[i] * Na)
     du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 * (1 - X(t)) * H[i])))
 end
 
 function SLC_metapop_MPA!(du, u, p, t)
-  Ne, Na, Sa = u
+  Na, Sa = u
    i, r, K, X, g, de,da, Smax, gamma = p
-  du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
+  #du[1] = dNe = (X(t) * r[i] * Na * ((K - Na) / K)) - (de[i] * Ne) - (g * Ne)
   du[2] = dNa = (g * Ne * ((K - Ne) / K)) - (da[i] * Na)
   du[3] = dSa = gamma[i] * Sa * (1 - Sa / (Smax))
 end

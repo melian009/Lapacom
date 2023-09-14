@@ -1,3 +1,8 @@
+# We need to clean the repo focusing on the SLC.jl with two species. 
+
+
+
+
 using Pkg
 Pkg.activate(".")
 using ForwardDiff
@@ -252,4 +257,9 @@ J_SLC = Symbolics.jacobian([(R1* X * r1 * Na1) - (de1 * Ne1) - (g1 * Ne1),(R2* X
 
 Det_SLC = det(J_SLC)
 M = Symbolics.simplify(Det_SLC)
+
+
+#14 SEPT 2023
+analytical_SLC.jl
+
 
