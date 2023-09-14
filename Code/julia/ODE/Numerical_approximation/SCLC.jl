@@ -15,6 +15,7 @@ import ForwardDiff.jacobian
 using GLMakie
 
 
+
 #Pkg.add("CairoMakie") 
 #Pkg.add("DataFrames") 
 #Pkg.add("CSV")  
@@ -390,8 +391,10 @@ function simulate_NS_values()
           Saverage = mean(Sa_values[1:j])
           Smaturity = 1.34 * Saverage - 28.06
           R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
-          Na_values[j] = No * exp((X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) * t) + X_val * r * R * (K^2) - d - H * (1 - X_val)
-          Sa_values[j] = Smax * (1 - H * (1 - X_val)) - So * exp(gamma * t)
+          
+          Na_values_[j] = (K/2)*(K+(-d+H(i)*(1-X_val))/(X_val*r*R))
+          
+          Sa_values_[j] = (Smax*(1-H(i)))/2
       end
 
       N_ = maximum(Na_values)
