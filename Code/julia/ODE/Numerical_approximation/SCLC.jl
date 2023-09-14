@@ -357,74 +357,6 @@ function SLC!(du, u, p, t)
 end
 ```
 
-
-function X(t)
-  if (t % 365) / 365 >= 0.42
-      return 1.0 # Ciclo reproductivo
-  else
-      return 0.0 # Ciclo de explotación
-  end
-end
-
-#function simulate_NS_values()
-  No = 10000.0    # Abundancia inicial
-  So = 43.41      # Tamaño inicial
-  r = 2515.4/500    # Tasa reproductiva
-  K = 640000.0    # Capacidad de carga
-  d = 0.55        # Mortalidad natural
-  Smax = 56.0     # Tamaño máximo
-  gamma = 0.34    # Tasa de crecimiento
-
-  t_max = 365*2    # Tiempo final de la simulación
-  step_size = 1   # Intervalo de tiempo (días)
-
-  H_values = 0:0.5:100  # Tasas de explotación
-
-  NS_matrix = zeros(length(H_values), 3)   # Matriz de salida para los valores estimados de N, S y H
-
-for (i, H) in enumerate(H_values)
-      _values = 0:step_size:t_max
-      Na_values = zeros(length(t_values))
-      Sa_values = zeros(length(t_values))
-
-      for (j, t) in enumerate(t_values)
-          X_val = X(t)
-          Saverage = mean(Sa_values[1:j])
-          Smaturity = 1.34 * Saverage - 28.06
-          R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
-          
-          Na_values[i] = (K/2)*(K+(-d+H[i]*(1 - X_val))/(X_val*r*R))
-          
-          Sa_values[i] = (Smax*(1-H[i]))/2
-      end
-
-      N_ = maximum(Na_values)
-      S_ = maximum(Sa_values)
-
-      NS_matrix[i, 1] = H
-      NS_matrix[i, 2] = N_
-      NS_matrix[i, 3] = S_
-  end
-
-return NS_matrix
-
-NS_matrix = simulate_NS_values()
-
-# Graficar S vs H
-FIG1 = Figure()
-AX1 = Axis(FIG1[1, 1])
-lines!(AX1,NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S")
-save("AA_SLC_S.png", FIG1, dpi = 300)
-
-# Graficar N vs H
-FIG2 = Figure()
-AX2 = Axis(FIG2[1, 1])
-lines!(AX2,NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N")
-save("AA_SLC_N.png", FIG1, dpi = 300)
-
-
-``````
-
 Exp_lim = 0.9999                 # Exploitation max limit 
 m = 0.0001                       # Interval of exploitation values 
 Expl = 0:m:Exp_lim               # Expoitation values for plotting
@@ -455,14 +387,14 @@ for H in 0:m:Exp_lim
  
 end
 
-FIGN = Figure()
+
 lines(Expl,N_at,label="Nₐ")
 xlims!(0.0,1)
 xlabel!("E")
 ylabel!("N (nº individuals)")
 savefig!("SLC_N_prima.png")
 
-FIGS = Figure()
+
 lines(Expl,S_at,label="Sₐ")
 xlims!(0.0,1)
 xlabel!("E")
