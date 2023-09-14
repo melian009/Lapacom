@@ -15,6 +15,7 @@ import ForwardDiff.jacobian
 using GLMakie
 
 
+
 #Pkg.add("CairoMakie") 
 #Pkg.add("DataFrames") 
 #Pkg.add("CSV")  
@@ -263,6 +264,7 @@ p_CLC_pa = [re[2], Kt, rates[2], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
 start_year = 2006
 end_year = 2018
+
 nyears = end_year - start_year + 1
 ndays = nyears * 365.0
 t_span = (0.0, ndays) # Temporal ranges for simulations.
@@ -287,7 +289,7 @@ sol_SLC_full = solve(prob_SLC_full, Tsit5())
 fig1 = Figure()
 ax1 = Axis(fig1[1, 1])
 lines!(ax1, sol_SLC_full.t, [u[1] for u in sol_SLC_full.u], yscale=:log10, label="Na")
-save("SLC_N_Full_access.png", fig1, dpi = 300)
+#save("SLC_N_Full_access.png", fig1, dpi = 300)
 
 fig11 = Figure()
 ax11 = Axis(fig11[1, 1])
@@ -355,66 +357,46 @@ function SLC!(du, u, p, t)
 end
 ```
 
+Exp_lim = 0.9999                 # Exploitation max limit 
+m = 0.0001                       # Interval of exploitation values 
+Expl = 0:m:Exp_lim               # Expoitation values for plotting
+tspan = (0.0,365*2)              # Time range two years
+K = 640000.0    # Capacidad de carga                
+# Initial conditions of N_a, S_a
 
-function X(t)
-  if (t % 365) / 365 >= 0.42
-      return 1.0 # Ciclo reproductivo
-  else
-      return 0.0 # Ciclo de explotación
-  end
+N_at = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
+S_at = zeros(Float64,size(Expl)) # Void vector to array the size of adults for diferent exploitation values
+c = 0                              # C is the position of the vector N_et, N_at and S_at
+
+for H in 0:m:Exp_lim
+  
+ Smax = 56
+ X_val = 1
+ Saverage = mean([42 56])
+ Smaturity = 1.34 * Saverage - 28.06
+ R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
+
+ Na_values = (K/2)*(K+(-d+H*(1 - X_val))/(X_val*r*R))
+ 
+ Sa_values = (Smax*(1-H))/2
+
+ 
+ c=c+1
+ N_at[c,] = Na_values
+ S_at[c,] = Sa_values
+ 
 end
 
-function simulate_NS_values()
-  No = 10000.0    # Abundancia inicial
-  So = 43.41      # Tamaño inicial
-  r = 2515.4/500    # Tasa reproductiva
-  K = 640000.0    # Capacidad de carga
-  d = 0.55        # Mortalidad natural
-  Smax = 56.0     # Tamaño máximo
-  gamma = 0.34    # Tasa de crecimiento
 
-  t_max = 365*2    # Tiempo final de la simulación
-  step_size = 1   # Intervalo de tiempo (días)
+lines(Expl,N_at,label="Nₐ")
+xlims!(0.0,1)
+xlabel!("E")
+ylabel!("N (nº individuals)")
+savefig!("SLC_N_prima.png")
 
-  H_values = 0:0.5:100  # Tasas de explotación
 
-  NS_matrix = zeros(length(H_values), 3)   # Matriz de salida para los valores estimados de N, S y H
-
-  for (i, H) in enumerate(H_values)
-      t_values = 0:step_size:t_max
-      Na_values = zeros(length(t_values))
-      Sa_values = zeros(length(t_values))
-
-      for (j, t) in enumerate(t_values)
-          X_val = X(t)
-          Saverage = mean(Sa_values[1:j])
-          Smaturity = 1.34 * Saverage - 28.06
-          R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
-          Na_values[j] = No * exp((X_val * r * R * K * (1 - 2 * X_val * r * R) + ((2 * X_val * r * R)/K - 1)*(d + H * (1 - X_val))) * t) + X_val * r * R * (K^2) - d - H * (1 - X_val)
-          Sa_values[j] = Smax * (1 - H * (1 - X_val)) - So * exp(gamma * t)
-      end
-
-      N_ = maximum(Na_values)
-      S_ = maximum(Sa_values)
-
-      NS_matrix[i, 1] = H
-      NS_matrix[i, 2] = N_
-      NS_matrix[i, 3] = S_
-  end
-
-  return NS_matrix
-end
-
-NS_matrix = simulate_NS_values()
-
-# Graficar S vs H
-FIG1 = Figure()
-AX1 = Axis(FIG1[1, 1])
-lines!(AX1,NS_matrix[:, 1], NS_matrix[:, 3], xlabel = "H", ylabel = "S")
-save("AA_SLC_S.png", FIG1, dpi = 300)
-
-# Graficar N vs H
-FIG2 = Figure()
-AX2 = Axis(FIG2[1, 1])
-lines!(AX2,NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N")
-save("AA_SLC_N.png", FIG1, dpi = 300)
+lines(Expl,S_at,label="Sₐ")
+xlims!(0.0,1)
+xlabel!("E")
+ylabel!("S(mm)")
+savefig!("SLC_S_prima.png")
