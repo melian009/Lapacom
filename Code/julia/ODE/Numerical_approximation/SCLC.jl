@@ -264,6 +264,7 @@ p_CLC_pa = [re[2], Kt, rates[2], gs, de_, dt_, dv_, dj_, da_, Sm, gammas[2]]
 
 start_year = 2006
 end_year = 2018
+
 nyears = end_year - start_year + 1
 ndays = nyears * 365.0
 t_span = (0.0, ndays) # Temporal ranges for simulations.
@@ -288,7 +289,7 @@ sol_SLC_full = solve(prob_SLC_full, Tsit5())
 fig1 = Figure()
 ax1 = Axis(fig1[1, 1])
 lines!(ax1, sol_SLC_full.t, [u[1] for u in sol_SLC_full.u], yscale=:log10, label="Na")
-save("SLC_N_Full_access.png", fig1, dpi = 300)
+#save("SLC_N_Full_access.png", fig1, dpi = 300)
 
 fig11 = Figure()
 ax11 = Axis(fig11[1, 1])
@@ -365,7 +366,7 @@ function X(t)
   end
 end
 
-function simulate_NS_values()
+#function simulate_NS_values()
   No = 10000.0    # Abundancia inicial
   So = 43.41      # Tamaño inicial
   r = 2515.4/500    # Tasa reproductiva
@@ -381,8 +382,8 @@ function simulate_NS_values()
 
   NS_matrix = zeros(length(H_values), 3)   # Matriz de salida para los valores estimados de N, S y H
 
-  for (i, H) in enumerate(H_values)
-      t_values = 0:step_size:t_max
+for (i, H) in enumerate(H_values)
+      _values = 0:step_size:t_max
       Na_values = zeros(length(t_values))
       Sa_values = zeros(length(t_values))
 
@@ -392,9 +393,9 @@ function simulate_NS_values()
           Smaturity = 1.34 * Saverage - 28.06
           R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
           
-          Na_values_[j] = (K/2)*(K+(-d+H(i)*(1-X_val))/(X_val*r*R))
+          Na_values[i] = (K/2)*(K+(-d+H[i]*(1 - X_val))/(X_val*r*R))
           
-          Sa_values_[j] = (Smax*(1-H(i)))/2
+          Sa_values[i] = (Smax*(1-H[i]))/2
       end
 
       N_ = maximum(Na_values)
@@ -405,8 +406,7 @@ function simulate_NS_values()
       NS_matrix[i, 3] = S_
   end
 
-  return NS_matrix
-end
+return NS_matrix
 
 NS_matrix = simulate_NS_values()
 
@@ -421,3 +421,50 @@ FIG2 = Figure()
 AX2 = Axis(FIG2[1, 1])
 lines!(AX2,NS_matrix[:, 1], NS_matrix[:, 2], xlabel = "H", ylabel = "N")
 save("AA_SLC_N.png", FIG1, dpi = 300)
+
+
+``````
+
+Exp_lim = 0.9999                 # Exploitation max limit 
+m = 0.0001                       # Interval of exploitation values 
+Expl = 0:m:Exp_lim               # Expoitation values for plotting
+tspan = (0.0,365*2)              # Time range two years
+K = 640000.0    # Capacidad de carga                
+# Initial conditions of N_a, S_a
+
+N_at = zeros(Float64,size(Expl)) # Void vector to array number of adults for diferent exploitation values
+S_at = zeros(Float64,size(Expl)) # Void vector to array the size of adults for diferent exploitation values
+c = 0                              # C is the position of the vector N_et, N_at and S_at
+
+for H in 0:m:Exp_lim
+  
+ Smax = 56
+ X_val = 1
+ Saverage = mean([42 56])
+ Smaturity = 1.34 * Saverage - 28.06
+ R = min(max(0.5 * (1.0 + (Saverage - Smaturity) / (Smax - Smaturity)), 0.0), 1.0)
+
+ Na_values = (K/2)*(K+(-d+H*(1 - X_val))/(X_val*r*R))
+ 
+ Sa_values = (Smax*(1-H))/2
+
+ 
+ c=c+1
+ N_at[c,] = Na_values
+ S_at[c,] = Sa_values
+ 
+end
+
+FIGN = Figure()
+lines(Expl,N_at,label="Nₐ")
+xlims!(0.0,1)
+xlabel!("E")
+ylabel!("N (nº individuals)")
+savefig!("SLC_N_prima.png")
+
+FIGS = Figure()
+lines(Expl,S_at,label="Sₐ")
+xlims!(0.0,1)
+xlabel!("E")
+ylabel!("S(mm)")
+savefig!("SLC_S_prima.png")
