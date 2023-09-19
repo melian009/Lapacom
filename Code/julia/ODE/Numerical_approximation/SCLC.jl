@@ -356,7 +356,6 @@ function SLC!(du, u, p, t)
  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
 ```
-
 Exp_lim = 0.9999                 # Exploitation max limit 
 m = 0.0001                       # Interval of exploitation values 
 Expl = 0:m:Exp_lim               # Expoitation values for plotting
@@ -400,3 +399,4 @@ xlims!(0.0,1)
 xlabel!("E")
 ylabel!("S(mm)")
 savefig!("SLC_S_prima.png")
+
