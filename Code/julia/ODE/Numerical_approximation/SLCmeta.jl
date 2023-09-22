@@ -59,7 +59,7 @@ u0 = [100.0, 100.0, 25.0, 25.0]  # Initial conditions
 tspan = (0.0, 1000.0)  # Time span for the simulation (from t=0 to t=1000)
 solver = Tsit5()
 prob = ODEProblem(my_ode!, u0, tspan)
-sol = solve(prob, solver)
+sol = solve(prob, solver) # Eros: There is an error when I run this line and I don't know how to fix it. "Error: BoundsError: attempt to access Float64 at index [2]"
 
 plot(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
 

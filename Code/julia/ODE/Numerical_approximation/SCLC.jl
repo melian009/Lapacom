@@ -12,7 +12,7 @@ using DiffEqParamEstim
 using Optim
 using Symbolics
 import ForwardDiff.jacobian
-using GLMakie
+#using GLMakie
 
 
 
@@ -342,7 +342,7 @@ lines!(ax5, sol_CLC_full.t, [u[6] for u in sol_CLC_full.u], yscale=:log10, label
 xlabel = "time", ylabel = "Sa (mm)")
 save("CLC_S_Full_access.png", fig4, dpi = 300)
 
-```
+#=
 Analytical Aproximation of SLC in One Place.
 
 function SLC!(du, u, p, t)
@@ -355,7 +355,8 @@ function SLC!(du, u, p, t)
  du[1] = dNa = X(t) * r * Na * Rep_cap(Saverage, Smaturity, Smax) * (K - Na/K) - (1 - X(t)) * H(i) * Na - (da * Na) 
  du[2] = dSa = gamma[i] * Sa * (1 - Sa / (Smax - (1 - H[i])))
 end
-```
+=#
+
 Exp_lim = 0.9999                 # Exploitation max limit 
 m = 0.0001                       # Interval of exploitation values 
 Expl = 0:m:Exp_lim               # Expoitation values for plotting
@@ -401,11 +402,8 @@ ylabel!("S(mm)")
 savefig!("SLC_S_prima.png")
 
 
-#= 
-#Exp_lim = 0.9999                 # Exploitation max limit 
-#m = 0.0001                       # Interval of exploitation values
-fig_acum = figure(1)              # Acumulative simulation figure
-for n in 0:m:Exp_lim
+
+#Check SLCmeta.jl
 
 function my_ode!(du, u, t, p)
     x1, x2, y1, y2 = u
@@ -420,37 +418,61 @@ function my_ode!(du, u, t, p)
    # reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
    # re = reggs / 500     # Population growth rate: re[1,1] re[2,1]
     
-   R1 = 1
-   R2 = 1
-   X =  0
-   K = 640000          # Carrying capacity 
-   H1 = n    #0.639
-   H2 = 0.57 # Exploitation rate (H)
-   g1 = 0.32
-   g2 = 0.36 # Adult growth rate
-    #rates2 = [0.02,0.01]
-    #gEA = 0.006          # Instant conversion between stages.
-   d1 = 0.55
-   d2 = 0.59    # Natural mortality rate for adults
-   Smax = 56              # Maximum size for adults
-   re1 = 0.32
-   re2 = 0.36 # Adult growth rate
-   c12 = 0.05#competition term species 2 on 1
-   c21 = 0.05#competition term species 1 on 2
+    du[1] = dx1 = (X(t) * re1 * R1 * x1)*((K - x1)/K) - (d1 * x1) - H1*(1 - X(t))*x1 - c12*x1*x2
+    du[2] = dx2 = (X(t) * re2 * R2 * x2)*((K - x2)/K) - (d2 * x2) - H2*(1 - X(t))*x2 - c21*x1*x2
+    du[3] = dy1 = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X(t))))))
+    du[4] = dy2 = (g2 * y2) * (1 - (y2/(Smax * (1 - H2 * (1-X(t))))))
+end
+
+# Reprouctive cycle X
+function rep(t)
+  if (t % 365) / 365 >= 0.42
+    return 1.0 # Reproductive Cycle
+  else
+    return 0.0 # Exploitation Cycle
+  end
+end
+
+#Initial parameters
+u0 = [100.0, 100.0, 25.0, 25.0]
+tspan = (0.0, 1000.0)
+
+R1 = 1
+R2 = 1
+K = 640000          # Carrying capacity 
+H1 = 0.639
+H2 = 0.57 # Exploitation rate (H)
+g1 = 0.32
+g2 = 0.36 # Adult growth rate
+ #rates2 = [0.02,0.01]
+ #gEA = 0.006          # Instant conversion between stages.
+d1 = 0.55
+d2 = 0.59  # Natural mortality rate for adults
+Smax = 56              # Maximum size for adults
+re1 = 0.32
+re2 = 0.36 # Adult growth rate
+c12 = 0.05 #competition term species 2 on 1
+c21 = 0.05 #competition term species 1 on 2
+
+# Exploitation gradient
+n_values = 0:0.05:1
+
+# Cubic matrix for save simulation outputs 
+du_t_n = zeros(length(u0), length(tspan[1]:tspan[2]), length(n_values))
+sol = zeros(length(u0), length(tspan[1]:tspan[2]))
+# Simulation loop for each exploitation value of the gradient
+
+#for (i, n) in enumerate(n_values)
+ n_values = 0.5
+
+    p_solve = re1, re2, K, n_values, H2, rep, R1, R2, g1, g2, d1, d2, c12, c21, Smax
+    # Define ODE Problem with a new H1 value
+    prob = ODEProblem(my_ode!, u0, tspan, p_solve)
     
-    du[1] = (X * re1 * R1 * x1)*((K - x1)/K) - (d1 * x1) - H1*(1 - X)*x1 - c12*x1*x2
-    du[2] = (X * re2 * R2 * x2)*((K - x2)/K) - (d2 * x2) - H2*(1 - X)*x2 - c21*x1*x2
-    du[3] = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X)))))
-    du[4] = (g2 * y2) * (1 - (y2/(Smax * (1 - H2 * (1-X)))))
-end
+    # Solve ODE problem and save solution in a cubic matrix
+    sol = solve(prob, Tsit5()) # There is an error when I run this line and I don't know how to fix it.
+    du_t_n[:, :, i] = sol
+#end
 
-u0 = [100.0, 100.0, 25.0, 25.0]  # Initial conditions
-tspan = (0.0, 1000.0)  # Time span for the simulation (from t=0 to t=1000)
-solver = Tsit5()
-prob = ODEProblem(my_ode!, u0, tspan)
-sol = solve(prob, solver)
+fig_acum = plot!(du_t_n[1,500,:], xlabel="Exploitation", ylabel="State Variables", label=["n"])
 
-fig_acum = plot!(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
-
-end
-=#
