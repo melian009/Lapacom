@@ -92,21 +92,37 @@ period = zeros(Float64,size(1:365*2))
 #Plot de t_ vs X_ para ver los periodos de reproducción intermitentes en el tiempo.
 
 
-period = zeros(Float64,size(1:365*5))
 function X_(t,t_0,k)
   phi(t) = 2*pi*(t-t_0)/(0.42*365)
-  X(t) = 0.5*(1-sin(phi(t)))
+  X(t) = 0.5(1-sin(k-phi(t)))
   return X(t)
 end
 
+function X(t)
+  if (t % 365) / 365 >= 0.42
+    return 1.0 # Reproductive Cycle
+  else
+    return 0.0 # Exploitation Cycle
+  end
+end
+
+period = zeros(Float64,size(1:365.14*5))
+periodX = zeros(Float64,size(1:365.14*5))
 c=1
-for t_ in 1:(365*5)
-period[c] = X_(t_,0,0.5)
+for t_ in 1:(365.14*5)
+period[c] = X_(t_,365*0.42,0.1)
+periodX[c] = X(t_)
 c=c+1
 end
 period 
-plot(period)
 
+
+plot(period, label="Reproductive cycle by gradient")
+plot!(periodX, label="Reproductive cicle by factor")
+xlabel!("Time (days)")
+ylabel!("Reproductive Cycle")
+
+savefig!("X_cycle.png", dpi = 300)
 
 R_ = 1.00
 r_ = 0.36 #0.32
