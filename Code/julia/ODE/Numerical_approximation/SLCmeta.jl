@@ -85,8 +85,8 @@ sol = solve(prob, solver) # Eros: There is an error when I run this line and I d
 #plot(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
 
 N[c,] = sol[end]
-plot(H_,N, xlabel="Exploitation rate", ylabel="Abundance",
-end
+plot(H_,N, xlabel="Exploitation rate", ylabel="Abundance")
+
 
 #lines(H_,Ne_,label="N",colour="blue")
 #lines!(Expl,N_,label="N (adults)",colour="red")
