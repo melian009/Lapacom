@@ -13,43 +13,48 @@ using Plots
 
 #Check analytical_SLC_without_S.jl 
 
-Exp_lim = 1                 # Exploitation max limit 
-m=0.05                      # Interval of exploitation values 
-for H = 0:m:Exp_lim
-end
+#Exp_lim = 1                 # Exploitation max limit 
+#m=0.05                      # Interval of exploitation values 
+#for H = 0:m:Exp_lim         #exploitation gradient
+#end
 function my_ode!(du, u, t, p)
     x1, x2, y1, y2 = u
     re1, re2, K, H1, H2, R1, R2, d1, d2, c12, c21, Smax, g1, g2 = p
     
+    function X(t)
+      if (t % 365) / 365 >= 0.42
+        return 1.0 # Reproductive Cycle
+      else
+        return 0.0 # Exploitation Cycle
+      end
+     end
+  
    
-   function X(t)
-    if (t % 365) / 365 >= 0.42
-      return 1.0 # Reproductive Cycle
-    else
-      return 0.0 # Exploitation Cycle
-    end
-   end
 
-    du[1] = x1 = (X(t) * re1 * R1 * x1)*((K - x1)/K) - (d1 * x1) - H1*(1 - X(t))*x1 - c12*x1*x2
-    du[2] = x2 = (X(t) * re2 * R2 * x2)*((K - x2)/K) - (d2 * x2) - H2*(1 - X(t))*x2 - c21*x2*x1
-    du[3] = y1 = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X(t))))))
-    du[4] = y2 = (g2 * y2) * (1 - (y2/(Smax * (1 - H2 * (1-X(t))))))
+    du[1] = (X(t) * re1 * R1 * x1)*((K - x1)/K) - (d1 * x1) - H1*(1 - X(t))*x1 - c12*x1*x2
+    du[2] = (X(t) * re2 * R2 * x2)*((K - x2)/K) - (d2 * x2) - H2*(1 - X(t))*x2 - c21*x2*x1
+    du[3] = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X(t))))))
+    du[4] = (g2 * y2) * (1 - (y2/(Smax * (1 - H2 * (1-X(t))))))
 end
 
-p_2=[0.32,0.36,640000,0.639 , 0.57, 1, 1, 0.55, 0.59, 0.05, 0.05,56, 0.6,0.6]
+#=
+function X_(t,t_0,k)
+  phi(t) = 2*pi*(t-t_0)/0.42
+  X(t) = 0.5*(1*-tanh(k-sen(phi(t))))
+  return X(t)
+end
+=#
 
-u0 = [100.0, 100.0, 25.0, 25.0]  # Initial conditions
+
+u0 = [1000.0, 1000.0, 25.0, 25.0]  # Initial conditions
 tspan = (1.0, 365*2)  # Time span for the simulation (from t=0 to t=1000)
-solver = Tsit5()
-prob = ODEProblem(my_ode!, u0, tspan)
-sol = solve(prob, solver) # "Error: BoundsError: attempt to access Float64 at index [2]"
 
-#plot(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
+p_1=[0.32, 0.36, 640000, 0.639, 0.57, 1, 1, 0.55, 0.59, 0.05, 0.05,56, 0.6,0.6]
 
-N[c,] = sol[end]
-plot(H_,N, xlabel="Exploitation rate", ylabel="Abundance")
+prob = ODEProblem(my_ode!, u0, tspan, p_1)
+sol = solve(prob, Tsit5()) # "Error: BoundsError: attempt to access Float64 at index [2]"
 
-
+plot(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
 
 
 
@@ -73,7 +78,7 @@ function ode_system_solutions!(du, u, p, t)
     du[1] = Nai1 = 1/(X*r*R*2*x1)*(K*H*(1-X(t))+c12*x2-X*r*R*K+K*d) #} When X = 1 Reproductive cycle ON.
     du[2] = Sai1 = 1/2*(Smax*(1-H*(1-X)))
    else 
-    du[1] = Nai2 = Na0                                             #} When X = 0 Reproductive cycle OFF Nai2 is the last value of abundances from their previous reproductive cycle.
+    du[1] = Nai2 = Na0                                             #} When X = 0 Reproductive cycle OFF Nai0 is the last value of abundances from their previous reproductive cycle.
     du[2] = Sai2 = 1/2*(Smax*(1-H*(1-X)))
    end
 
@@ -85,23 +90,37 @@ tspan = (0.0, 1000)  # Time span for the simulation (from t=0 to t=1000)
 period = zeros(Float64,size(1:365*2))
 # X, R, r, K, d, H, c12, Smax
 #Plot de t_ vs X_ para ver los periodos de reproducción intermitentes en el tiempo.
-for t_ in 1:(365*2)
-#period = X(t_)
+
+
+period = zeros(Float64,size(1:365*5))
+function X_(t,t_0,k)
+  phi(t) = 2*pi*(t-t_0)/(0.42*365)
+  X(t) = 0.5*(1-sin(phi(t)))
+  return X(t)
 end
 
-R_ = 1.0
+c=1
+for t_ in 1:(365*5)
+period[c] = X_(t_,0,0.5)
+c=c+1
+end
+period 
+plot(period)
+
+
+R_ = 1.00
 r_ = 0.36 #0.32
-K_ = 640000.0          # Carrying capacity
-d1_ = 0.59
+K_ = 640000.00        # Carrying capacity
+d1_ = 0.590
 H1_ = 0.639
-c12_ = 0.05#competition term species 2 on 1
+c12_ = 0.05 #competition term species 2 on 1
 Smax_ = 56.0             # Maximum size for adults
 Na_0 = 100 # Minimum size of population (lower limit)
-p_ = [R_,r_,K_,d1_,H1_,c12_,Smax_, Na_0]
+p_2 = [R_,r_,K_,d1_,H1_,c12_,Smax_, Na_0]
 
 
 # Define the ODE problem
-prob = ODEProblem(ode_system_solutions!, u0, tspan,p_)
+prob = ODEProblem(ode_system_solutions!, u0, tspan, p_2)
 
 # Solve the ODE numerically
 sol = solve(prob) 
