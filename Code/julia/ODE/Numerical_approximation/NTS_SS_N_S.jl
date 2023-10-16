@@ -117,6 +117,7 @@ end
 period 
 
 
+
 plot(period, label="Reproductive cycle by gradient")
 plot!(periodX, label="Reproductive cicle by factor")
 xlabel!("Time (days)")
