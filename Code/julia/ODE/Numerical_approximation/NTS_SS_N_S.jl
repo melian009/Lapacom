@@ -6,6 +6,7 @@ Pkg.activate(".")
 using LinearAlgebra
 using DifferentialEquations
 using Plots
+using Statistics
 
 
 # Simple life cycle on one site.
@@ -17,64 +18,32 @@ using Plots
 #m=0.05                      # Interval of exploitation values 
 #for H = 0:m:Exp_lim         #exploitation gradient
 #end
-function my_ode!(du, u, t, p)
-    x1, y1,= u
-    re1, K, H1, R1, d1, c12, x2, Smax, g1 = p
+function MSLC!(du, u, t, p)
+    Na, Sa,= u
+    X, re, K, H, R, d, c12, xj, Smax, g = p
     
-    function X(t)
-      if (t % 365) / 365 >= 0.42
-        return 1.0 # Reproductive Cycle
-      else
-        return 0.0 # Exploitation Cycle
-      end
-     end
   
-    du[1] = (X(t) * re1 * R1 * x1)*((K - x1)/K) - (d1 * x1) - H1*(1 - X(t))*x1 - c12*x1*x2
-    du[2] = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X(t))))))
-    end
+    du[1] = dNa = (X(t) * re * R * Na)*((K - Na)/K) - (d * Na) - H*(1 - X(t)) * Na - c12 * Na * x2
+    du[2] = dSa = (g * Sa) * (1 - (Sa/(Smax * (1 - H * (1 - X(t))))))
+end
 
-#=
-function X_(t,t_0,k)
-  phi(t) = 2*pi*(t-t_0)/0.42
-  X(t) = 0.5*(1*-tanh(k-sen(phi(t))))
+
+function X_(t)
+  phi(t) = 2*pi*(t-0)/0.42
+  X(t) = 0.5*(1*-tanh(0.5-sen(phi(t))))
   return X(t)
 end
-=#
 
+#=
 
 u0 = [1000.0, 25.0]  # Initial conditions
 tspan = (1.0, 365*2)  # Time span for the simulation (from t=0 to t=1000)
-p_1=[0.32, 640000, 0.639, 1, 0.55, 0.5, 10000, 56, 0.6]
+p_1=[X_,0.32, 640000, 0.639, 1, 0.55, 0.5, 10000, 56, 0.6]
 
-prob = ODEProblem(my_ode!, u0, tspan, p_1)
+prob = ODEProblem(MSLC!, u0, tspan, p_1)
 sol = solve(prob, Tsit5()) # "Error: BoundsError: attempt to access Float64 at index [2]"
 
 plot(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
-
-
-
-# Non-trivial solution for Na and Sa on a Single Site.
-
-for t_ in 1:365*5 
-   function X(t)
-    if (t % 365) / 365 >= 0.42
-      return 1.0 # Reproductive Cycle
-    else
-      return 0.0 # Exploitation Cycle
-    end
-   end
-
-   #Non trivial solution expresions.
-
-   if X(t) == 1
-    du[1] = Nai1 = 1/(X*r*R*2*x1)*(K*H*(1-X(t))+c12*x2-X*r*R*K+K*d) #} When X = 1 Reproductive cycle ON.
-    du[2] = Sai1 = 1/2*(Smax*(1-H*(1-X)))
-   else 
-    du[1] = Nai2 = Na0                                             #} When X = 0 Reproductive cycle OFF Nai0 is the last value of abundances from their previous reproductive cycle.
-    du[2] = Sai2 = 1/2*(Smax*(1-H*(1-X)))
-   end
-
-end
 
 
 u0 = [2500.0,25.0]  # Initial conditions for [x, y]
@@ -116,24 +85,223 @@ xlabel!("Time (days)")
 ylabel!("Reproductive Cycle")
 
 savefig!("X_cycle.png", dpi = 300)
+=#
 
-R_ = 1.00
-r_ = 0.36 #0.32
-K_ = 640000.00        # Carrying capacity
+
+
+
+
+
+# Non-trivial solution for Na and Sa on a Single Site.
+R_ = 500.00
+avg_oocytes = 385_613 # This is the actual mean. mean([92098, 804183])
+reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
+r_= reggs
+K_ = 2000    # Carrying capacity
+
+
 d1_ = 0.590
-H1_ = 0.639
-c12_ = 0.05 #competition term species 2 on 1
+#H1_ = 0.639
+#c12_ = 0.5 #competition term species 2 on 1
 Smax_ = 56.0             # Maximum size for adults
-Na_0 = 100 # Minimum size of population (lower limit)
-p_2 = [R_,r_,K_,d1_,H1_,c12_,Smax_, Na_0]
+Naj = 2000
 
 
-# Define the ODE problem
-prob = ODEProblem(ode_system_solutions!, u0, tspan, p_2)
 
-# Solve the ODE numerically
-sol = solve(prob) 
-````ERROR: MethodError: no method matching -(::Int64, ::var"#X#8") ```
 
-# Plot the solution
-plot(sol, xlabel="Time", ylabel="Na (nº individuals)", label=["Na_i*"])
+
+n=2    #Number of years in the simulation
+tspan = length(zeros(Float64,size(1:365.14*n)))
+hspan = length(zeros(Float64, size(0:0.1:1)))
+span = ones(Float64,size(1:365.14*n))
+Kspan = ones(Float64,size(1:365.14*n))*K_ 
+R_span = ones(Float64,size(1:365.14*n))*R_
+Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+
+
+H_r = range(0, 1, length=hspan)
+H_span = ones(Float64,hspan)
+cij_span = ones(Float64,hspan)
+
+
+for i in 1:length(H_span)
+    H_span[i] = H_r[i]
+    cij_span[i] = H_r[i]
+end
+
+H_span
+cij_span
+
+Nai = zeros(tspan,hspan)
+Sai = zeros(tspan,hspan)
+period = zeros(tspan)
+
+
+
+for i in 1:length(cij_span)
+  cij_ = cij_span[5]
+  H_i = H_span[i]
+  c=1 
+  Nai1 = zeros(Float64,size(1:365.14*n))
+  Sai1 = zeros(Float64,size(1:365.14*n))
+  periodX = zeros(tspan)
+
+  
+  for t_ in 1:(365.14*n)
+    t_0 = (365.14*0.42)
+    k=0.1
+      phi(t_) = 2*pi*(t_ - t_0)/(0.42 * 365)
+      periodX[c] = 0.5*(1 - sin(k-phi(t_)))
+      
+      #Non trivial solution expresions
+        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_ * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
+        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
+    c=c+1
+    end
+    Nai[:,i] = Nai1
+    Sai[:,i] = Sai1
+
+end
+
+plot(Nai, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], ylim=(0,K_/2*1.2), legend=:right)
+plot!(Kspan/2,label=false, color=:red)
+annotate!(120, K_/2*1.03, text("K/2", :red, :center, 7))
+ylabel!("Abuncance population")
+xlabel!("Time (days)")
+plot!(periodX*800, label="X(t)",color=:blue, style = :dash)
+plot!(span*800, c=:blue, style = :dash, label=false)
+plot!(span*0, color=:blue, style = :dash, label=false)
+annotate!(50, 830, text("X(t)=1", :blue, :center, 8))
+annotate!(50, 30, text("X(t)=0", :blue, :center, 8))
+
+
+
+
+plot(Sai, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], legend=:right)
+plot!(Sm_span,color=:red,label = false)
+annotate!(-150, Smax_/2, text("Smax/2", :red, :center, 8))
+
+plot!(periodX*10, label="X(t)",color=:blue, style = :dash)
+plot!(span*10, color=:blue, style = :dash, label=false)
+plot!(span*0, color=:blue, style = :dash, label=false)
+annotate!(50, 11, text("X(t)=1", :blue, :center, 8))
+annotate!(50, 1, text("X(t)=0", :blue, :center, 8))
+xlabel!("Time (days)")
+ylabel!("Adult Size (mm)")
+
+
+#Na and Sa vs H
+
+Sa_H = ones(Float64,hspan)
+Na_H = ones(Float64,hspan)
+
+for j in 1:hspan
+Sa_H[j] = minimum(Sai[:,j])
+Na_H[j] = mean(Sai[:,j])
+end
+Sa_H[1]
+
+plot(H_span,Sa_H)
+plot(H_span,Na_H)
+
+
+
+
+
+
+
+
+
+
+# Non-trivial solution for Na and Sa on a Single Site.
+R_ = 50000.00
+avg_oocytes = 385_613 # This is the actual mean. mean([92098, 804183])
+reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
+r_= reggs
+K_ = 10000    # Carrying capacity
+
+
+d1_ = 0.590
+#H1_ = 0.639
+#c12_ = 0.5 #competition term species 2 on 1
+Smax_ = 56.0             # Maximum size for adults
+Naj = 2500
+
+
+
+
+
+n=2    #Number of years in the simulation
+tspan = length(zeros(Float64,size(1:365.14*n)))
+hspan = length(zeros(Float64, size(0:0.1:1)))
+span = ones(Float64,size(1:365.14*n))
+Kspan = ones(Float64,size(1:365.14*n))*K_ 
+R_span = ones(Float64,size(1:365.14*n))*R_
+Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+
+
+H_r = range(0, 1, length=hspan)
+H_span = ones(Float64,hspan)
+cij_span = ones(Float64,hspan)
+
+for i in 1:length(H_span)
+  H_span[i] = H_r[i]
+  cij_span[i] = H_r[i]
+end
+
+
+
+#cij gradient. 
+
+for i in 1:length(H_span)
+  cij_ = cij_span[i]
+  H_i = H_span[5]
+  c=1 
+  Nai1 = zeros(Float64,size(1:365.14*n))
+  Sai1 = zeros(Float64,size(1:365.14*n))
+  periodX = zeros(tspan)
+
+  
+  for t_ in 1:(365.14*n)
+    t_0 = (365.14*0.42)
+    k=0.1
+      phi(t_) = 2*pi*(t_ - t_0)/(0.42 * 365)
+      periodX[c] = 0.5*(1 - sin(k-phi(t_)))
+      
+      #Non trivial solution expresions
+        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_ * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
+        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
+    c=c+1
+    end
+    Nai[:,i] = Nai1
+    Sai[:,i] = Sai1
+
+end
+
+
+
+plot(Nai, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], ylim=(0,K_/2*1.2), legend=:right)
+plot!(Kspan/2,label=false, color=:red)
+annotate!(120, K_/2*1.03, text("K/2", :red, :center, 7))
+ylabel!("Abuncance population")
+xlabel!("Time (days)")
+plot!(periodX*800, label="X(t)",color=:blue, style = :dash)
+plot!(span*800, c=:blue, style = :dash, label=false)
+plot!(span*0, color=:blue, style = :dash, label=false)
+annotate!(50, 830, text("X(t)=1", :blue, :center, 8))
+annotate!(50, 30, text("X(t)=0", :blue, :center, 8))
+
+
+
+
+plot(Sai, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], legend=:right)
+plot!(Sm_span,color=:red,label = false)
+annotate!(-150, Smax_/2, text("Smax/2", :red, :center, 8))
+
+plot!(periodX*10, label="X(t)",color=:blue, style = :dash)
+plot!(span*10, color=:blue, style = :dash, label=false)
+plot!(span*0, color=:blue, style = :dash, label=false)
+annotate!(50, 11, text("X(t)=1", :blue, :center, 8))
+annotate!(50, 1, text("X(t)=0", :blue, :center, 8))
+xlabel!("Time (days)")
+ylabel!("Adult Size (mm)")
