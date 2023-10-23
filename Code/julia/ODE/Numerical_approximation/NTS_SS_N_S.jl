@@ -18,8 +18,8 @@ using Plots
 #for H = 0:m:Exp_lim         #exploitation gradient
 #end
 function my_ode!(du, u, t, p)
-    x1, x2, y1, y2 = u
-    re1, re2, K, H1, H2, R1, R2, d1, d2, c12, c21, Smax, g1, g2 = p
+    x1, y1,= u
+    re1, K, H1, R1, d1, c12, x2, Smax, g1 = p
     
     function X(t)
       if (t % 365) / 365 >= 0.42
@@ -29,13 +29,9 @@ function my_ode!(du, u, t, p)
       end
      end
   
-   
-
     du[1] = (X(t) * re1 * R1 * x1)*((K - x1)/K) - (d1 * x1) - H1*(1 - X(t))*x1 - c12*x1*x2
-    du[2] = (X(t) * re2 * R2 * x2)*((K - x2)/K) - (d2 * x2) - H2*(1 - X(t))*x2 - c21*x2*x1
-    du[3] = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X(t))))))
-    du[4] = (g2 * y2) * (1 - (y2/(Smax * (1 - H2 * (1-X(t))))))
-end
+    du[2] = (g1 * y1) * (1 - (y1/(Smax * (1 - H1 * (1-X(t))))))
+    end
 
 #=
 function X_(t,t_0,k)
@@ -46,10 +42,9 @@ end
 =#
 
 
-u0 = [1000.0, 1000.0, 25.0, 25.0]  # Initial conditions
+u0 = [1000.0, 25.0]  # Initial conditions
 tspan = (1.0, 365*2)  # Time span for the simulation (from t=0 to t=1000)
-
-p_1=[0.32, 0.36, 640000, 0.639, 0.57, 1, 1, 0.55, 0.59, 0.05, 0.05,56, 0.6,0.6]
+p_1=[0.32, 640000, 0.639, 1, 0.55, 0.5, 10000, 56, 0.6]
 
 prob = ODEProblem(my_ode!, u0, tspan, p_1)
 sol = solve(prob, Tsit5()) # "Error: BoundsError: attempt to access Float64 at index [2]"
@@ -60,10 +55,7 @@ plot(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
 
 # Non-trivial solution for Na and Sa on a Single Site.
 
-function ode_system_solutions!(du, u, p, t)
-   x1, x2 = u
-   R, r, K, d, H, c12, Smax, Na0 = p
-    
+for t_ in 1:365*5 
    function X(t)
     if (t % 365) / 365 >= 0.42
       return 1.0 # Reproductive Cycle
