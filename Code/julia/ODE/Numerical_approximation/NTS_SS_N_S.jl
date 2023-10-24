@@ -99,7 +99,7 @@ reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 r_= reggs
 K_ = 64000    # Carrying capacity
 d1_ = 0.590
-#H1_ = 0.639
+H1_ = 0.639
 #c12_ = 0.5 #competition term species 2 on 1
 Smax_ = 56.0             # Maximum size for adults
 Naj = 2500
@@ -220,26 +220,6 @@ xlabel!("Exploitation normalizedrate (H)")
 ylabel!("Adult abundances (nº individuals)")
 
 
-
-
-
-
-
-
-
-# Non-trivial solution for Na and Sa on a Single Site.
-avg_oocytes = mean([92098, 804183]) # This is the actual mean. mean([92098, 804183])
-reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-r_= reggs
-K_ = 64000.00    # Carrying capacity
-
-
-d1_ = 0.590
-H1_ = 0.639
-#c12_ = 0.5 #competition term species 2 on 1
-Smax_ = 56.0             # Maximum size for adults
-Naj = 2500
-avg_size = 33.4
 
 
 
@@ -376,10 +356,10 @@ function CLC!(du, u, p, t)
    R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax - Smat)), 0.0), 1.0)
 
   du[1] = dNe = periodX(t) * r[1] * Na * R_ - d[1] * Ne - r[2] * Ne
-  du[2] = dNt = periodX(t+0.7)*r[2] * Ne - r[3] * Nt - d[2] * Nt
-  du[3] = dNv = periodX(t+1.3)*r[3] * Nt * ((K - Nv)/ K) - r[4] * Nv - d[3] * Nv
-  du[4] = dNj = periodX(t+7)*r[4] * Nv * ((K - Nj)/ K) - r[5] * Nj - d[4] * Nj
-  du[5] = dNa = periodX(t+730)*r[5] * Nj * ((K - Na)/ K) - d[5] * Na - (1 - periodX(t)) * H * Na
+  du[2] = dNt = periodX(t)*r[2] * Ne - r[3] * Nt - d[2] * Nt
+  du[3] = dNv = periodX(t)*r[3] * Nt * ((K - Nv)/ K) - r[4] * Nv - d[3] * Nv
+  du[4] = dNj = periodX(t)*r[4] * Nv * ((K - Nj)/ K) - r[5] * Nj - d[4] * Nj
+  du[5] = dNa = periodX(t)*r[5]* R_ * Nj * ((K - Na)/ K) - d[5] * Na - (1 - periodX(t)) * H * Na
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 
 end
@@ -396,7 +376,7 @@ cij_= 0.5
 Naj = 2500
 
 K_ = 64000.00    # Carrying capacity
-H1_ = 0.5
+H1_ = 0.1
 Smax_ = 56.0             # Maximum size for adults
 
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma, cij, xj
@@ -412,14 +392,36 @@ solve_= solve(prob_, Tsit5())
 
 
 
-solve_
 
-plot(solve_, vars=1, label="Ne",xlim = (100,365), ylim = (0,2*10^5))
-plot!(solve_, vars=2, label="Nt",xlim = (100,365), ylim = (0,2*10^5))
-plot!(solve_, vars=3, label="Nv",xlim = (100,365), ylim = (0,2*10^5))
-plot!(solve_, vars=4, label="Nj",xlim = (100,365), ylim = (0,2*10^5))
-plot!(solve_, vars=5, label="Na",xlim = (100,365), ylim = (0,2*10^5))
+t_l = length(zeros(Float64,size(1:length(solve_.u))))
+n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
+vars = zeros(t_l,n_v)
+time = zeros(t_l,1)
+for j in 1:length(solve_.u)
+  for i in 1:6
+    vars[j,i] = solve_.u[j][i]
+    time[j] = solve_.t[j]
+   end 
+end
 
+Ne = vars[:,1]
+Nt = vars[:,2]
+Nv = vars[:,3]
+Nj = vars[:,4]
+Na = vars[:,5]
+Sa = vars[:,3]
+
+
+time2 = time .+ 0.7
+
+
+
+plot(time, Ne, label="Ne",xlim = (800,1000))#, ylim=(6.5*10^4,2.5*10^7))
+plot!(time .- 0.7, Nt, label="Nt",xlim = (800,1000))#, ylim=(6.5*10^4,2.5*10^7))
+plot!(time .- (0.7+1.3), Nv, label="Nv",xlim = (800,1000), ylim=(0,6.5*10^4))
+plot!(time .- (0.7+1.3 + 7), Nj, label="Nj",xlim = (800,1000))#, ylim=(0,6.5*10^4))
+plot!(time .+ 230 , Na, label="Na",xlim = (800,1000))
+plot!(Kspan)
 
 plot(solve_, vars=6, label="Sa", color=:black)
 
