@@ -207,7 +207,7 @@ Na_H = ones(Float64,h_span)
 
 for j in 1:h_span
 Sa_H[j] = minimum(Sai_h[:,j])
-Na_H[j] = maximum(Nai_h[:,j])
+Na_H[j] = minimum(Nai_h[:,j])
 end
 Sa_H[1]
 Smax_/2
@@ -222,11 +222,11 @@ display(H_Sa_)
 
 
 #Na vs H
-H_Na_ = plot(H_span,Na_H,label=false)
+H_Na_ = plot(H_span,Na_H,label=false, ylim=(0,32*10^3))
 plot!(H_span,zero_line,label=false)
 xlabel!("Exploitation normalized rate (H)")
 ylabel!("Adult abundances (nº individuals)")
-# png("H_Na_")
+#png("H_Na_")
 
 display(H_Na_)
 
@@ -393,7 +393,7 @@ p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate]
 
 
 
-n=3   #Number of years in the simulation
+n=10   #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^7,0,0,0,10^4, 49.25]
 prob_ = ODEProblem(CLC!, U0_, tspan, p_span)
@@ -430,7 +430,7 @@ Sa = vars[:,6]
 
 
 
-CLC_NAt2 = plot(time, Ne, label="Ne",xlim=(0,850), ylim=(10^5,4*10^7))
+CLC_NAt2 = plot(time, Ne, label="Ne", ylim=(10^5,4*10^7))
 plot!(time .- 0.7, Nt, label="Nt")
 plot!(time .- (0.7+1.3), Nv, label="Nv", ylim=(0,10^5))
 plot!(time .- (0.7+1.3 + 7), Nj, label="Nj")
