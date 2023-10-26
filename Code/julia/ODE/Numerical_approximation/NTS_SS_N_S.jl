@@ -423,6 +423,13 @@ Sa = vars[:,6]
 
 
 
+
+
+
+
+
+
+
 CLC_NAt2 = plot(time, Ne, label="Ne",xlim=(0,850), ylim=(10^5,4*10^7))
 plot!(time .- 0.7, Nt, label="Nt")
 plot!(time .- (0.7+1.3), Nv, label="Nv", ylim=(0,10^5))
