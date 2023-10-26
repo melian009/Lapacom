@@ -385,7 +385,7 @@ cij_= 0.5
 Naj = 2500
 
 K_ = 64000.00    # Carrying capacity
-H1_ = 0.1
+H1_ = 0.6
 Smax_ = 56.0             # Maximum size for adults
 
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma, cij, xj
@@ -430,7 +430,7 @@ Sa = vars[:,6]
 
 
 
-CLC_NAt2 = plot(time, Ne, label="Ne", ylim=(10^5,4*10^7))
+CLC_NAt2 = plot(time, Ne, label="Ne", ylim=(10^5,2*10^7), xlim=(0, 1000))
 plot!(time .- 0.7, Nt, label="Nt")
 plot!(time .- (0.7+1.3), Nv, label="Nv", ylim=(0,10^5))
 plot!(time .- (0.7+1.3 + 7), Nj, label="Nj")
@@ -443,7 +443,7 @@ png("CLC_NAt2")
 CLC_SAt =  plot(time, Sa, label="Na", color = :blue)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
-#png("CLC_SAt")
+png("CLC_SAt")
 
 
 
