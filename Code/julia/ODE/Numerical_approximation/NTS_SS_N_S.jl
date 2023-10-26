@@ -304,7 +304,7 @@ annotate!(100, -1000, text("X(t)=0", :blue, :center, 8))
 
 
 #Sa vs t (by cij)
-cijX_SAt = plot(Sai_cij, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], legend=:right)
+cijX_SAt = plot(Sai_cij, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:right)
 plot!((Sm_span),color=:red,label = false)
 annotate!(30, (Smax_)/2+0.5, text("Smax/2", :red, :center, 8))
 plot!(periodX*(Smax_+1)/2, label="X(t)",color=:blue, style = :dash)
@@ -315,7 +315,7 @@ annotate!(260, 1, text("X(t)=0", :blue, :center, 8))
 xlabel!("Time (days)")
 ylabel!("Adult Size (mm)")
 title!("SLC Adult size in differtent grades of cij")
-#png("cijX_SAt")
+png("cijX_SAt")
 
 
 
