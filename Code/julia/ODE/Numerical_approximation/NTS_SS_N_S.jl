@@ -406,6 +406,7 @@ t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
 time = zeros(t_l,1)
+
 for j in 1:length(solve_.u)
   for i in 1:6
     vars[j,i] = solve_.u[j][i]
@@ -430,9 +431,13 @@ Sa = vars[:,6]
 
 
 
-CLC_NAt2 = plot(time, Ne, label="Ne", ylim=(10^5,2*10^7), xlim=(0, 1000))
+CLC_NAt = plot(time, Ne, label="Ne", xlim=(0, 1000))
 plot!(time .- 0.7, Nt, label="Nt")
-plot!(time .- (0.7+1.3), Nv, label="Nv", ylim=(0,10^5))
+xlabel!("time (days)")
+ylabel!("Abundance (nº individuals)")
+png("CLC_NAt")
+
+CLC_NAt2 = plot(time .- (0.7+1.3), Nv, label="Nv", ylim=(0,10^5), xlim=(0, 1000))
 plot!(time .- (0.7+1.3 + 7), Nj, label="Nj")
 plot!(time .- (0.7 + 1.3 + 7 + 230) , Na, label="Na", color = :black)
 xlabel!("time (days)")
@@ -442,9 +447,80 @@ png("CLC_NAt2")
 
 CLC_SAt =  plot(time, Sa, label="Na", color = :blue)
 xlabel!("time (days)")
-ylabel!("Abundance (nº individuals)")
+ylabel!("Size (mm)")
 png("CLC_SAt")
 
 
 
 
+
+
+function SLC!(du, u, p, t)
+  Na, Sa = u
+  t_0, k, r, K, H , d, Smax, gamma = p
+   
+   
+   
+   #reproductive cycle
+   phi(t) = 2*pi*(t - t_0)/(365)
+   periodX(t) = tanh(1 - sin(0.42-phi(t)))
+
+   # reproductive capacity
+   avg_size = du[6]
+   Smat = 1.34 * (avg_size) - 28.06
+   R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax - Smat)), 0.0), 1.0)
+
+  du[1] = dNa = periodX(t)*r* R_ * Na * ((K - Na)/ K) - d * Na - (1 - periodX(t)) * H * Na
+  du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
+end
+
+avg_oocytes = mean([92098, 804183]) # This is the actual mean. mean([92098, 804183])
+reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
+r_ = reggs
+# natural death rates per life stage.
+d = 0.000322/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
+size_growth_rate = 0.00014898749263737575
+t0_ = 365.14*0.42
+k_= 0.1
+cij_= 0.5
+Naj = 2500
+
+K_ = 64000.00    # Carrying capacity
+H1_ = 0.6
+Smax_ = 56.0             # Maximum size for adults
+
+#         t_0, k,  r,  K,  H ,  d, Smax,  gamma, cij, xj
+p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate] 
+
+
+n=10   #Number of years in the simulation
+tspan = (0,365.14*n)
+U0_ = [10^4, 49.25]
+prob_ = ODEProblem(CLC!, U0_, tspan, p_span)
+solve_= solve(prob_, Tsit5())
+
+t_l = length(zeros(Float64,size(1:length(solve_.u))))
+n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
+vars = zeros(t_l,n_v)
+time = zeros(t_l,1)
+
+for j in 1:length(solve_.u)
+  for i in 1:6
+    vars[j,i] = solve_.u[j][i]
+    time[j] = solve_.t[j]
+   end 
+end
+
+Na = vars[:,1]
+Sa = vars[:,2]
+
+SLC_NAt = plot(time, Na, label="Ne", xlim=(0, 1000))
+xlabel!("time (days)")
+ylabel!("Abundance (nº individuals)")
+png("SLC_NAt")
+
+
+SLC_SAt = plot(time, Sa, label="Ne", xlim=(0, 1000))
+xlabel!("time (days)")
+ylabel!("Size (mm)")
+png("SLC_SAt")
