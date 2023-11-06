@@ -342,7 +342,7 @@ cij_Na = plot(H_span,Na_c,label=false, ylims= (0,32000))
 annotate!(0.835, 700, text("|cij = 0.77 ", :blue, :center, 8))
 xlabel!("Spatial competition coeficent cij")
 ylabel!("Adult abundances (nº individuals)")
-png("cij_Na")
+#png("cij_Na")
 
 #Complex life cycle on a single site
 #No da lo que debería, al principio tenía resultados coherentes, pero ahora me da error y no hace las simulaciones debidamente:
@@ -358,7 +358,7 @@ function CLC!(du, u, p, t)
    
    #reproductive cycle
    phi(t) = 2*pi*(t - t_0)/(365)
-   periodX(t) = 1/2*(1+tanh(2*sin(phi(t_)) - k))
+   periodX(t) = 1/2*(1+tanh(2*sin(phi(t)) - k))
 
    # reproductive capacity
    avg_size = du[6]
@@ -367,7 +367,7 @@ function CLC!(du, u, p, t)
 
   du[1] = dNe = periodX(t) * r[1] * Na * R_ - d[1] * Ne - r[2] * Ne
   du[2] = dNt = periodX(t)*r[2] * Ne - r[3] * Nt - d[2] * Nt
-  du[3] = dNv = periodX(t)*r[3] * Nt * ((K - Nv)/ K) - r[4] * Nv - d[3] * Nv
+  du[3] = dNv = periodX(t)*r[3] * Nt - r[4] * Nv - d[3] * Nv
   du[4] = dNj = periodX(t)*r[4] * Nv * ((K - Nj)/ K) - r[5] * Nj - d[4] * Nj
   du[5] = dNa = periodX(t)*r[5]* R_ * Nj * ((K - Na)/ K) - d[5] * Na - (1 - periodX(t)) * H * Na
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
@@ -432,23 +432,42 @@ Sa = vars[:,6]
 
 
 
-CLC_NAt = plot(time, Ne, label="Ne", xlim=(0, 1000))
-plot!(time .- 0.7, Nt, label="Nt")
+CLC_NAt0 = plot(time  , Na, label="Na", color = :black)
+plot!(time.- (0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlim=(150,550),ylims=(0,20000), legend=:outerright, color=:red)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
-png("CLC_NAt")
+png("CLC_NAt0")
 
-CLC_NAt2 = plot(time .- (0.7+1.3), Nv, label="Nv", ylim=(0,10^5), xlim=(0, 1000))
-plot!(time .- (0.7+1.3 + 7), Nj, label="Nj")
-plot!(time .- (0.7 + 1.3 + 7 + 230) , Na, label="Na", color = :black)
+CLC_NAt1 = plot(time.- (0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlim=(150, 550), legend=:outerright, color=:red)
+plot!(time.- (1.3 + 7 + 230), Nt, label="Nt", color=:blue)
+xlabel!("time (days)")
+ylabel!("Abundance (nº individuals)")
+png("CLC_NAt1")
+
+CLC_NAt2 = plot(time.-(1.3 + 7 + 230), Nt, label="Nt", xlim=(150,550),legend=:outerright, color=:blue)
+plot!(time.-(7 + 230), Nv, label="Nv", legend=:outerright, color=:green)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
 png("CLC_NAt2")
 
-
-CLC_SAt =  plot(time, Sa, label="Na", color = :blue)
+CLC_NAt3 = plot(time.-(7 + 230), Nv, label="Nv", xlim=(150,550),legend=:outerright, color=:green)
+plot!(time.-(230), Nj, label="Nv",ylims=(0,65000), legend=:outerright,color=:brown)
 xlabel!("time (days)")
-ylabel!("Size (mm)")
+ylabel!("Abundance (nº individuals)")
+png("CLC_NAt3")
+
+CLC_NAt4 = plot(time.-(230), Nj, label="Nv",ylims=(0,65000), xlim=(150,550), legend=:outerright,color=:brown)
+plot!(time  , Na, label="Na", color = :black)
+xlabel!("time (days)")
+ylabel!("Abundance (nº individuals)")
+png("CLC_NAt4")
+
+
+
+
+CLC_SAt =  plot(time, Sa, label=false, color = :blue)
+xlabel!("time (days)")
+ylabel!("Adult size (mm)")
 png("CLC_SAt")
 
 
@@ -464,21 +483,21 @@ function SLC!(du, u, p, t)
    
    #reproductive cycle
    phi(t) = 2*pi*(t - t_0)/(365)
-   periodX(t) = 1/2*(1+tanh(2*sin(phi(t_)) - k))
+   periodX(t) = 1/2*(1+tanh(2*sin(phi(t)) - k))
 
 
    # reproductive capacity
-   avg_size = du[6]
+   avg_size = du[2]
    Smat = 1.34 * (avg_size) - 28.06
    R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax - Smat)), 0.0), 1.0)
 
-  du[1] = dNa = periodX(t)*r* R_ * Na * ((K - Na)/ K) - d * Na - (1 - periodX(t)) * H * Na
+  du[1] = dNa = periodX(t)* r * R_ * Na * ((K - Na)/ K) - d * Na - (1 - periodX(t)) * H * Na
   du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 end
 
 avg_oocytes = mean([92098, 804183]) # This is the actual mean. mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-r_ = reggs
+r_ = reggs*0.998611*0.971057*0.4820525*0.00629
 # natural death rates per life stage.
 d = 0.000322/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = 0.00014898749263737575
@@ -495,34 +514,36 @@ Smax_ = 56.0             # Maximum size for adults
 p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate] 
 
 
-n=10   #Number of years in the simulation
+n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
-U0_ = [10^4, 49.25]
-prob_ = ODEProblem(CLC!, U0_, tspan, p_span)
-solve_= solve(prob_, Tsit5())
+U0_ = [10^2, 49.25]
+prob_2 = ODEProblem(SLC!, U0_, tspan, p_span)
+solve_= solve(prob_2, Tsit5())
 
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
-time = zeros(t_l,1)
+time2 = zeros(t_l,1)
 
 for j in 1:length(solve_.u)
-  for i in 1:6
+  for i in 1:2
     vars[j,i] = solve_.u[j][i]
-    time[j] = solve_.t[j]
+    time2[j] = solve_.t[j]
    end 
 end
 
-Na = vars[:,1]
-Sa = vars[:,2]
+Na2 = vars[:,1]
+Sa2 = vars[:,2]
 
-SLC_NAt = plot(time, Na, label="Ne", xlim=(0, 1000))
+SLC_NAt = plot(time2, Na2, label="Na SLC", ylims=(0,64000), xlim=(150,550))
+plot!(time, Na, label="Na CLC",color=:black,xlim=(150,400))
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
 png("SLC_NAt")
 
 
-SLC_SAt = plot(time, Sa, label="Ne", xlim=(0, 1000))
+SLC_SAt = plot(time2, Sa2, label="Sa SLC")
+plot!(time, Sa, label="Sa CLC",xlims=(0,885))
 xlabel!("time (days)")
 ylabel!("Size (mm)")
 png("SLC_SAt")
