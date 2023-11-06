@@ -109,7 +109,7 @@ avg_size = 33.4
 
 
 #Vectors for ploting and simulations
-n=3    #Number of years in the simulation
+n=1.5    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.1:1)))
 span = ones(Float64,size(1:365.14*n))
@@ -149,8 +149,8 @@ for i in 1:length(cij_span)
   for t_ in 1:(365.14*n)
     t_0 = (365.14*0.42)
     k=0.1
-      phi(t_) = 2*pi*(t_ - t_0)/(365)
-      periodX[c] = tanh(1 - sin(0.42-phi(t_)))
+      phi(t_) = 2*pi*(t_ - t_0)/(365.25)
+      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
       Smat = 1.34 * (avg_size) - 28.06
       R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
       #Non trivial solution expresions
@@ -166,34 +166,34 @@ for i in 1:length(cij_span)
 end
 
 #Sa vs t (by H)
-HX_NAt = plot(Nai_h, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], ylim=(0,K_/2*1.2), legend=:right)
+HX_NAt = plot(Nai_h, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], ylim=(0,K_/2*1.2), legend =:outerright)
 plot!(Kspan/2,label=false, color=:red)
-annotate!(120, K_/2*1.03, text("K/2", :red, :center, 7))
-ylabel!("Adult abundances (nº individuals)")
+annotate!(50, K_/2*1.03, text("K/2", :red, :center, 7))
+ylabel!("Adult abundance (nº individuals)")
 xlabel!("Time (days)")
-plot!(periodX*K_/2, label="X(t)",color=:blue, style = :dash)
-plot!(span*((K_/2)-0.1*10^4), c=:blue, style = :dash, label=false)
+plot!(periodX*(K_/2), label="X(t)",color=:blue, style = :dash)
+plot!(span*(31299.796819466865), c=:blue, style = :dash, label=false)
 plot!(span*0, color=:blue, style = :dash, label=false)
-annotate!(30, K_/2-2000, text("X(t)=1", :blue, :center, 8))
-annotate!(-120, 0, text("X(t) =", :blue, :center, 8))
-title!("SLC Adult dinamics in differtent grades of H")
+annotate!(50, 30000, text("X(t)=1", :blue, :center, 8))
+annotate!(50, 3000, text("X(t)=0", :blue, :center, 8))
+title!("Na* in differtent grades of H")
 #png("HX_NAt.png")
 
 display(HX_NAt)
 
 #Na vs t (by H)
 
-HX_SAt = plot(Sai_h, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], legend=:right)
+HX_SAt = plot(Sai_h, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], legend =:outerright)
 plot!(Sm_span,color=:red,label = false)
-annotate!(-75, Smax_/2, text("Smax/2", :red, :center, 7))
+annotate!(50, Smax_/2+1, text("Smax/2", :red, :center, 7))
 plot!(periodX*Smax_/2, label="X(t)",color=:blue, style = :dash)
-plot!(span*(Smax_/2-1), color=:blue, style = :dash, label=false)
+plot!(span*(27.387286092247592), color=:blue, style = :dash, label=false)
 plot!(span*0, color=:blue, style = :dash, label=false)
-annotate!(260, Smax_/2-3, text("X(t)=1", :blue, :center, 8))
-annotate!(260, 1, text("X(t)=0", :blue, :center, 8))
+annotate!(250, 26, text("X(t)=1", :blue, :center, 8))
+annotate!(250, 1, text("X(t)=0", :blue, :center, 8))
 xlabel!("Time (days)")
 ylabel!("Adult Size (mm)")
-title!("Adult size in different grades of H")
+title!("Sa* in different grades of H")
 #png("HX_SAt.png")
 
 display(HX_SAt)
@@ -207,14 +207,15 @@ Na_H = ones(Float64,h_span)
 
 for j in 1:h_span
 Sa_H[j] = minimum(Sai_h[:,j])
-Na_H[j] = minimum(Nai_h[:,j])
+Na_H[j] = maximum(Nai_h[:,j])
 end
-Sa_H[1]
+Sa_H
+Na_H
 Smax_/2
 
 #Sa vs H
 H_Sa_ = plot(H_span,Sa_H, label=false)
-xlabel!("Exploitation normalized rate (H)")
+xlabel!("Exploitation rate (H)")
 ylabel!("Adult Size (mm)")
 #png("H_Sa_")
 
@@ -222,17 +223,17 @@ display(H_Sa_)
 
 
 #Na vs H
-H_Na_ = plot(H_span,Na_H,label=false, ylim=(0,32*10^3))
-plot!(H_span,zero_line,label=false)
-xlabel!("Exploitation normalized rate (H)")
-ylabel!("Adult abundances (nº individuals)")
+H_Na_ = plot(H_span,Na_H,label=false, ylims=(0,32000))
+annotate!(0.83, 700, text("|H = 0.77 ", :blue, :center, 8))
+xlabel!("Exploitation rate (H)")
+ylabel!("Adult abundance (nº individuals)")
 #png("H_Na_")
 
 display(H_Na_)
 
 
 
-n=3    #Number of years in the simulation
+n=1.5    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.1:1)))
 span = ones(Float64,size(1:365.14*n))
@@ -271,7 +272,7 @@ for i in 1:length(H_span)
     t_0 = (365.14*0.42)
     k=0.1
       phi(t_) = 2*pi*(t_ - t_0)/(365)
-      periodX[c] = tanh(1 - sin(0.42-phi(t_)))
+      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
       Smat = 1.34 * (avg_size) - 28.06
       R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
       #Non trivial solution expresions
@@ -288,34 +289,33 @@ end
 
 
 #Na vs t (by cij)
-cijX_NAt = plot(Nai_cij, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], ylim=(0,K_/2*1.2), legend=:right)
+cijX_NAt = plot(Nai_cij, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], ylim=(0,K_/2*1.2), legend=:outerright)
 plot!(Kspan/2,label=false, color=:red)
 annotate!(0, K_/2*1.03, text("K/2", :red, :center, 7))
 ylabel!("Abuncance population (Nº of individuals)")
 xlabel!("Time (days)")
-title!("SLC Adult dinamics in differtent grades of cij ")
-plot!(periodX*K_/2, label="X(t)",color=:blue, style = :dash)
-plot!(span*K_/2, c=:blue, style = :dash, label=false)
+title!("Na* in differtent grades of cij")
+plot!(periodX*(K_/2), label="X(t)",color=:blue, style = :dash)
+plot!(span*(31299.796819466865), c=:blue, style = :dash, label=false)
 plot!(span*0, color=:blue, style = :dash, label=false)
-annotate!(100, K_/2+1000, text("X(t)=1", :blue, :center, 8))
-annotate!(100, -1000, text("X(t)=0", :blue, :center, 8))
-
+annotate!(50, 30000, text("X(t)=1", :blue, :center, 8))
+annotate!(50, 3000, text("X(t)=0", :blue, :center, 8))
 #png("cijX_NAt")
 
 
 #Sa vs t (by cij)
-cijX_SAt = plot(Sai_cij, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:right)
+cijX_SAt = plot(Sai_cij, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
 plot!((Sm_span),color=:red,label = false)
 annotate!(30, (Smax_)/2+0.5, text("Smax/2", :red, :center, 8))
 plot!(periodX*(Smax_+1)/2, label="X(t)",color=:blue, style = :dash)
-plot!(span*(Smax_- 1)/2 , color=:blue, style = :dash, label=false)
+plot!(span*(Smax_)/2 , color=:blue, style = :dash, label=false)
 plot!(span*0, color=:blue, style = :dash, label=false)
-annotate!(260, 26, text("X(t)=1", :blue, :center, 8))
-annotate!(260, 1, text("X(t)=0", :blue, :center, 8))
+annotate!(250, 26, text("X(t)=1", :blue, :center, 8))
+annotate!(250, 1, text("X(t)=0", :blue, :center, 8))
 xlabel!("Time (days)")
 ylabel!("Adult Size (mm)")
-title!("SLC Adult size in differtent grades of cij")
-png("cijX_SAt")
+title!("Sa* in differtent grades of cij")
+#png("cijX_SAt")
 
 
 
@@ -330,18 +330,19 @@ end
 
 
 #Sa vs cij
-cij_Sa = plot(H_span,Sa_c, label=false, ylim = (27.34,27.36)) 
-xlabel!("Species interaction coeficent cij")
+cij_Sa = plot(H_span,Sa_c, label=false, ylims=(27,28)) 
+annotate!(-0.07, 27.61, text("27.608 -", :blue, :center, 8))
+xlabel!("Spatial competition coeficent cij")
 ylabel!("Asult Size (mm)")
 #png("cij_Sa")
 
 
 #Na vs cij
-cij_Na = plot(H_span,Na_c,label=false)
-plot!(H_span,zero_line,label=false)
-xlabel!("Species interaction coeficent cij")
+cij_Na = plot(H_span,Na_c,label=false, ylims= (0,32000))
+annotate!(0.835, 700, text("|cij = 0.77 ", :blue, :center, 8))
+xlabel!("Spatial competition coeficent cij")
 ylabel!("Adult abundances (nº individuals)")
-#png("cij_Na")
+png("cij_Na")
 
 #Complex life cycle on a single site
 #No da lo que debería, al principio tenía resultados coherentes, pero ahora me da error y no hace las simulaciones debidamente:
@@ -357,7 +358,7 @@ function CLC!(du, u, p, t)
    
    #reproductive cycle
    phi(t) = 2*pi*(t - t_0)/(365)
-   periodX(t) = tanh(1 - sin(0.42-phi(t)))
+   periodX(t) = 1/2*(1+tanh(2*sin(phi(t_)) - k))
 
    # reproductive capacity
    avg_size = du[6]
@@ -463,7 +464,8 @@ function SLC!(du, u, p, t)
    
    #reproductive cycle
    phi(t) = 2*pi*(t - t_0)/(365)
-   periodX(t) = tanh(1 - sin(0.42-phi(t)))
+   periodX(t) = 1/2*(1+tanh(2*sin(phi(t_)) - k))
+
 
    # reproductive capacity
    avg_size = du[6]
