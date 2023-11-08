@@ -420,31 +420,23 @@ Na = vars[:,5]
 Sa = vars[:,6]
 
 
-CLC_NeNt = plot(time.- (0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlims=(0,365.25*1.5), legend=:outerright, color=:red)
-plot!(time.- (1.3 + 7 + 230), Nt, label="Nt", color=:blue)
+
+
+
+
+
+
+CLC_NeNt_ = plot(time.-(0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlim=(0,365.25*1.5), legend=:outerright, color=:red)
+plot!(time.-(1.3 + 7 + 230), Nt, label="Nt", color=:blue)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
-png("CLC_NeNt")
+png("CLC_NeNt_")
 
 
-
-CLC_NvNjNa = plot(time.-(7 + 230), Nv, label="Nv", xlims=(0,365.25*1.5),legend=:outerright, color=:green)
-plot!(time.-(230), Nj, label="Nj", legend=:outerright,color=:brown)
-plot!(time  , Na, label="Na", color = :black)
-xlabel!("time (days)")
-ylabel!("Abundance (nº individuals)")
-png("CLC_NvNjNa")
-
-
-
-
-
-
-
-
-CLC_NAt0 = plot(time  , Na, label="Na", color = :black)
-plot!(time.- (0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlim=(150,550),ylims=(0,20000), legend=:outerright, color=:red)
-xlabel!("time (days)")
+CLC_NAt0 = plot(time, Na, label="Na", color = :black)
+plot!(time.-(7 + 230), Nv, label="Nv", legend=:outerright, color=:green)
+plot!(time.-(230), Nj, label="Nj",ylims=(0,65000),xlims=(0,365.25*1.5), legend=:outerright,color=:brown)
+xlabel!("Time (days)")
 ylabel!("Abundance (nº individuals)")
 png("CLC_NAt0")
 
@@ -475,7 +467,7 @@ png("CLC_NAt4")
 
 
 
-CLC_SAt =  plot(time, Sa, label=false, color = :blue)
+CLC_SAt =  plot(time, Sa, label="Sa", color = :blue, legend=:outerright)
 xlabel!("time (days)")
 ylabel!("Adult size (mm)")
 png("CLC_SAt")
@@ -487,7 +479,7 @@ png("CLC_SAt")
 
 function SLC!(du, u, p, t)
   Na, Sa = u
-  t_0, k, r, K, H , d, Smax, gamma = p
+  t_0, k, r, K, H , d, Smax, gamma, cij = p
    
    
    
@@ -501,7 +493,7 @@ function SLC!(du, u, p, t)
    Smat = 1.34 * (avg_size) - 28.06
    R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax - Smat)), 0.0), 1.0)
 
-  du[1] = dNa = periodX(t)* r * R_ * Na * ((K - Na)/ K) - d * Na - (1 - periodX(t)) * H * Na
+  du[1] = dNa = periodX(t)* r * R_ * Na * ((K - Na)/ K) - d * Na - (1 - periodX(t)) * H * Na - cij * Na
   du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 end
 
@@ -512,21 +504,21 @@ r_ = reggs*0.998611*0.971057*0.4820525*0.00629
 d = 0.000322/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = 0.00014898749263737575
 t0_ = 365.14*0.42
-k_= 0.1
-cij_= 0.5
-Naj = 2500
+k_= 0.42
+cij_= 0.05
+Naj_ = 500
 
 K_ = 64000.00    # Carrying capacity
-H1_ = 0.6
+H1_ = 0.639
 Smax_ = 56.0             # Maximum size for adults
 
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
-p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate] 
+p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_] 
 
 
-n=10  #Number of years in the simulation
+n=1.5  #Number of years in the simulation
 tspan = (0,365.14*n)
-U0_ = [10^2, 49.25]
+U0_ = [10^4, 49.25]
 prob_2 = ODEProblem(SLC!, U0_, tspan, p_span)
 solve_= solve(prob_2, Tsit5())
 
@@ -545,8 +537,8 @@ end
 Na2 = vars[:,1]
 Sa2 = vars[:,2]
 
-SLC_NAt = plot(time2, Na2, label="Na SLC", ylims=(0,64000), xlim=(150,550))
-plot!(time, Na, label="Na CLC",color=:black,xlim=(150,400))
+SLC_NAt = plot(time2, Na2, label="Na SLC", xlim=(0,365.25*1.5), ylims=(0,64000), legend=:outerright)
+plot!(time, Na, label="Na CLC",color=:black)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
 png("SLC_NAt")
