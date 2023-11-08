@@ -367,7 +367,7 @@ function CLC!(du, u, p, t)
 
   du[1] = dNe = periodX(t) * r[1] * Na * R_ - d[1] * Ne - r[2] * Ne
   du[2] = dNt = periodX(t)*r[2] * Ne - r[3] * Nt - d[2] * Nt
-  du[3] = dNv = periodX(t)*r[3] * Nt - r[4] * Nv - d[3] * Nv
+  du[3] = dNv = periodX(t)*r[3] * Nt*((K - Nv)/ K) - r[4] * Nv - d[3] * Nv
   du[4] = dNj = periodX(t)*r[4] * Nv * ((K - Nj)/ K) - r[5] * Nj - d[4] * Nj
   du[5] = dNa = periodX(t)*r[5]* R_ * Nj * ((K - Na)/ K) - d[5] * Na - (1 - periodX(t)) * H * Na
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
@@ -378,15 +378,12 @@ avg_oocytes = mean([92098, 804183]) # This is the actual mean. mean([92098, 8041
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 r_ = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629]
 # natural death rates per life stage.
-d = [0.999/365.14, 0.585/365.14, 0.343/365.14, 0.201/365.14, 0.000322/365.14]  # see estimate_mortality_rates.jl for how these values were estimated.
+d = [0.999/365.25, 0.585/365.25, 0.343/365.25, 0.201/365.25, 0.000322/365.25]  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = 0.00014898749263737575
 t0_ = 365.14*0.42
-k_= 0.1
-cij_= 0.5
-Naj = 2500
-
+k_ = 0.42
 K_ = 64000.00    # Carrying capacity
-H1_ = 0.6
+H1_ = 0.639
 Smax_ = 56.0             # Maximum size for adults
 
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma, cij, xj
@@ -423,7 +420,20 @@ Na = vars[:,5]
 Sa = vars[:,6]
 
 
+CLC_NeNt = plot(time.- (0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlims=(0,365.25*1.5), legend=:outerright, color=:red)
+plot!(time.- (1.3 + 7 + 230), Nt, label="Nt", color=:blue)
+xlabel!("time (days)")
+ylabel!("Abundance (nº individuals)")
+png("CLC_NeNt")
 
+
+
+CLC_NvNjNa = plot(time.-(7 + 230), Nv, label="Nv", xlims=(0,365.25*1.5),legend=:outerright, color=:green)
+plot!(time.-(230), Nj, label="Nj", legend=:outerright,color=:brown)
+plot!(time  , Na, label="Na", color = :black)
+xlabel!("time (days)")
+ylabel!("Abundance (nº individuals)")
+png("CLC_NvNjNa")
 
 
 
@@ -451,12 +461,12 @@ ylabel!("Abundance (nº individuals)")
 png("CLC_NAt2")
 
 CLC_NAt3 = plot(time.-(7 + 230), Nv, label="Nv", xlim=(150,550),legend=:outerright, color=:green)
-plot!(time.-(230), Nj, label="Nv",ylims=(0,65000), legend=:outerright,color=:brown)
+plot!(time.-(230), Nj, label="Nj",ylims=(0,65000), legend=:outerright,color=:brown)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
 png("CLC_NAt3")
 
-CLC_NAt4 = plot(time.-(230), Nj, label="Nv",ylims=(0,65000), xlim=(150,550), legend=:outerright,color=:brown)
+CLC_NAt4 = plot(time.-(230), Nj, label="Nj",ylims=(0,65000), xlim=(150,550), legend=:outerright,color=:brown)
 plot!(time  , Na, label="Na", color = :black)
 xlabel!("time (days)")
 ylabel!("Abundance (nº individuals)")
@@ -510,7 +520,7 @@ K_ = 64000.00    # Carrying capacity
 H1_ = 0.6
 Smax_ = 56.0             # Maximum size for adults
 
-#         t_0, k,  r,  K,  H ,  d, Smax,  gamma, cij, xj
+#         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate] 
 
 
