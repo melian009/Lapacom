@@ -324,17 +324,17 @@ Sa_c = ones(Float64,h_span)
 Na_c = ones(Float64,h_span)
 
 for j in 1:h_span
-Sa_c[j] = maximum(Sai_cij[:,j])
+Sa_c[j] = minimum(Sai_cij[:,j])
 Na_c[j] = maximum(Nai_cij[:,j])
 end
 
 
 #Sa vs cij
-cij_Sa = plot(H_span,Sa_c, label=false, ylims=(27,28)) 
-annotate!(-0.07, 27.61, text("27.608 -", :blue, :center, 8))
+cij_Sa = plot(H_span,Sa_c, label=false, ylims=(10.3,10.4))
+annotate!(-0.07, 10.3723388021333, text("10.372 -", :blue, :center, 8))
 xlabel!("Spatial competition coeficent cij")
-ylabel!("Asult Size (mm)")
-#png("cij_Sa")
+ylabel!("Adult Size (mm)")
+png("cij_Sa")
 
 
 #Na vs cij
