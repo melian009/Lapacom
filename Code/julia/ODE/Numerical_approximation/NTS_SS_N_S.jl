@@ -249,6 +249,8 @@ periodX = zeros(t_span)
 H_r = range(0, 1, length=h_span)
 H_span = ones(Float64,h_span)
 cij_span = ones(Float64,h_span)
+N_H_c_span = zeros(11,11)
+S_H_c_span = zeros(11,11)
 
 for i in 1:length(H_span)
   H_span[i] = H_r[i]
@@ -256,37 +258,48 @@ for i in 1:length(H_span)
 end
 
 
-
-
-#cij gradient. 
-
-for i in 1:length(H_span)
-  cij_ = cij_span[i]
-  H_i = H1_
-  c=1 
-  Nai1 = zeros(Float64,size(1:365.14*n))
-  Sai1 = zeros(Float64,size(1:365.14*n))
-  periodX = zeros(t_span)
-
-  for t_ in 1:(365.14*n)
-    t_0 = (365.14*0.42)
-    k=0.1
-      phi(t_) = 2*pi*(t_ - t_0)/(365)
-      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
-      Smat = 1.34 * (avg_size) - 28.06
-      R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
+for j in 1:length(H_span)
+    H_j = H_span[j]
+    c=1
+    n=1.5 #Years
+    Nai1 = zeros(Float64,size(1:365.14*n))
+    Sai1 = zeros(Float64,size(1:365.14*n))
+    periodX = zeros(t_span)
+    avg_size = 33.4
+    for t_ in 1:(365.25*n)
+      t_0 = (365.25*0.42)
+      k=0.42
+        phi(t_) = 2*pi*(t_ - t_0)/(365.25)
+        periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
+        Smat = 1.34 * (avg_size) - 28.06
+        R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
       #Non trivial solution expresions
-        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_span[i] * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
-        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
+        Nai1[c] = -(H_j * (1 - periodX[c]) + cij_i * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
+        Sai1[c] = 1/2*(Smax_ * (1 - H_j * (1 - periodX[c])))
     
-    avg_size = mean(Sai1)  
-    c=c+1
+        avg_size = mean(Sai1)  
+        c=c+1
     end
-    Nai_cij[:,i] = Nai1
-    Sai_cij[:,i] = Sai1
+    Nai_cij[:,j] = Nai1
+    Sai_cij[:,j] = Sai1
+  end 
+  Sa_c = ones(Float64,h_span)
+  Na_c = ones(Float64,h_span)
+  for m in 1:h_span
+  Sa_c[m] = minimum(Sai_cij[:,m])
+  Na_c[m] = maximum(Nai_cij[:,m])
+end
+
+
+for i in 1:length(cij_span)
+  cij_i = cij_span[i]
+  
+  N_H_c_span[:,i] = Na_c
+  S_H_c_span[:,i] = Sa_c
 
 end
 
+N_H_c_span
 
 #Na vs t (by cij)
 cijX_NAt = plot(Nai_cij, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], ylim=(0,K_/2*1.2), legend=:outerright)
@@ -334,7 +347,7 @@ cij_Sa = plot(H_span,Sa_c, label=false, ylims=(10.3,10.4))
 annotate!(-0.07, 10.3723388021333, text("10.372 -", :blue, :center, 8))
 xlabel!("Spatial competition coeficent cij")
 ylabel!("Adult Size (mm)")
-png("cij_Sa")
+#png("cij_Sa")
 
 
 #Na vs cij
@@ -549,3 +562,103 @@ plot!(time, Sa, label="Sa CLC",xlims=(0,885))
 xlabel!("time (days)")
 ylabel!("Size (mm)")
 png("SLC_SAt")
+
+
+
+
+
+# Non-trivial solution for Na and Sa on a Single Site.
+#Parameters
+avg_oocytes = mean([92098, 804183]) # This is the actual mean. 
+reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
+r_= reggs
+K_ = 64000    # Carrying capacity
+d1_ = 0.590
+H1_ = 0.639
+#c12_ = 0.5 #competition term species 2 on 1
+Smax_ = 56.0             # Maximum size for adults
+Naj = 2500
+avg_size = 33.4
+
+
+
+
+#Vectors for ploting and simulations
+n=3    #Number of years in the simulation
+t_span = length(zeros(Float64,size(1:365.14*n)))
+h_span = length(zeros(Float64, size(0:0.1:1)))
+span = ones(Float64,size(1:365.14*n))
+Kspan = ones(Float64,size(1:365.14*n))*K_ 
+Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+
+H_r = range(0, 1, length=h_span)
+H_span = ones(Float64,h_span)
+cij_span = ones(Float64,h_span)
+
+zero_line = zeros(Float64,h_span)
+
+for i in 1:length(H_span)
+    H_span[i] = H_r[i]
+    cij_span[i] = H_r[i]
+end
+
+H_span
+cij_span
+
+#Outputs of simulations
+Nai_h = zeros(t_span,h_span)
+Sai_h = zeros(t_span,h_span)
+periodX = zeros(t_span)
+Nai_h_c = zeros(h_span,h_span)
+Sai_h_c = zeros(h_span,h_span)
+
+
+for m in 1:length(cij_span)
+  for i in 1:length(H_span)
+    cij_ = cij_span[m]
+    H_i = H_span[i]
+    c=1 
+
+    Nai1 = zeros(Float64,size(1:365.14*n))
+    Sai1 = zeros(Float64,size(1:365.14*n))
+    periodX = zeros(t_span)
+
+    for t_ in 1:(365.14*n)
+      t_0 = (365.14*0.42)
+      k=0.1
+      phi(t_) = 2*pi*(t_ - t_0)/(365.25)
+      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
+      Smat = 1.34 * (avg_size) - 28.06
+      R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
+      #Non trivial solution expresions
+        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_ * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
+        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
+    
+      avg_size = mean(Sai1)  
+      c=c+1
+    end
+    Nai_h[:,i] = Nai1
+    Sai_h[:,i] = Sai1
+
+  end
+  #Na and Sa vs H
+
+  Sa_H = ones(Float64,h_span)
+  Na_H = ones(Float64,h_span)
+
+  for j in 1:h_span
+  Sa_H[j] = minimum(Sai_h[:,j])
+  Na_H[j] = maximum(Nai_h[:,j])
+  end
+ Sai_h_c[:,m] = Sa_H
+ Nai_h_c[:,m] = Na_H
+end
+
+plot(H_span, Nai_h_c,label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
+xlabel!("Exploitation rate (H)")
+ylabel!("Adult abundance (nº individuals)")
+png("H_decay_for_cij_gradient_N")
+plot(H_span, Sai_h_c, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
+xlabel!("Exploitation rate (H)")
+ylabel!("Adult size (mm)")
+png("H_decay_for_cij_gradient_S")
