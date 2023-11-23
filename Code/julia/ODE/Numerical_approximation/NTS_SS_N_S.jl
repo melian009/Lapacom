@@ -654,7 +654,7 @@ for m in 1:length(cij_span)
  Nai_h_c[:,m] = Na_H
 end
 
-plot(H_span, Nai_h_c,label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
+plot(H_span,Nai_h_c, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], yaxis=:log, legend=:outerright)
 xlabel!("Exploitation rate (H)")
 ylabel!("Adult abundance (nº individuals)")
 png("H_decay_for_cij_gradient_N")
