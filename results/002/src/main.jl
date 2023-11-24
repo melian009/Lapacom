@@ -184,13 +184,18 @@ for site in 1:8
   important_parameter_indices = vcat(collect(1:5), # r for all life stages
     vcat(6:10), # d for all life stages
     vcat(76:83), # exploitation rates for all sites. (10+64+1):(10+64+1+8)
-    vcat(86:88), # α
+    vcat(86:87), # α
   )
-  important_parameter_names = ["r1", "r2", "r3", "r4", "r5", "d1", "d2", "d3", "d4", "d5", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "α1", "α2", "α3"]  ## Bar plot
+  important_parameter_names = ["r1", "r2", "r3", "r4", "r5", "d1", "d2", "d3", "d4", "d5", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "α1", "α2"]  ## Bar plot
   normalized_mST = m.ST ./ sum(m.ST, dims=2)
   sensitivity_indices = normalized_mST[site, important_parameter_indices]
+  if site == 4
+    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])")
+  else
+    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])", yscale = Makie.pseudolog10)
+  end
+  ylims!(ax, 0.0, 1.0)
 
-  ax = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="Site $(site)")
   bars = barplot!(ax, 1:length(important_parameter_names), sensitivity_indices, color=:black)
   # site != 8 &&  hidexdecorations!(ax, grid=true, ticks=true)
 end
