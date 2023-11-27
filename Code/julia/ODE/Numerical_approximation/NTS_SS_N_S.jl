@@ -260,6 +260,7 @@ end
 
 for j in 1:length(H_span)
     H_j = H_span[j]
+    cij_i = cij_span[5]
     c=1
     n=1.5 #Years
     Nai1 = zeros(Float64,size(1:365.14*n))
@@ -416,12 +417,12 @@ solve_= solve(prob_, Tsit5())
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
-time = zeros(t_l,1)
+days = ones(t_l,1)
 
 for j in 1:length(solve_.u)
   for i in 1:6
     vars[j,i] = solve_.u[j][i]
-    time[j] = solve_.t[j]
+    days[j] = solve_.t[j]
    end 
 end
 
@@ -439,16 +440,16 @@ Sa = vars[:,6]
 
 
 
-CLC_NeNt_ = plot(time.-(0.7 + 1.3 + 7 + 230), Ne, label="Ne", xlim=(0,365.25*1.5), legend=:outerright, color=:red)
-plot!(time.-(1.3 + 7 + 230), Nt, label="Nt", color=:blue)
-xlabel!("time (days)")
+CLC_NeNt_ = plot(days.-(0.7 + 1.3 + 7 + 230), Ne, label="Eggs", xlim=(0,365.25*1.5), legend=:outerright, color=:red)
+plot!(days.-(1.3 + 7 + 230), Nt, label="Trochophore", color=:blue)
+xlabel!("Time (days)")
 ylabel!("Abundance (nº individuals)")
 png("CLC_NeNt_")
 
 
-CLC_NAt0 = plot(time, Na, label="Na", color = :black)
-plot!(time.-(7 + 230), Nv, label="Nv", legend=:outerright, color=:green)
-plot!(time.-(230), Nj, label="Nj",ylims=(0,65000),xlims=(0,365.25*1.5), legend=:outerright,color=:brown)
+CLC_NAt0 = plot(days, Na, label="Adults", color = :black)
+plot!(days.-(7 + 230), Nv, label="Veliger", legend=:outerright, color=:green)
+plot!(days.-(230), Nj, label="Juvenile",ylims=(0,65000),xlims=(0,365.25*1.5), legend=:outerright,color=:brown)
 xlabel!("Time (days)")
 ylabel!("Abundance (nº individuals)")
 png("CLC_NAt0")
@@ -550,9 +551,9 @@ end
 Na2 = vars[:,1]
 Sa2 = vars[:,2]
 
-SLC_NAt = plot(time2, Na2, label="Na SLC", xlim=(0,365.25*1.5), ylims=(0,64000), legend=:outerright)
-plot!(time, Na, label="Na CLC",color=:black)
-xlabel!("time (days)")
+SLC_NAt = plot(time2, Na2, label="Adults SLC", xlim=(0,365.25*1.5), ylims=(0,64000), legend=:outerright)
+plot!(days, Na, label="Adults CLC",color=:black)
+xlabel!("Time (days)")
 ylabel!("Abundance (nº individuals)")
 png("SLC_NAt")
 
@@ -584,7 +585,7 @@ avg_size = 33.4
 
 
 #Vectors for ploting and simulations
-n=3    #Number of years in the simulation
+n=1.5    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.1:1)))
 span = ones(Float64,size(1:365.14*n))
@@ -653,11 +654,13 @@ for m in 1:length(cij_span)
  Sai_h_c[:,m] = Sa_H
  Nai_h_c[:,m] = Na_H
 end
+ 
+real(log(Nai_h_c))
 
-plot(H_span,Nai_h_c, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], yaxis=:log, legend=:outerright)
+plot(H_span,real(log(Nai_h_c)), label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
 xlabel!("Exploitation rate (H)")
 ylabel!("Adult abundance (nº individuals)")
-png("H_decay_for_cij_gradient_N")
+png("H_decay_for_cij_gradient_N_log")
 plot(H_span, Sai_h_c, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
 xlabel!("Exploitation rate (H)")
 ylabel!("Adult size (mm)")
