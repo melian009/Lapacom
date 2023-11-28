@@ -7,7 +7,7 @@ function my_ode!(du, u, p, t)
 end
 
 u0 = [1.0, 2.0]  # Initial conditions
-tspan = (0.0, 10.0)  # Time span for the simulation (from t=0 to t=10)
+tspan = (0.0, 100.0)  # Time span for the simulation (from t=0 to t=10)
 
 using DifferentialEquations
 solver = Tsit5()
