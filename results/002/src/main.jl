@@ -31,33 +31,47 @@ for factor in e_factors
   # Saving the results
   df_general = DataFrame(sol_general)
   CSV.write("../figs/general_e_factor=$(factor).csv", df_general)
+  @save "../figs/general_e_factor=$(factor).jld2" sol_general
 
   # Plotting the results
+  ## Load the ODE results
+  # JLD2.@load "../figs/general.jld2" sol_general
+
   all_u = sol_general.u
   all_times = sol_general.t
   # site_names = distance_df.site
   site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
+  colors = ["#55a47b", "#a361c7", "#91db6f", "#e87cb2", "#a6953f", "#6588cd", "#ffa66a", "#cb5358"]
+
   for stage in 1:5
-    fig = Figure()
-    ax1 = Axis(fig[1, 1])
-    lines!(ax1, all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
+    fig = Figure(resolution=(900, 600), backgroundcolor=:transparent)
+    ax1 = Axis(fig[1, 1], backgroundcolor=:transparent)
+    lines!(ax1, all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1], color=colors[1])
     ax1.title = "N for stage: $(stage)"
     for site in 2:nsites#2:8
-      lines!(ax1, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
+      lines!(ax1, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site], color=colors[site])
     end
-    fig[1, 2] = Legend(fig, ax1, "Site")
+    fontsize_theme = Theme(fontsize=20)
+    set_theme!(fontsize_theme)
+    fig[1, 2] = Legend(fig, ax1, "Site", labelsize=20)
     save("../figs/stage=$(stage)_e_factor=$(factor).pdf", fig)
+    save("../figs/stage=$(stage)_e_factor=$(factor).png", fig)
   end
 
   # Changes in body size
   stage = 6
-  fig, ax, plt = lines(all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1])
-  ax.title = "Body size"
+  fig = Figure(resolution=(900, 600), backgroundcolor=:transparent)
+  ax2 = Axis(fig[1, 1], backgroundcolor=:transparent)
+  lines!(all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1], color=colors[1])
+  ax2.title = "Body size"
   for site in 2:nsites
-    lines!(ax, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site])
+    lines!(ax2, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site], color=colors[site])
   end
-  fig[1, 2] = Legend(fig, ax, "Site")
+  fontsize_theme = Theme(fontsize=20)
+  set_theme!(fontsize_theme)
+  fig[1, 2] = Legend(fig, ax2, "Site", labelsize=20)
   save("../figs/body_sizes_e_factor=$(factor).pdf", fig)
+  save("../figs/body_sizes_e_factor=$(factor).png", fig)
 end
 
 ########################################################
@@ -92,35 +106,41 @@ for lifestage in 1:6
 
   # Save the plot for each lifestage separately.
   # Create the line plot
-  fig = Figure(resolution = (600, 400))
-  ax = Axis(fig[1, 1], xlabel = "Exploitation rate", ylabel = "Mean Population Size", title = lifestage_names[lifestage])
+  colors = ["#55a47b", "#a361c7", "#91db6f", "#e87cb2", "#a6953f", "#6588cd", "#ffa66a", "#cb5358"]
+
+  fig = Figure(resolution=(900, 600), backgroundcolor=:transparent)
+  ax = Axis(fig[1, 1], xlabel = "Exploitation rate", ylabel = "Mean Population Size", title = lifestage_names[lifestage], backgroundcolor=:transparent)
 
   for site in 1:8
-    lines!(ax, e_factors, sites_mean_pop_size[site, :], label=site_names[site])
+    lines!(ax, e_factors, sites_mean_pop_size[site, :], label=site_names[site], color=colors[site])
   end
-
+  fontsize_theme = Theme(fontsize=20)
+  set_theme!(fontsize_theme)
   # Add a legend
-  leg = Legend(fig[1, 2], ax)
+  leg = Legend(fig[1, 2], ax, labelsize=20)
   fig[1, 1] = ax
   # axislegend(ax, "Site $(1:8)", position = :rt)
 
   save("../figs/exploitation_vs_population_size_lifestage=$(lifestage).pdf", fig)
+  save("../figs/exploitation_vs_population_size_lifestage=$(lifestage).png", fig)
 
   # Save all life stages in the same plot
   # Create the line plot in a new subplot
-  ax = Axis(fig_all[lifestage, 1], xlabel="Exploitation rate", ylabel="Mean Population Size", title=lifestage_names[lifestage])
+  ax = Axis(fig_all[lifestage, 1], xlabel="Exploitation rate", ylabel="Mean Population Size", title=lifestage_names[lifestage], backgroundcolor=:transparent)
 
   for site in 1:8
-    lines!(ax, e_factors, sites_mean_pop_size[site, :], label=site_names[site])
+    lines!(ax, e_factors, sites_mean_pop_size[site, :], label=site_names[site], color=colors[site])
   end
-
+  fontsize_theme = Theme(fontsize=20)
+  set_theme!(fontsize_theme)
   # Add a legend
-  leg = Legend(fig_all[lifestage, 2], ax)
+  leg = Legend(fig_all[lifestage, 2], ax, labelsize=20)
   fig_all[lifestage, 1] = ax
 end
 
 # Save the figure
 save("../figs/exploitation_vs_population_size_all_lifestages.pdf", fig_all)
+save("../figs/exploitation_vs_population_size_all_lifestages.png", fig_all)
 
 ########################################################
 ## Sensitivity analysis
@@ -190,9 +210,9 @@ for site in 1:8
   normalized_mST = m.ST ./ sum(m.ST, dims=2)
   sensitivity_indices = normalized_mST[site, important_parameter_indices]
   if site == 4
-    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])")
+    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])", backgroundcolor=:transparent)
   else
-    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])", yscale = Makie.pseudolog10)
+    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])", yscale = Makie.pseudolog10, backgroundcolor=:transparent)
   end
   ylims!(ax, 0.0, 1.0)
 
@@ -200,5 +220,6 @@ for site in 1:8
   # site != 8 &&  hidexdecorations!(ax, grid=true, ticks=true)
 end
 save("../figs/sensitivity_indices_barplot_total_effect_lifestage=$(lifestage)_e_factor=$(factor).pdf", f)
+save("../figs/sensitivity_indices_barplot_total_effect_lifestage=$(lifestage)_e_factor=$(factor).png", f)
 # end
 # end
