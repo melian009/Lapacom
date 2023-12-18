@@ -597,14 +597,15 @@ plot(H_span, Nai_h_c,
        xtickfont=font(12), 
       ytickfont=font(12), 
       guidefont=font(12), 
-      legendfont=font(12))
+      legendfont=font(12),
+      background=nothing)
 plot!(0.01*span_11,Nai_h_c[1,:], color=:black, style = :dash, label="H=0.01")
 plot!(0.1*span_11,Nai_h_c[1,:], color=:black, style = :dash, label="H=0.1")
 plot!(1*span_11,Nai_h_c[1,:], color=:black, style = :dash, label="H=1")
 
 xlabel!("Exploitation rate (H)")
-ylabel!("Adult size (mm)")
-png("H_decay_for_cij_gradient_S")
+ylabel!("Abundance (nº individuals)")
+savefig("H_decay_for_cij_gradient_S.pdf")
 
 
 
@@ -637,16 +638,16 @@ d = 0.000322/365.14  # see estimate_mortality_rates.jl for how these values were
 size_growth_rate = 0.00014898749263737575
 t0_ = 365.14*0.42
 k_= 0.42
-Naj_# = 500
+Naj_ = 2500
 K_ = 64000.00    # Carrying capacity
 Smax_ = 53.0             # Maximum size for adults3
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
 
 
-H1_ = 0
+H1_ = 1.0
 
-cij_= 1
+cij_= 1.0
 p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_] 
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
@@ -670,14 +671,13 @@ Na1c0 = vars[:,1]
 
 
 
-plot!(Na1c0, label="cij=1",legend=:outerright)
-
+plot!(Na1c0, label="cij=1.0",legend=:outerright, background=nothing)
 xlims!(0,100)
 ylims!(0,7*10^4)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
-
-png("SLC_NAt_H0_cij_3")
+title!("H=1.0")
+savefig("SLC_NAt_H100_cij.png")
 
 #C:\\Users\\miste\\AppData\\Local\\Programs\\Julia-1.9.3\\bin\\julia.exe
 
