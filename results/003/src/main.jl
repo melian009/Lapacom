@@ -139,6 +139,55 @@ for cf in competition_coefficients, ef in e_factors
 end
 
 
+"""
+    process_dataframe(ef::Float64, cf::Vector{Float64}, site_names::Vector{String}, lifestage_names::Vector{String}, species::Vector{String})
+
+Reads a saved dataframe and converts it into a proper structure for easier plotting with VegaLite.
+
+# Arguments
+- `ef::Float64`: A float representing the e factor.
+- `cf::Vector{Float64}`: A vector of floats representing the competition coefficients.
+- `site_names::Vector{String}`: A vector of strings representing the site names.
+- `lifestage_names::Vector{String}`: A vector of strings representing the life stage names.
+- `species::Vector{String}`: A vector of strings representing the species names.
+
+# Returns
+- `DataFrame`: A long format dataframe with columns for time, site, life stage, species, and value.
+
+# Example
+```julia
+site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
+lifestage_names = ["Eggs", "Trochophore", "Veliger", "Juvenile", "Adult", "Adult Body Size"]
+species = ["Species 1", "Species 2"]  # Replace with your actual species names
+ef = 0.5
+cf = [0.5, 0.5]
+
+long_format = process_dataframe(ef, cf, site_names, lifestage_names, species)
+```
+"""
+function process_dataframe(ef::Float64, cf::Vector{Float64}, site_names::Vector{String}, lifestage_names::Vector{String}, species::Vector{String})
+  # load a df
+  df = CSV.File("../figs/general_e_factor=$(ef)_competition_coef=$(cf).csv") |> DataFrame
+
+  # Change column names
+  column_names = ["time"]
+  for site in site_names, stage in lifestage_names, spec in species
+    name = string("site=", site, "_stage=", stage, "_", "species=", spec)
+    push!(column_names, name)
+  end
+  rename!(df, column_names)
+
+  # stack to long format
+  long_format = stack(df, Not(:time))
+
+  # Parse the site, life_stage and species information from the variable names
+  long_format[!, :site] = replace.(string.(long_format.variable), r"site=([\w\s\.]+)_stage=[\w\s\.]+_species=[\w\s\.]+" => s"\1")
+  long_format[!, :life_stage] = replace.(string.(long_format.variable), r"site=[\w\s\.]+_stage=([\w\s\.]+)_species=[\w\s\.]+" => s"\1")
+  long_format[!, :species] = replace.(string.(long_format.variable), r"site=[\w\s\.]+_stage=[\w\s\.]+_species=([\w\s\.]+)" => s"\1")
+  select!(long_format, Not(:variable))
+
+  return long_format
+end
 
 ########################################################
 ## Plot mean population size vs exploitation rate TODO
