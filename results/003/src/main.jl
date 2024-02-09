@@ -15,6 +15,8 @@ exploitation_rates_org = cat(exploitation_rates, exploitation_rates, dims=2) # f
 
 e_factors = [0.1, 0.5, 1.0, 2.0, 10.0, 50.0, 80.0, 100.0]
 competition_coefficients = [[0.5, 0.5], [1.0, 1.0]]
+species = ["P. ordinaria", "P. aspera"]
+nspecies = length(species)
 
 for cf in competition_coefficients, ef in e_factors
   exploitation_rates = exploitation_rates_org * ef
@@ -32,8 +34,8 @@ for cf in competition_coefficients, ef in e_factors
 
   # Saving the results
   df_general = DataFrame(sol_general)
-  CSV.write("../figs/general_e_factor=$(factor).csv", df_general)
-  @save "../figs/general_e_factor=$(factor).jld2" sol_general
+  CSV.write("../figs/general_e_factor=$(ef)_competition_coef=$(cf).csv", df_general)
+  @save "../figs/general_e_factor=$(ef)_competition_coef=$(cf).jld2" sol_general
 
   # Plotting the results
   ## Load the ODE results
@@ -44,40 +46,100 @@ for cf in competition_coefficients, ef in e_factors
   # site_names = distance_df.site
   site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
   colors = ["#55a47b", "#a361c7", "#91db6f", "#e87cb2", "#a6953f", "#6588cd", "#ffa66a", "#cb5358"]
+  linestyles = [:solid, :dash, :dot, :dashdot, :dashdotdot]  # Define more styles if you have more species
 
   for stage in 1:5
     fig = Figure(resolution=(900, 600), backgroundcolor=:transparent)
     ax1 = Axis(fig[1, 1], backgroundcolor=:transparent)
-    lines!(ax1, all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1], color=colors[1])
-    ax1.title = "N for stage: $(stage)"
-    for site in 2:nsites#2:8
-      lines!(ax1, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site], color=colors[site])
+
+    legends_colors = []  # Store legends for each site
+    legends_styles = []  # Store legends for each species
+    plots_colors = []  # Store plots for color legend
+    labels_colors = []  # Store labels for color legend
+    plots_styles = []  # Store plots for style legend
+    labels_styles = []  # Store labels for style legend
+
+    for sp in 1:nspecies
+      for site in 1:nsites
+        p = lines!(ax1, all_times, [all_u[i][site, stage, sp] for i in 1:length(all_times)], yscale=:log10, color=colors[site], linestyle=linestyles[sp])
+        ax1.title = "N for stage: $(stage)"
+        ax1.xlabel = "Time (days)"
+        ax1.ylabel = "Population size"
+        if sp == 1  # Only add to color legend for the first species
+          push!(plots_colors, p)
+          push!(labels_colors, site_names[site])
+        end
+      end
+      # Create a legend for each species with a dummy plot for the line style
+      p_dummy = lines!(ax1, [NaN], [NaN], linestyle=linestyles[sp])  # Dummy plot, won't be visible
+      push!(plots_styles, p_dummy)
+      push!(labels_styles, species[sp])
     end
+
+    # Create legends
+    push!(legends_colors, Legend(fig, plots_colors, labels_colors, "Site", labelsize=20))
+    push!(legends_styles, Legend(fig, plots_styles, labels_styles, "Species", labelsize=20))
+
     fontsize_theme = Theme(fontsize=20)
     set_theme!(fontsize_theme)
-    fig[1, 2] = Legend(fig, ax1, "Site", labelsize=20)
-    save("../figs/stage=$(stage)_e_factor=$(factor).pdf", fig)
-    save("../figs/stage=$(stage)_e_factor=$(factor).png", fig)
+
+    # Combine the legends
+    fig[1, 2] = Makie.vgrid!(legends_colors...)
+    fig[1, 3] = Makie.vgrid!(legends_styles...)
+
+    save("../figs/stage=$(stage)_e_factor=$(ef)_competition_coef=$(cf).pdf", fig)
+    save("../figs/stage=$(stage)_e_factor=$(ef)_competition_coef=$(cf).png", fig)
+
   end
 
   # Changes in body size
   stage = 6
+
   fig = Figure(resolution=(900, 600), backgroundcolor=:transparent)
   ax2 = Axis(fig[1, 1], backgroundcolor=:transparent)
-  lines!(all_times, [all_u[i][1, stage] for i in 1:length(all_times)], yscale=:log10, label=site_names[1], color=colors[1])
-  ax2.title = "Body size"
-  for site in 2:nsites
-    lines!(ax2, all_times, [all_u[i][site, stage] for i in 1:length(all_times)], label=site_names[site], color=colors[site])
+
+  legends_colors = []  # Store legends for each site
+  legends_styles = []  # Store legends for each species
+  plots_colors = []  # Store plots for color legend
+  labels_colors = []  # Store labels for color legend
+  plots_styles = []  # Store plots for style legend
+  labels_styles = []  # Store labels for style legend
+
+  for sp in 1:nspecies
+    for site in 1:nsites
+      p = lines!(ax2, all_times, [all_u[i][site, stage, sp] for i in 1:length(all_times)], yscale=:log10, color=colors[site], linestyle=linestyles[sp])
+      ax2.title = "Body size"
+      ax2.xlabel = "Time (days)"
+      ax2.ylabel = "Body size (mm)"
+      if sp == 1  # Only add to color legend for the first species
+        push!(plots_colors, p)
+        push!(labels_colors, site_names[site])
+      end
+    end
+    # Create a legend for each species with a dummy plot for the line style
+    p_dummy = lines!(ax2, [NaN], [NaN], linestyle=linestyles[sp])  # Dummy plot, won't be visible
+    push!(plots_styles, p_dummy)
+    push!(labels_styles, species[sp])
   end
+
+  # Create legends
+  push!(legends_colors, Legend(fig, plots_colors, labels_colors, "Site", labelsize=20))
+  push!(legends_styles, Legend(fig, plots_styles, labels_styles, "Species", labelsize=20))
+
   fontsize_theme = Theme(fontsize=20)
   set_theme!(fontsize_theme)
-  fig[1, 2] = Legend(fig, ax2, "Site", labelsize=20)
-  save("../figs/body_sizes_e_factor=$(factor).pdf", fig)
-  save("../figs/body_sizes_e_factor=$(factor).png", fig)
+
+  # Combine the legends
+  fig[1, 2] = Makie.vgrid!(legends_colors...)
+  fig[1, 3] = Makie.vgrid!(legends_styles...)
+
+  save("../figs/body_size_e_factor=$(ef)_competition_coef=$(cf).pdf", fig)
+  save("../figs/body_size_e_factor=$(ef)_competition_coef=$(cf).png", fig)
+
 end
 
 ########################################################
-## Plot mean population size vs exploitation rate
+## Plot mean population size vs exploitation rate TODO
 ########################################################
 
 site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
@@ -87,11 +149,11 @@ fig_all = Figure(resolution=(600, 2400))
 
 for lifestage in 1:6
   # Variable to hold each site's mean population size for each e_factor
-  sites_mean_pop_size = zeros(Float64, 8, length(e_factors))
+  sites_mean_pop_size = zeros(Float64, 8, length(e_factors), nspecies)
 
   # Iterate through e_factors
-  for (i, e_factor) in enumerate(e_factors)
-      filename = "../figs/general_e_factor=$(e_factor).csv"
+  for (i, ef) in enumerate(e_factors), (j, cf) in enumerate(competition_coefficients)
+      filename = "../figs/general_e_factor=$(ef)_competition_coef=$(cf).csv"
 
       # Load the CSV file into a DataFrame
       df = CSV.File(filename) |> DataFrame
@@ -144,84 +206,3 @@ end
 save("../figs/exploitation_vs_population_size_all_lifestages.pdf", fig_all)
 save("../figs/exploitation_vs_population_size_all_lifestages.png", fig_all)
 
-########################################################
-## Sensitivity analysis
-########################################################
-
-# for lifestage in 1:6
-lifestage=5
-
-# for factor in e_factors
-factor = 1.0
-
-exploitation_rates = exploitation_rates_org * factor
-p_general = [r, d, size_growth_rate, distance_matrix, exploitation_rates, size_max, K, α, mig_probs]
-p_general_flat = flatten_p(p_general)
-
-start_year = 2006
-end_year = 2018
-nyears = end_year - start_year + 1
-ndays = nyears * 365.0
-tspan_general = (0.0, ndays)
-
-prob_general = ODEProblem(nsites!, u0_general, tspan_general, p_general_flat)
-# sol_general = solve(prob_general)
-
-fn = function (p)
-  prob1 = remake(prob_general; p=p)
-  sol = solve(prob1)
-  indices = (lifestage - 1) * 8 .+ (1:8)  # 8 sites
-  [mean(sol[indices[1], :]), mean(sol[indices[2], :]), mean(sol[indices[3], :]), mean(sol[indices[4], :]), mean(sol[indices[5], :]), mean(sol[indices[6], :]), mean(sol[indices[7], :]), mean(sol[indices[8], :])] # mean population size for each site across all times.
-end
-
-mig_probs_bounds = Array{Float64}[]
-for ind in eachindex(mig_probs)
-  entry = [mig_probs[ind], mig_probs[ind] + 0.001]
-  push!(mig_probs_bounds, entry)
-end
-distance_matrix_bounds = Array{Float64}[]
-for ind in eachindex(distance_matrix)
-  entry = [distance_matrix[ind], distance_matrix[ind] + 0.001]
-  push!(distance_matrix_bounds, entry)
-end
-bounds_n = [
-  [0.0, 6], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
-  [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
-  [0.0, 0.1],
-  distance_matrix_bounds...,
-  [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
-  [16.0, 76.0],
-  [20000, 90000],
-  [0.0, 0.2], [0.0, 0.2], [0.0, 0.2],
-  mig_probs_bounds...
-]
-
-output = "../figs/sensitivity_results_lifestage=$(lifestage)_e_factor=$(factor).jld2"
-isfile(output) ? m = load(output, "results") : m = gsa(fn, Sobol(), bounds_n, samples=100) && save(output, "results", m)
-
-# Plot the results
-f = Figure(resolution=(600, 2400))
-for site in 1:8
-  param_names = ["r", "d", "size_growth_rate", "distance_matrix", "exploitation_rates", "size_max", "K", "α", "mig_probs"]
-  important_parameter_indices = vcat(collect(1:5), # r for all life stages
-    vcat(6:10), # d for all life stages
-    vcat(76:83), # exploitation rates for all sites. (10+64+1):(10+64+1+8)
-    vcat(86:87), # α
-  )
-  important_parameter_names = ["r1", "r2", "r3", "r4", "r5", "d1", "d2", "d3", "d4", "d5", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "α1", "α2"]  ## Bar plot
-  normalized_mST = m.ST ./ sum(m.ST, dims=2)
-  sensitivity_indices = normalized_mST[site, important_parameter_indices]
-  if site == 4
-    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])", backgroundcolor=:transparent)
-  else
-    ax  = Axis(f[site, 1], xlabel="Parameter", ylabel="Sensitivity index - total effect", xticks=(1:length(important_parameter_names), important_parameter_names), title="$(site_names[site])", yscale = Makie.pseudolog10, backgroundcolor=:transparent)
-  end
-  ylims!(ax, 0.0, 1.0)
-
-  bars = barplot!(ax, 1:length(important_parameter_names), sensitivity_indices, color=:black)
-  # site != 8 &&  hidexdecorations!(ax, grid=true, ticks=true)
-end
-save("../figs/sensitivity_indices_barplot_total_effect_lifestage=$(lifestage)_e_factor=$(factor).pdf", f)
-save("../figs/sensitivity_indices_barplot_total_effect_lifestage=$(lifestage)_e_factor=$(factor).png", f)
-# end
-# end
