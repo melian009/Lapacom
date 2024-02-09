@@ -71,7 +71,7 @@ for cf in competition_coefficients, ef in e_factors
         end
       end
       # Create a legend for each species with a dummy plot for the line style
-      p_dummy = lines!(ax1, [NaN], [NaN], linestyle=linestyles[sp])  # Dummy plot, won't be visible
+      p_dummy = lines!(ax1, [NaN], [NaN], linestyle=linestyles[sp], color= :black)  # Dummy plot, won't be visible
       push!(plots_styles, p_dummy)
       push!(labels_styles, species[sp])
     end
@@ -117,7 +117,7 @@ for cf in competition_coefficients, ef in e_factors
       end
     end
     # Create a legend for each species with a dummy plot for the line style
-    p_dummy = lines!(ax2, [NaN], [NaN], linestyle=linestyles[sp])  # Dummy plot, won't be visible
+    p_dummy = lines!(ax2, [NaN], [NaN], linestyle=linestyles[sp], color=:black)  # Dummy plot, won't be visible
     push!(plots_styles, p_dummy)
     push!(labels_styles, species[sp])
   end
