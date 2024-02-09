@@ -138,10 +138,13 @@ for cf in competition_coefficients, ef in e_factors
 
 end
 
+
+
 ########################################################
 ## Plot mean population size vs exploitation rate TODO
 ########################################################
 
+#=
 site_names = ["Porto Moniz", "Paúl do Mar", "Funchal", "Desertas", "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"]
 lifestage_names = ["Eggs", "Trochophore", "Veliger", "Juvenile", "Adult", "Adult Body Size"]
 
@@ -206,3 +209,4 @@ end
 save("../figs/exploitation_vs_population_size_all_lifestages.pdf", fig_all)
 save("../figs/exploitation_vs_population_size_all_lifestages.png", fig_all)
 
+=#
