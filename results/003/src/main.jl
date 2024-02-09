@@ -62,7 +62,7 @@ for cf in competition_coefficients, ef in e_factors
     for sp in 1:nspecies
       for site in 1:nsites
         p = lines!(ax1, all_times, [all_u[i][site, stage, sp] for i in 1:length(all_times)], yscale=:log10, color=colors[site], linestyle=linestyles[sp])
-        ax1.title = "N for stage: $(stage)"
+        ax1.title = "Life stage: $(stage)"
         ax1.xlabel = "Time (days)"
         ax1.ylabel = "Population size"
         if sp == 1  # Only add to color legend for the first species
