@@ -234,7 +234,7 @@ display(H_Na_)
 
 
 
-n=1.5    #Number of years in the simulation
+n=10    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.1:1)))
 span = ones(Float64,size(1:365.14*n))
@@ -261,7 +261,7 @@ end
 
 for j in 1:length(H_span)
     H_j = H_span[j]
-    cij_i = cij_span[5]
+    cij_i = cij_span[1]
     c=1
     n=1.5 #Years
     Nai1 = zeros(Float64,size(1:365.14*n))
@@ -531,7 +531,7 @@ for i in 1:length(H_span)
 end
 
 H_span
-cij_span
+cij_span = [0.0, 0.5, 1.0]
 
 #Outputs of simulations
 Nai_h = zeros(t_span,h_span)
@@ -541,10 +541,10 @@ Nai_h_c = zeros(h_span,h_span)
 Sai_h_c = zeros(h_span,h_span)
 
 
-for m in 1:length(cij_span)
-  for i in 1:length(H_span)
-    cij_ = cij_span[m]
-    H_i = H_span[i]
+#for m in 1:length(cij_span)
+#  for i in 1:length(H_span)
+    cij_ = cij_span[1]
+    H_i = H_span[1]
     c=1 
 
     Nai1 = zeros(Float64,size(1:365.14*n))
@@ -565,10 +565,10 @@ for m in 1:length(cij_span)
       avg_size = mean(Sai1)  
       c=c+1
     end
-    Nai_h[:,i] = Nai1
-    Sai_h[:,i] = Sai1
+    Nai_h[:,1] = Nai1
+    Sai_h[:,1] = Sai1
 
-  end
+  #end
   #Na and Sa vs H
 
   Sa_H = ones(Float64,h_span)
@@ -578,13 +578,13 @@ for m in 1:length(cij_span)
   Sa_H[j] = minimum(Sai_h[:,j])
   Na_H[j] = maximum(Nai_h[:,j])
   end
- Sai_h_c[:,m] = Sa_H
- Nai_h_c[:,m] = Na_H
-end
+ Sai_h_c[:,1] = Sa_H
+ Nai_h_c[:,1] = Na_H
+
  
 real(log(Nai_h_c))
 
-plot(H_span,real(log(Nai_h_c)), label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
+plot(H_span,log(Nai_h_c), label="cij=0", legend=:outerright, color=:blue)
 xlabel!("Exploitation rate (H)")
 ylabel!("Adult abundance (nº individuals)")
 png("H_decay_for_cij_gradient_N_log")
@@ -630,6 +630,10 @@ function SLC!(du, u, p, t)
   du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 end
 
+
+
+
+
 avg_oocytes = mean([92098, 804183]) # This is the actual mean. mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 r_ = reggs*0.998611*0.971057*0.4820525*0.00629
@@ -671,12 +675,12 @@ Na1c0 = vars[:,1]
 
 
 
-plot!(Na1c0, label="cij=1.0",legend=:outerright, background=nothing)
+plot!(Na1c0, label="cij=1.0", color=:red, legend=:outerright, background=nothing)
 xlims!(0,100)
 ylims!(0,7*10^4)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
-title!("H=1.0")
+title!("H=0.1")
 savefig("SLC_NAt_H100_cij.png")
 
 #C:\\Users\\miste\\AppData\\Local\\Programs\\Julia-1.9.3\\bin\\julia.exe
