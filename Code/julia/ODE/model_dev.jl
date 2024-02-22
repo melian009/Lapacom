@@ -440,7 +440,6 @@ fig[1, 2] = Legend(fig, ax, "Site")
 save("figs/body_sizes.pdf", fig)
 
 ### --------------------------------------------------
-### 3. Sensitivity analysis
 ### --------------------------------------------------
 
 ### 3.1 Single site
