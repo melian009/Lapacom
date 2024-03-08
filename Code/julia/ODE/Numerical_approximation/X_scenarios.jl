@@ -80,7 +80,7 @@ Smax_ = 53.0             # Maximum size for adults3
 
 n=10    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
-h_span = length(zeros(Float64, size(0:0.1:1)))
+h_span = length(zeros(Float64, size(0:0.01:1)))
 span = ones(Float64,size(1:365.14*n))
 Kspan = ones(Float64,size(1:365.14*n))*K_ 
 Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
@@ -227,14 +227,14 @@ title!("X=1")
 savefig("SLC_NA_H_cij_X1.png")
 
 
-plot(resultados_simulaciones[:,10,1],label="cij=0.0",  color=:red, style=:solid)
-plot!(resultados_simulaciones[:,10,6],label="cij=0.5",  color=:red, style=:dash)
-plot!(resultados_simulaciones[:,10,10],label="cij=0.9", color=:red, style=:dashdot,
+plot(resultados_simulaciones[:,100,1],label="H=0.00",  color=:red, style=:solid)
+plot!(resultados_simulaciones[:,100,51],label="H=0.50",  color=:red, style=:dash)
+plot!(resultados_simulaciones[:,100,100],label="H=0.99", color=:red, style=:dashdot,
       legend=:outerright,background=nothing)
 
 xlims!(0,4000)
-ylims!(0,7*10^4)
+ylims!(5*10^4,7*10^4)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
-title!("H=0.9")
-savefig("Figure_4d.png")
+title!("H=0.99")
+savefig("Figure_4f.png")
