@@ -227,24 +227,12 @@ title!("X=1")
 savefig("SLC_NA_H_cij_X1.png")
 
 
-plot(resultados_simulaciones[:,10,1],label="cij=0.0",  color=:red,style=:solid)
-plot!(resultados_simulaciones[:,10,6],label="cij=0.5",  color=:red,style=:dash)
-plot!(resultados_simulaciones[:,10,10],label="cij=0.9", color=:red,style=:dashdot)
+plot(resultados_simulaciones[:,10,1],label="cij=0.0",  color=:red, style=:solid)
+plot!(resultados_simulaciones[:,10,6],label="cij=0.5",  color=:red, style=:dash)
+plot!(resultados_simulaciones[:,10,10],label="cij=0.9", color=:red, style=:dashdot,
+      legend=:outerright,background=nothing)
 
-plot!(resultados_simulaciones[:,1,6],label="H=0.0, cij=0.5", color=:green,style=:solid)
-plot!(resultados_simulaciones[:,6,6],label="H=0.5, cij=0.5", color=:green,style=:dash)
-plot!(resultados_simulaciones[:,10,6],label="H=0.9, cij=0.5", color=:green,style=:dashdot)
-
-plot!(resultados_simulaciones[:,1,11],label="H=0.0, cij=1.0", color=:red,style=:solid)
-plot!(resultados_simulaciones[:,6,11],label="H=0.5, cij=1.0", color=:red,style=:dash)
-plot!(resultados_simulaciones[:,10,11],label="H=0.9, cij=1.0", color=:red,style=:dashdot)
-
-plot!(resultados_simulaciones[:,11,1],label="H=1, cij=0.0", color=:black,style=:solid)
-plot!(resultados_simulaciones[:,11,6],label="H=1, cij=0.5", color=:black,style=:dash)
-plot!(resultados_simulaciones[:,11,11],label="H=1,cij=1.0", color=:black,style=:dashdot,
-       legend=:outerright)
-
-xlims!(620,1000)
+xlims!(0,4000)
 ylims!(0,7*10^4)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
