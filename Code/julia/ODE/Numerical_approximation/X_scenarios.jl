@@ -67,8 +67,8 @@ avg_oocytes = mean([77404, 385613]) # This is the actual mean.
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 r_ = reggs*0.998611*0.971057*0.4820525*0.00629
 # natural death rates per life stage.
-d = 0.000322/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
-size_growth_rate = 0.00014898749263737575
+d = mean([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
+size_growth_rate = mean([0.32,0.36]) #0.00014898749263737575
 t0_ = 365.14*0.42
 k_= 0.42
 Naj_ = 2500
@@ -79,7 +79,7 @@ Smax_ = 53.0             # Maximum size for adults3
 
 n=10    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
-h_span = length(zeros(Float64, size(0:0.1:1)))
+h_span = length(zeros(Float64, size(0:0.01:1)))
 span = ones(Float64,size(1:365.14*n))
 Kspan = ones(Float64,size(1:365.14*n))*K_ 
 Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
@@ -185,25 +185,28 @@ for i in 1:length(H_span)
 end
 
 
-Na1c0=[resultados_simulaciones[:,1,1]  resultados_simulaciones[:,5,1]  resultados_simulaciones[:,11,1]]
-Na5c0=[resultados_simulaciones[:,1,5],resultados_simulaciones[:,5,5], resultados_simulaciones[:,11,5]]
+Na1c0=[resultados_simulaciones[:,1,1], resultados_simulaciones[:,5,1],  resultados_simulaciones[:,11,1]]
+Na5c0=[resultados_simulaciones[:,1,5], resultados_simulaciones[:,5,5], resultados_simulaciones[:,11,5]]
 Na10c0=[resultados_simulaciones[:,1,10],resultados_simulaciones[:,5,10], resultados_simulaciones[:,11,10]]
 Na11c0=[resultados_simulaciones[:,1,11],resultados_simulaciones[:,5,11], resultados_simulaciones[:,11,11]]
 
-resultados_simulaciones[:,1,1]
-length(resultados_simulaciones[:,1,5])
-
+resultados_simulaciones[:,:,:]
+length(resultados_simulaciones[:,1,1])
+plot!(resultados_simulaciones[:,100,100])
+ylims!(0,K_+10000)
+xlims!(400,500)
 
 #X=0 en el dia 625 (day, H, cij)
-X0 = resultados_simulaciones[:,:,1]
-X1 = resultados_simulaciones[625,:,6]
-X2 = resultados_simulaciones[625,:,10]
-X3 = resultados_simulaciones[625,:,11]
+X0 = resultados_simulaciones[650,:,1]
+X1 = resultados_simulaciones[625,:,11]
+X2 = resultados_simulaciones[550,:,51]
+X3 = resultados_simulaciones[450,:,91]
 #X=1 en el dia 900
-X4 = resultados_simulaciones[900,:,1]
-X5 = resultados_simulaciones[900,:,6]
-X6 = resultados_simulaciones[900,:,10]
-X7 = resultados_simulaciones[900,:,11]
+X4 = resultados_simulaciones[800,:,1]
+X5 = resultados_simulaciones[800,:,6]
+X6 = resultados_simulaciones[800,:,10]
+X7 = resultados_simulaciones[800,:,11]
+
 
 plot(H_span,X0,label="cij=0.0", color=:blue)
 plot!(H_span,X1,label="cij=0.5", color=:green)
@@ -216,7 +219,7 @@ ylabel!("Abundance (nº individuals)", font=12)
 title!("X=0")
 savefig("SLC_NA_H_cij_X0.png")
 
-
+0.79/365
 plot(H_span,X4,label="cij=0.0", color=:blue, style=:solid)
 plot!(H_span,X5,label="cij=0.5", color=:green,style=:solid)
 plot!(H_span,X6,label="cij=0.9", color=:red, style=:solid)
@@ -241,26 +244,62 @@ savefig("Figure_4f.png")
 
 # Simulations for Patella aspera and Patella ordinaria 
 
-oocytes_po = 385.613                  # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = 77.404                  # Average: Patella aspera (nº of Eggs)
+oocytes_po = 385613 # Average: Patella ordinaria (nº of Eggs)
+oocytes_pa = 77404  # Average: Patella aspera (nº of Eggs)
+c_po = oocytes_po/(oocytes_pa+oocytes_po)
+c_pa = oocytes_pa/(oocytes_po+oocytes_pa)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
-reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
-
-re = reggs / 500     # Population growth rate
-Kt = 6400           # Carrying capacity
-rates = [0.639,0.57] # Exploitation rate (H)
-rates2 = [0.02,0.01]
-gEA = 0.006          # Instant conversion between stages.
+reggs = oocytes / (365 * 0.42)       # Population growth rate    
+re = reggs*0.998611*0.971057*0.4820525*0.00629     # conversion of poplation growth rate from eggs to adults.
+Kt = 64000          # Carrying capacity
+H_ = [0.639,0.57] # Exploitation rate (H)
 da_ = [0.55,0.59]    # Natural mortality rate for adults
 Sm = 56              # Maximum size for adults
 gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
+Naj_po = reggs[2]
+Naj_pa = reggs[1]
+t0_ = 365.14 * 0.42
 
-t0_ = 365.14*0.42
-
-p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_]  
+p_span_po = [t0_, k_, reggs[1], K_, H_[1], da_[1], Smax_, gammas[1],c_po,Naj_po]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
-U0_ = [10^4, 49.25]
-prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
+U0_ = [10^3, 49.25]
+prob_ = ODEProblem(SLC!, U0_, tspan, p_span_po)
 solve_= solve(prob_, Tsit5())
+
+t_l_po = length(zeros(Float64,size(1:length(solve_.u))))
+n_v_po = length(zeros(Float64,size(1:length(solve_.u[1]))))
+vars_po = zeros(t_l_po,n_v_po)
+time2_po = zeros(t_l_po,1)
+
+for j in 1:length(solve_.u)
+    for i in 1:2
+      vars_po[j,i] = solve_.u[j][i]
+      time2_po[j] = solve_.t[j]
+    end 
+end
+
+p_span_pa = [t0_, k_, reggs[2], K_, H_[2], da_[2], Smax_, gammas[2],c_pa,Naj_pa]  
+n=10  #Number of years in the simulation
+tspan = (0,365.14*n)
+U0_ = [10^3, 49.25]
+prob_ = ODEProblem(SLC!, U0_, tspan, p_span_pa)
+solve_= solve(prob_, Tsit5())
+
+t_l_pa = length(zeros(Float64,size(1:length(solve_.u))))
+n_v_pa = length(zeros(Float64,size(1:length(solve_.u[1]))))
+vars_pa = zeros(t_l_pa,n_v_pa)
+time2_pa = zeros(t_l_pa,1)
+
+for j in 1:length(solve_.u)
+    for i in 1:2
+      vars_pa[j,i] = solve_.u[j][i]
+      time2_pa[j] = solve_.t[j]
+    end 
+end
+
+plot(vars_po[:,1],label="Patella ordinaria", style=:solid)
+plot!(vars_pa[:,1],label="Patella aspera", style=:solid)
+ylims!(6.3*10^4,6.4*10^4)
+xlims!(400,500)
