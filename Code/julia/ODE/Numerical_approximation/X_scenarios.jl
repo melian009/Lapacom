@@ -192,62 +192,78 @@ Na11c0=[resultados_simulaciones[:,1,11],resultados_simulaciones[:,5,11], resulta
 
 resultados_simulaciones[:,:,:]
 length(resultados_simulaciones[:,1,1])
-plot!(resultados_simulaciones[:,100,100])
+plot!(resultados_simulaciones[:,100,84])
 ylims!(0,K_+10000)
 xlims!(400,500)
 
-#X=0 en el dia 625 (day, H, cij)
+#X=0 (day, H, cij)
 X0 = resultados_simulaciones[650,:,1]
 X1 = resultados_simulaciones[625,:,11]
 X2 = resultados_simulaciones[550,:,51]
 X3 = resultados_simulaciones[450,:,91]
+X4 = resultados_simulaciones[425,:,101]
+
+po = resultados_simulaciones[475,:,84]
+pa = resultados_simulaciones[625,:,17]
+
 #X=1 en el dia 900
-X4 = resultados_simulaciones[800,:,1]
-X5 = resultados_simulaciones[800,:,6]
-X6 = resultados_simulaciones[800,:,10]
-X7 = resultados_simulaciones[800,:,11]
+X5 = resultados_simulaciones[800,:,1]
+X6 = resultados_simulaciones[775,:,11]
+X7 = resultados_simulaciones[650,:,51]
+X8 = resultados_simulaciones[550,:,91]
+X9 = resultados_simulaciones[525,:,101]
+
 
 
 plot(H_span,X0,label="cij=0.0", color=:blue)
-plot!(H_span,X1,label="cij=0.5", color=:green)
-plot!(H_span,X2,label="cij=0.9", color=:red)
-plot!(H_span,X3,label="cij=1.0", color=:black)
-      #background=nothing)
-
+plot!(H_span,X1,label="cij=0.1", color=:green)
+plot!(H_span,pa,label="c(pa,po)=0.16", color=:green, style = :dash)
+plot!(H_span,X2,label="cij=0.5", color=:red)
+plot!(H_span,po,label="c(po,pa)=0.83", color=:brown, style = :dash)
+plot!(H_span,X3,label="cij=0.9", color=:brown)
+plot!(H_span,X4,label="cij=1.0", color=:black,legend=:bottomleft,
+      background=nothing)
 xlabel!("Exploitation rate (H)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
 title!("X=0")
 savefig("SLC_NA_H_cij_X0.png")
 
-0.79/365
-plot(H_span,X4,label="cij=0.0", color=:blue, style=:solid)
-plot!(H_span,X5,label="cij=0.5", color=:green,style=:solid)
-plot!(H_span,X6,label="cij=0.9", color=:red, style=:solid)
-plot!(H_span,X7,label="cij=1.0", color=:black, style=:solid)
+plot(H_span,X5,label="cij=0.0", color=:blue, style=:solid)
+plot!(H_span,X6,label="cij=0.1", color=:green,style=:solid)
+plot!(H_span,X7,label="cij=0.5", color=:red, style=:solid)
+plot!(H_span,X8,label="cij=0.9", color=:brown, style=:solid)
+plot!(H_span,X9,label="cij=1.0", color=:black, style=:solid)
 xlabel!("Exploitation rate (H)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
 title!("X=1")
 savefig("SLC_NA_H_cij_X1.png")
 
 
-plot(resultados_simulaciones[:,3,1],label="H=0.00",  color=:red, style=:solid)
-plot!(resultados_simulaciones[:,100,51],label="H=0.50",  color=:red, style=:dash)
-plot!(resultados_simulaciones[:,100,100],label="H=0.99", color=:red, style=:dashdot,
-      legend=:outerright,background=nothing)
 
-xlims!(0,4000)
+
+plot(resultados_simulaciones[:,91,1],label="cij=0.00",  color=:red, style=:solid)
+plot!(resultados_simulaciones[:,91,11],label="cij=0.10",  color=:red, style=:dash)
+plot!(resultados_simulaciones[:,91,51],label="cij=0.50",  color=:red, style=:dashdot)
+plot!(resultados_simulaciones[:,91,91],label="cij=0.90", color=:red, style=:dashdotdot,
+      background=nothing)
+
+xlims!(0,2000)
 ylims!(5*10^4,7*10^4)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
-title!("H=0.99")
-savefig("Figure_4f.png")
+title!("H=0.9")
+savefig("Figure_4d.png")
 
-# Simulations for Patella aspera and Patella ordinaria 
 
+
+
+
+
+#= Simulations for Patella aspera and Patella ordinaria 
 oocytes_po = 385613 # Average: Patella ordinaria (nº of Eggs)
 oocytes_pa = 77404  # Average: Patella aspera (nº of Eggs)
-c_po = oocytes_po/(oocytes_pa+oocytes_po)
-c_pa = oocytes_pa/(oocytes_po+oocytes_pa)
+c_po = oocytes_po/(oocytes_pa + oocytes_po)
+c_pa = oocytes_pa/(oocytes_po + oocytes_pa)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # Population growth rate    
 re = reggs*0.998611*0.971057*0.4820525*0.00629     # conversion of poplation growth rate from eggs to adults.
@@ -283,7 +299,7 @@ end
 p_span_pa = [t0_, k_, reggs[2], K_, H_[2], da_[2], Smax_, gammas[2],c_pa,Naj_pa]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
-U0_ = [10^3, 49.25]
+U0_ = [10^4, 49.25]
 prob_ = ODEProblem(SLC!, U0_, tspan, p_span_pa)
 solve_= solve(prob_, Tsit5())
 
@@ -299,7 +315,13 @@ for j in 1:length(solve_.u)
     end 
 end
 
-plot(vars_po[:,1],label="Patella ordinaria", style=:solid)
-plot!(vars_pa[:,1],label="Patella aspera", style=:solid)
-ylims!(6.3*10^4,6.4*10^4)
-xlims!(400,500)
+=#
+
+plot(resultados_simulaciones[:,64,84],label="Patella ordinaria",  color=:red, style=:solid)
+plot!(resultados_simulaciones[:,57,17],label="Patella aspera",  color=:blue, style=:solid)
+xlims!(000,2000)
+xlabel!("Time (days)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
+savefig("Figure_4e.png")
+
+
