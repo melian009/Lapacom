@@ -318,7 +318,7 @@ end
 =#
 
 plot(resultados_simulaciones[:,64,84],label="Patella ordinaria",  color=:red, style=:solid)
-plot!(resultados_simulaciones[:,57,17],label="Patella aspera",  color=:blue, style=:solid)
+plot!(resultados_simulaciones[:,57,17],label="Patella aspera",  color=:blue, style=:solid, background=nothing)
 xlims!(000,2000)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
