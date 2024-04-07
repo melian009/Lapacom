@@ -192,9 +192,9 @@ Na11c0=[resultados_simulaciones[:,1,11],resultados_simulaciones[:,5,11], resulta
 
 resultados_simulaciones[:,:,:]
 length(resultados_simulaciones[:,1,1])
-plot!(resultados_simulaciones[:,100,84])
+plot!(resultados_simulaciones[:,50,31])
 ylims!(0,K_+10000)
-xlims!(400,500)
+xlims!(550,650)
 
 #X=0 (day, H, cij)
 X0 = resultados_simulaciones[650,:,1]
