@@ -81,8 +81,8 @@ n=10    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.01:1)))
 span = ones(Float64,size(1:365.14*n))
-Kspan = ones(Float64,size(1:365.14*n))*K_ 
-Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+#Kspan = ones(Float64,size(1:365.14*n))*K_ 
+#Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
 
 
 Nai_cij = zeros(t_span,h_span)
@@ -104,7 +104,7 @@ end
 Hs=length(zeros(Float64,size(1:length(H_span))))
 cijs = length(zeros(Float64,size(1:length(cij_span))))
 
-
+#condiciones de estabilidad
 H1_ = H_span[1]
 cij_= cij_span[1]
 
@@ -118,18 +118,18 @@ solve_= solve(prob_, Tsit5())
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
-time2 = zeros(t_l,1,n_v)
+time_inicial = zeros(t_l)
 
-  for j in 1:length(solve_.u)
-    for i in 1:2
-      vars[j,i] = solve_.u[j][i]
-      time2[j] = solve_.t[j]
-    end 
-  end
+for j in 1:length(solve_.u)
+  for i in 1:2
+    vars[j,i] = solve_.u[j][i]
+    time_inicial[j] = solve_.t[j]
+  end 
+end
 
-  resultados_tiempos = zeros(length(time2), length(H_span), length(cij_span)) 
-  tiempos_maximos = length(time2, length(H_span), length(cij_span))
-
+resultados_simulaciones = zeros(length(time_inicial), length(H_span), length(cij_span)) 
+tiempos_totales = zeros(length(time_inicial), length(H_span), length(cij_span))
+tiempos_maximos = zeros(length(H_span), length(cij_span))
 
 
 
@@ -156,96 +156,194 @@ for i in 1:length(H_span)
     t_l = length(zeros(Float64,size(1:length(solve_.u))))
     n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
     vars = zeros(t_l,n_v)
-    time2 = zeros(t_l,1)
+    time2 = zeros(t_l)
  
-      for j in 1:length(solve_.u)
-        for i in 1:2
-          vars[j,i] = solve_.u[j][i]
-          time2[j] = solve_.t[j]
+      for a in 1:length(solve_.u)
+        for b in 1:2
+          vars[a,b] = solve_.u[a][b]
+          time2[a] = solve_.t[a]
         end 
       end
 
     if i == 1 && j == 1
       longitud_simulacion = length(time2)
-    # Guardar los resultados de la simulación en la matriz
-      resultados_simulaciones[:,i,j] = vars[:,1]
-    
+    # Guardar los resultados de la simulación en la matriz cúbica
+      resultados_simulaciones[:,i,j] = vars[:,1] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+      tiempos_totales[:,i,j] = time2
     else 
-      lon_lar = length(resultados_simulaciones[:,1,1])
-      lon_cor = length(vars[:,1])
-      elementos_faltantes = lon_lar - lon_cor
-      if elementos_faltantes > 0
+      lon_0 = length(resultados_simulaciones[:,1,1])
+      lon_c = length(vars[:,1])
+      elementos_faltantes = lon_0 - lon_c
+      if elementos_faltantes > 0 # Concadena el vector corto con zeros para tener la misma longitud del vector de las condiciones iniciales, el mas largo.
         vector_corto = vcat(vars[:,1],zeros(elementos_faltantes))
+        vector_corto_t = vcat(time2,ones(elementos_faltantes)*maximum(time2))
       else
-        vector_corto = vars[:,1][1:lon_lar] # Trunca el vector corto si es más largo que el vector largo
+        vector_corto = vars[:,1][1:lon_0] # Selecciona los valores del vector mas largo hasta la longitud de la simulación de las condiciones estandar (H=0,c=0)
+        vector_corto_t = time2[1:lon_0]
       end
     resultados_simulaciones[:,i,j] = vector_corto
+    tiempos_totales[:,i,j] = vector_corto_t
+    tiempos_maximos[i,j] = maximum(vector_corto_t) #ultima iteración (nº máximo de días) por simulación
     end
   end
 end
 
+resultados_simulaciones
+tiempos_totales
+tiempos_maximos
 
-Na1c0=[resultados_simulaciones[:,1,1], resultados_simulaciones[:,5,1],  resultados_simulaciones[:,11,1]]
-Na5c0=[resultados_simulaciones[:,1,5], resultados_simulaciones[:,5,5], resultados_simulaciones[:,11,5]]
-Na10c0=[resultados_simulaciones[:,1,10],resultados_simulaciones[:,5,10], resultados_simulaciones[:,11,10]]
-Na11c0=[resultados_simulaciones[:,1,11],resultados_simulaciones[:,5,11], resultados_simulaciones[:,11,11]]
 
 resultados_simulaciones[:,:,:]
 length(resultados_simulaciones[:,1,1])
-plot!(resultados_simulaciones[:,50,31])
-ylims!(0,K_+10000)
-xlims!(550,650)
+for_plot = hcat(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1])
 
-#X=0 (day, H, cij)
-X0 = resultados_simulaciones[650,:,1]
-X1 = resultados_simulaciones[625,:,11]
-X2 = resultados_simulaciones[550,:,51]
-X3 = resultados_simulaciones[450,:,91]
-X4 = resultados_simulaciones[425,:,101]
+#Initial condition
+plot(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1], label="Stable specie")
 
-po = resultados_simulaciones[475,:,84]
-pa = resultados_simulaciones[625,:,17]
+#competence variability
+for i in 1:10:length(H_span)
+c=1  #c=0.0
+h=i
+plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:blue, label=false)
+end
+xlims!(612,682) 
+
+(682-612)/2
+ylims!(4.4*10^4,6.4*10^4)
+for i in 1:10:length(H_span)
+  c=16 #c_patella_aspera
+  h=i
+  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:green, label=false)
+end
+
+for i in 1:10:length(H_span)
+  c=51  #c=0.5
+  h=i
+  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:brown, label=false)
+end
+  
+for i in 1:10:length(H_span)
+  c=91  #c=0.9
+  h=i
+  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:red, label=false)
+end
+
+for i in 1:10:length(H_span)
+  c=101  #c=1
+  h=i
+  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:black, label=false)
+end
+
+plot!(tiempos_totales[:,101,1],resultados_simulaciones[:,101,1],color=:black, label=false)
+xlims!(650,800)
+ylims!(4*10^4,6.4*10^4)
+
+#ylims!(4*10^4,7*10^4)
+xlims!(475,600)
+
+#X=0 (day, H, cij) no exploitation
+X0 = hcat(tiempos_totales[725,:,1],resultados_simulaciones[725,:,1])
+X1 = hcat(tiempos_totales[725,:,11], resultados_simulaciones[725,:,11])
+X2 = hcat(tiempos_totales[725,:,51],resultados_simulaciones[725,:,51])
+X3 = hcat(tiempos_totales[725,:,91],resultados_simulaciones[725,:,91])
+X4 = hcat(tiempos_totales[725,:,101],resultados_simulaciones[725,:,101])
+
+po = hcat(tiempos_totales[725,:,84],resultados_simulaciones[725,:,84])
+pa = hcat(tiempos_totales[725,:,17],resultados_simulaciones[275,:,17])
 
 #X=1 en el dia 900
-X5 = resultados_simulaciones[800,:,1]
-X6 = resultados_simulaciones[775,:,11]
-X7 = resultados_simulaciones[650,:,51]
-X8 = resultados_simulaciones[550,:,91]
-X9 = resultados_simulaciones[525,:,101]
+X5 = hcat(tiempos_totales[650,:,1],resultados_simulaciones[650,:,1])
+X6 = hcat(tiempos_totales[650,:,11],resultados_simulaciones[650,:,11])
+X7 = hcat(tiempos_totales[650,:,51],resultados_simulaciones[650,:,51])
+X8 = hcat(tiempos_totales[650,:,91],resultados_simulaciones[650,:,91])
+X9 = hcat(tiempos_totales[650,:,101],resultados_simulaciones[650,:,101])
+
+po_X = hcat(tiempos_totales[650,:,84],resultados_simulaciones[650,:,84])
+pa_X = hcat(tiempos_totales[650,:,17],resultados_simulaciones[650,:,17])
 
 
+#pendientes!(tiempos_totales, resultados_simulaciones,intervalo,days,comp_Pos)
+days=745
+c=1
+X0 = hcat(tiempos_totales[days,:,c],resultados_simulaciones[days,:,c])
+plot(H_span,X0[:,2], label=vcat("cij=",cij_span[1]), legend=:outerright)
+  
+for j in vcat(1,11,51,91,101)
 
-plot(H_span,X0,label="cij=0.0", color=:blue)
-plot!(H_span,X1,label="cij=0.1", color=:green)
-plot!(H_span,pa,label="c(pa,po)=0.16", color=:green, style = :dash)
-plot!(H_span,X2,label="cij=0.5", color=:red)
-plot!(H_span,po,label="c(po,pa)=0.83", color=:brown, style = :dash)
-plot!(H_span,X3,label="cij=0.9", color=:brown)
-plot!(H_span,X4,label="cij=1.0", color=:black,legend=:bottomleft,
+  com_pos = j
+  X = hcat(tiempos_totales[days,:,com_pos],resultados_simulaciones[days,:,com_pos])
+
+
+  intervalo=0.01
+  h_span = length(zeros(Float64, size(0:intervalo:1)))
+  H_r = range(0, 1, length=h_span)
+  H_span = ones(Float64,h_span)
+
+  for i in 1:length(H_span)
+    H_span[i] = H_r[i]
+  end
+
+  h_N=zeros(length(1:10:length(H_span)))
+  h_v=zeros(length(1:10:length(H_span)))
+  c=1
+  for i in 1:10:length(H_span)
+    h_v[c] = H_span[i]
+    h_N[c] = X[i,2]
+    c=c+1
+  end
+  h_N_p = vcat(h_N[1],h_N[2],h_N[3],h_N[4],h_N[5],h_N[6],h_N[7],
+          h_N[8],h_N[9],h_N[10],h_N[11])
+  h_v_p = vcat(h_v[1],h_v[2],h_v[3],h_v[4],h_v[5],h_v[6],h_v[7],
+      h_v[8],h_v[9],h_v[10],h_v[11])
+  
+  if j == 1
+  scatter(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]), legend=:outerright)
+  plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]), legend=:outerright)
+  
+  else
+  scatter!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]))
+  plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]), legend=:outerright)
+  
+  end
+end
+
+
+ylims!(0,6.4*10^4)
+xlims!(0.0,1.0)
+
+
+#=
+plot(H_span,X0[:,2],label="cij=0.0", color=:blue)
+plot!(H_span,X1[:,2],label="cij=0.1", color=:green)
+plot!(H_span,pa[:,2],label="c(pa,po)=0.16", color=:green, style = :dash)
+plot!(H_span,X2[:,2],label="cij=0.5", color=:red)
+plot!(H_span,po[:,2],label="c(po,pa)=0.83", color=:brown, style = :dash)
+plot!(H_span,X3[:,2],label="cij=0.9", color=:brown)
+plot!(H_span,X4[:,2],label="cij=1.0", color=:black,legend=:bottomleft,
       background=nothing)
 xlabel!("Exploitation rate (H)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
 title!("X=0")
 savefig("SLC_NA_H_cij_X0.png")
 
-plot(H_span,X5,label="cij=0.0", color=:blue, style=:solid)
-plot!(H_span,X6,label="cij=0.1", color=:green,style=:solid)
-plot!(H_span,X7,label="cij=0.5", color=:red, style=:solid)
-plot!(H_span,X8,label="cij=0.9", color=:brown, style=:solid)
-plot!(H_span,X9,label="cij=1.0", color=:black, style=:solid)
+
+plot!(H_span,X6[:,2],label="cij=0.1", color=:green,style=:solid)
+plot!(H_span,X7[:,2],label="cij=0.5", color=:red, style=:solid)
+plot!(H_span,X8[:,2],label="cij=0.9", color=:brown, style=:solid)
+plot!(H_span,X9[:,2],label="cij=1.0", color=:black, style=:solid)
 xlabel!("Exploitation rate (H)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
 title!("X=1")
 savefig("SLC_NA_H_cij_X1.png")
+=#
 
 
 
-
-plot(resultados_simulaciones[:,91,1],label="cij=0.00",  color=:red, style=:solid)
-plot!(resultados_simulaciones[:,91,11],label="cij=0.10",  color=:red, style=:dash)
-plot!(resultados_simulaciones[:,91,51],label="cij=0.50",  color=:red, style=:dashdot)
-plot!(resultados_simulaciones[:,91,91],label="cij=0.90", color=:red, style=:dashdotdot,
-      background=nothing)
+plot(vcat(tiempos_totales[:,91,1],resultados_simulaciones[:,91,1]), label="cij=0.00", color=:green, style=:solid)
+plot!(vcat(tiempos_totales[:,91,11],resultados_simulaciones[:,91,11]),label="cij=0.10",  color=:blue, style=:dash)
+plot!(vcat(tiempos_totales[:,91,51],resultados_simulaciones[:,91,51]),label="cij=0.50",  color=:brown, style=:dashdot)
+plot!(vcat(tiempos_totales[:,91,91],resultados_simulaciones[:,91,91]),label="cij=0.90", color=:red, style=:dashdotdot)
+      #background=nothing)
 
 xlims!(0,2000)
 ylims!(5*10^4,7*10^4)
