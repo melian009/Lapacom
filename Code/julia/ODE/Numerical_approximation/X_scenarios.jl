@@ -44,7 +44,7 @@ function SLC!(du, u, p, t)
    #periodX(t) = 1/2*(1+tanh(2*sin(phi(t)) - k))
    
    function periodX(t)
-    if (t % 365) / 365 >= 0.42
+    if (t % t_0 / t_0) >= k
       return 1.0 # Reproductive Cycle
     else
       return 0.0 # Exploitation Cycle
@@ -64,8 +64,8 @@ end
 
 
 avg_oocytes = mean([77404, 385613]) # This is the actual mean.
-reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-r_ = reggs*0.998611*0.971057*0.4820525*0.00629
+reggs = avg_oocytes / (365 * 0.42) #aplication of the reproduction period stablish by law. (The time banned for extraction or exploitation for the species)
+r_ = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
 # natural death rates per life stage.
 d = mean([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
 size_growth_rate = mean([0.32,0.36]) #0.00014898749263737575
@@ -93,8 +93,8 @@ periodX = zeros(t_span)
 H_r = range(0, 1, length=h_span)
 H_span = ones(Float64,h_span)
 cij_span = ones(Float64,h_span)
-N_H_c_span = zeros(11,11)
-S_H_c_span = zeros(11,11)
+#N_H_c_span = zeros(11,11)
+#S_H_c_span = zeros(11,11)
 
 for i in 1:length(H_span)
   H_span[i] = H_r[i]
@@ -118,7 +118,7 @@ solve_= solve(prob_, Tsit5())
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
-time2 = zeros(t_l,1)
+time2 = zeros(t_l,1,n_v)
 
   for j in 1:length(solve_.u)
     for i in 1:2
@@ -127,8 +127,8 @@ time2 = zeros(t_l,1)
     end 
   end
 
-  resultados_simulaciones = zeros(length(time2), length(H_span), length(cij_span)) 
-  longitud_simulacion = length(time2)
+  resultados_tiempos = zeros(length(time2), length(H_span), length(cij_span)) 
+  tiempos_maximos = length(time2, length(H_span), length(cij_span))
 
 
 
@@ -259,7 +259,7 @@ savefig("Figure_4d.png")
 
 
 
-#= Simulations for Patella aspera and Patella ordinaria 
+#Simulations for Patella aspera and Patella ordinaria 
 oocytes_po = 385613 # Average: Patella ordinaria (nº of Eggs)
 oocytes_pa = 77404  # Average: Patella aspera (nº of Eggs)
 c_po = oocytes_po/(oocytes_pa + oocytes_po)
@@ -275,7 +275,9 @@ gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
 Naj_po = reggs[2]
 Naj_pa = reggs[1]
-t0_ = 365.14 * 0.42
+k_ = 0.42
+t0_ = 365.25
+
 
 p_span_po = [t0_, k_, reggs[1], K_, H_[1], da_[1], Smax_, gammas[1],c_po,Naj_po]  
 n=10  #Number of years in the simulation
@@ -315,13 +317,14 @@ for j in 1:length(solve_.u)
     end 
 end
 
-=#
 
-plot(resultados_simulaciones[:,64,84],label="Patella ordinaria",  color=:red, style=:solid)
-plot!(resultados_simulaciones[:,57,17],label="Patella aspera",  color=:blue, style=:solid, background=nothing)
+
+plot(resultados_simulaciones[:,64,84],label="Patella aspera",  color=:blue, style=:solid)
+plot!(resultados_simulaciones[:,57,17],label="Patella ordinaria",  color=:yellow, style=:solid, background=nothing)
 xlims!(000,2000)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
 savefig("Figure_4e.png")
 
 
+cat(zeros(10,1),ones(10,1),dims=1)
