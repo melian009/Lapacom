@@ -193,10 +193,6 @@ tiempos_totales
 tiempos_maximos
 
 
-resultados_simulaciones[:,:,:]
-length(resultados_simulaciones[:,1,1])
-for_plot = hcat(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1])
-
 #Initial condition
 plot(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1], label="Stable specie")
 
@@ -206,9 +202,7 @@ c=1  #c=0.0
 h=i
 plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:blue, label=false)
 end
-xlims!(612,682) 
 
-(682-612)/2
 ylims!(4.4*10^4,6.4*10^4)
 for i in 1:10:length(H_span)
   c=16 #c_patella_aspera
@@ -236,44 +230,43 @@ end
 
 plot!(tiempos_totales[:,101,1],resultados_simulaciones[:,101,1],color=:black, label=false)
 xlims!(650,800)
-ylims!(4*10^4,6.4*10^4)
+ylims!(0,6.4*10^4)
 
 #ylims!(4*10^4,7*10^4)
-xlims!(475,600)
+xlims!(612,682) 
+#Día es estabilidad, punto medio entre inicio y fin el 
+#peródo de explotación X=1 entre los días 612 y 682
 
-#X=0 (day, H, cij) no exploitation
-X0 = hcat(tiempos_totales[725,:,1],resultados_simulaciones[725,:,1])
-X1 = hcat(tiempos_totales[725,:,11], resultados_simulaciones[725,:,11])
-X2 = hcat(tiempos_totales[725,:,51],resultados_simulaciones[725,:,51])
-X3 = hcat(tiempos_totales[725,:,91],resultados_simulaciones[725,:,91])
-X4 = hcat(tiempos_totales[725,:,101],resultados_simulaciones[725,:,101])
+#LOCALIZACIÓN DE VALORES PARA UN DÍA ESPECÍFICO
+#Matriz de alamacenamiento
 
-po = hcat(tiempos_totales[725,:,84],resultados_simulaciones[725,:,84])
-pa = hcat(tiempos_totales[725,:,17],resultados_simulaciones[275,:,17])
+time_loc = zeros(Int64,101,101)
+abun_loc = zeros(Float64,101,101)
 
-#X=1 en el dia 900
-X5 = hcat(tiempos_totales[650,:,1],resultados_simulaciones[650,:,1])
-X6 = hcat(tiempos_totales[650,:,11],resultados_simulaciones[650,:,11])
-X7 = hcat(tiempos_totales[650,:,51],resultados_simulaciones[650,:,51])
-X8 = hcat(tiempos_totales[650,:,91],resultados_simulaciones[650,:,91])
-X9 = hcat(tiempos_totales[650,:,101],resultados_simulaciones[650,:,101])
+for j in 1:length(H_span)
+  for k in 1:length(cij_span)
+    for i in 1:length(tiempos_totales[:,1,1])
+      if tiempos_totales[i,j,k] > 346.9 && tiempos_totales[i,j,k] < 347.1 
+        time_loc[j,k] = i
+        abun_loc[j,k] = resultados_simulaciones[i,j,k]
+      end
+    end
+  end
+end
 
-po_X = hcat(tiempos_totales[650,:,84],resultados_simulaciones[650,:,84])
-pa_X = hcat(tiempos_totales[650,:,17],resultados_simulaciones[650,:,17])
+abun_loc[:,17]
 
-
+plot!(abun_loc[:,101])
 #pendientes!(tiempos_totales, resultados_simulaciones,intervalo,days,comp_Pos)
-days=745
+
 c=1
+days= time_loc[1,1]
 X0 = hcat(tiempos_totales[days,:,c],resultados_simulaciones[days,:,c])
 plot(H_span,X0[:,2], label=vcat("cij=",cij_span[1]), legend=:outerright)
   
-for j in vcat(1,11,51,91,101)
 
-  com_pos = j
-  X = hcat(tiempos_totales[days,:,com_pos],resultados_simulaciones[days,:,com_pos])
-
-
+for j in vcat(1,11,17,51,84,91,101) 
+  X = abun_loc[:,j]
   intervalo=0.01
   h_span = length(zeros(Float64, size(0:intervalo:1)))
   H_r = range(0, 1, length=h_span)
@@ -286,30 +279,48 @@ for j in vcat(1,11,51,91,101)
   h_N=zeros(length(1:10:length(H_span)))
   h_v=zeros(length(1:10:length(H_span)))
   c=1
+  
   for i in 1:10:length(H_span)
     h_v[c] = H_span[i]
-    h_N[c] = X[i,2]
+    h_N[c] = X[i]
     c=c+1
   end
-  h_N_p = vcat(h_N[1],h_N[2],h_N[3],h_N[4],h_N[5],h_N[6],h_N[7],
-          h_N[8],h_N[9],h_N[10],h_N[11])
-  h_v_p = vcat(h_v[1],h_v[2],h_v[3],h_v[4],h_v[5],h_v[6],h_v[7],
-      h_v[8],h_v[9],h_v[10],h_v[11])
+
+  h_N_p = vcat(h_N[1],h_N[2],h_N[3],h_N[4],h_N[5],h_N[6],h_N[8],h_N[9],h_N[10],h_N[11])  
+  h_v_p = vcat(h_v[1],h_v[2],h_v[3],h_v[4],h_v[5],h_v[6],h_v[8],h_v[9],h_v[10],h_v[11])
   
-  if j == 1
-  scatter(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]), legend=:outerright)
-  plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]), legend=:outerright)
-  
-  else
-  scatter!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]))
-  plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]), legend=:outerright)
-  
+  # Generación de gráficos coloreados en función del rango de competencia:
+  if j == 1 #Non competence
+     plot(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:blue, style=:solid, legend=:bottomleft,background=false)
+    else
+    if j > 1 && j < 12 #10% of competence
+     plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:green, style=:solid)
+     else  
+     if j > 12 && j < 22 #Patella aspera range of competence
+       plot!(h_v_p,h_N_p, label=vcat("c(Patella aspera)=",cij_span[j]),color=:green, style=:dot)
+       else
+        if j > 22 && j < 52 #50% of competence
+          plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:red, style=:solid)
+          else 
+          if j > 52 && j < 85 #Patella ordinaria range of copetence
+            plot!(h_v_p,h_N_p, label=vcat("c(Patella ordinaria)=",cij_span[j]),color=:brown, style=:dot)
+            else 
+            if j > 85 && j < 92 #90% of competence
+              plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:brown, style=:solid)
+              else j > 93 && j < 102 #100% of competence
+                plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:black, style=:solid)
+            end
+          end
+        end
+      end
+    end
   end
 end
+xlabel!("Exploitation rate (H)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
+title!("Exploitation vs Abuncance")
+savefig("FIG_4a_legend.png")
 
-
-ylims!(0,6.4*10^4)
-xlims!(0.0,1.0)
 
 
 #=
@@ -339,18 +350,18 @@ savefig("SLC_NA_H_cij_X1.png")
 
 
 
-plot(vcat(tiempos_totales[:,91,1],resultados_simulaciones[:,91,1]), label="cij=0.00", color=:green, style=:solid)
-plot!(vcat(tiempos_totales[:,91,11],resultados_simulaciones[:,91,11]),label="cij=0.10",  color=:blue, style=:dash)
-plot!(vcat(tiempos_totales[:,91,51],resultados_simulaciones[:,91,51]),label="cij=0.50",  color=:brown, style=:dashdot)
-plot!(vcat(tiempos_totales[:,91,91],resultados_simulaciones[:,91,91]),label="cij=0.90", color=:red, style=:dashdotdot)
-      #background=nothing)
+plot(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1], label="cij=0.00", color=:blue, style=:solid)
+plot!(tiempos_totales[:,1,11],resultados_simulaciones[:,1,11],label="cij=0.10",  color=:blue, style=:dash)
+plot!(tiempos_totales[:,1,51],resultados_simulaciones[:,1,51],label="cij=0.50",  color=:blue, style=:dashdot)
+plot!(tiempos_totales[:,1,91],resultados_simulaciones[:,1,91],label="cij=0.90", color=:blue, style=:dashdotdot,
+      background=nothing)
 
-xlims!(0,2000)
+xlims!(0,365.14*8)
 ylims!(5*10^4,7*10^4)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
-title!("H=0.9")
-savefig("Figure_4d.png")
+title!("H=0.0")
+savefig("Figure_4c.png")
 
 
 
