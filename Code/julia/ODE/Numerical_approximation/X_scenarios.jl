@@ -127,17 +127,10 @@ for j in 1:length(solve_.u)
   end 
 end
 
+#Generacion de metrices cúbicas de almacenamiento 
 resultados_simulaciones = zeros(length(time_inicial), length(H_span), length(cij_span)) 
 tiempos_totales = zeros(length(time_inicial), length(H_span), length(cij_span))
 tiempos_maximos = zeros(length(H_span), length(cij_span))
-
-
-
-
-
-
-
-
 
 
 for i in 1:length(H_span)
@@ -192,77 +185,127 @@ resultados_simulaciones
 tiempos_totales
 tiempos_maximos
 
+#¿En cuáles días se explota y en cuales no (X = 0 y X = 1)? Plot Dynamics
 
-#Initial condition
+#Initial condition or stable dynamic (H = 0, c = 0)
 plot(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1], label="Stable specie")
 
-#competence variability
-for i in 1:10:length(H_span)
-c=1  #c=0.0
-h=i
-plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:blue, label=false)
-end
-
-ylims!(4.4*10^4,6.4*10^4)
-for i in 1:10:length(H_span)
-  c=16 #c_patella_aspera
+#to explore exploitation variability without competition (cij = 0)
+for i in 1:10:length(H_span)  
+  c=1  #c=0.0
   h=i
-  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:green, label=false)
+    if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:blue, label=false)
+    else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:blue, label=vcat("cij =",H_span[c]))
+    end
 end
-
-for i in 1:10:length(H_span)
-  c=51  #c=0.5
-  h=i
-  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:brown, label=false)
-end
-  
-for i in 1:10:length(H_span)
-  c=91  #c=0.9
-  h=i
-  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:red, label=false)
-end
-
-for i in 1:10:length(H_span)
-  c=101  #c=1
-  h=i
-  plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:black, label=false)
-end
-
-plot!(tiempos_totales[:,101,1],resultados_simulaciones[:,101,1],color=:black, label=false)
-xlims!(650,800)
 ylims!(0,6.4*10^4)
 
+# to explore exploitation variability with competition (cij =/= 0)
+for i in 1:10:length(H_span)
+  c=11 #c_patella_aspera=0.16
+  h=i
+  if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:green, label=false)
+  else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:green, label=vcat("cij =",H_span[c]))
+  end
+end
+ylims!(0,6.4*10^4)
+
+#for patella aspera
+for i in 1:10:length(H_span)
+  c=17 #c_patella_aspera=0.16
+  h=i
+  if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:green,style=:dash, label=false)
+  else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:green,style=:dash, label=vcat("cij =", H_span[c])) 
+  end
+end
+ylims!(0,6.4*10^4)
+
+
+for i in 1:10:length(H_span)
+  c=51  #cij=0.5
+  h=i
+  if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:brown, label=false)
+  else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:brown, label=vcat("cij =",H_span[c]))
+  end
+end
+ylims!(0,6.4*10^4)
+
+for i in 1:10:length(H_span)
+  c=85 #cij=0.84 Patella ordinaria
+  h=i
+  if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:red, label=false)
+  else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:red,style=:dash, label=vcat("cij =",H_span[c]))
+  end
+end
+
+for i in 1:10:length(H_span)
+  c=91 #cij=0.9
+  h=i
+  if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:red, label=false)
+  else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:red, label=vcat("cij =",H_span[c]))
+  end
+end
+
+for i in 1:10:length(H_span)
+  c=101  #cij=1
+  h=i
+  if i < length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:black, label=false)
+  else i == length(H_span)
+    plot!(tiempos_totales[:,h,c],resultados_simulaciones[:,h,c],color=:black, label=vcat("cij =",H_span[c]))
+  end
+end
+
+plot!(tiempos_totales[:,101,1],resultados_simulaciones[:,101,1],color=:black, label=false, legend=:outerright)
+xlims!(650,800)
+ylims!(2*10^4,6.4*10^4)
+
 #ylims!(4*10^4,7*10^4)
-xlims!(612,682) 
+xlims!(152,220) 
 #Día es estabilidad, punto medio entre inicio y fin el 
 #peródo de explotación X=1 entre los días 612 y 682
 
 #LOCALIZACIÓN DE VALORES PARA UN DÍA ESPECÍFICO
 #Matriz de alamacenamiento
 
-time_loc = zeros(Int64,101,101)
-abun_loc = zeros(Float64,101,101)
+time_loc = zeros(Int64,101,101)   #Posición del día a seleccionar dentro de la matrix de tiempos totales-
+abun_loc = zeros(Float64,101,101) #Abundancia estimada dentro de la matrix de resultados simulaciones en el día a seleccionar.
+
+dia_estable = 152+(220-152)/2  #Día donde no se aplica la restricción de la restricción de explotación (X=0)
 
 for j in 1:length(H_span)
   for k in 1:length(cij_span)
     for i in 1:length(tiempos_totales[:,1,1])
-      if tiempos_totales[i,j,k] > 346.9 && tiempos_totales[i,j,k] < 347.1 
+      if tiempos_totales[i,j,k] > (646) && tiempos_totales[i,j,k] < (648) 
         time_loc[j,k] = i
         abun_loc[j,k] = resultados_simulaciones[i,j,k]
       end
     end
   end
 end
+time_loc
+abun_loc
 
-abun_loc[:,17]
 
-plot!(abun_loc[:,101])
+plot(abun_loc[:,1])
 #pendientes!(tiempos_totales, resultados_simulaciones,intervalo,days,comp_Pos)
 
 c=1
 days= time_loc[1,1]
-X0 = hcat(tiempos_totales[days,:,c],resultados_simulaciones[days,:,c])
-plot(H_span,X0[:,2], label=vcat("cij=",cij_span[1]), legend=:outerright)
+X0 = hcat(abun_loc[:,c])
+plot(H_span,X0, label=vcat("cij=",cij_span[1]), legend=:outerright)
   
 
 for j in vcat(1,11,17,51,84,91,101) 
@@ -286,12 +329,12 @@ for j in vcat(1,11,17,51,84,91,101)
     c=c+1
   end
 
-  h_N_p = vcat(h_N[1],h_N[2],h_N[3],h_N[4],h_N[5],h_N[6],h_N[8],h_N[9],h_N[10],h_N[11])  
-  h_v_p = vcat(h_v[1],h_v[2],h_v[3],h_v[4],h_v[5],h_v[6],h_v[8],h_v[9],h_v[10],h_v[11])
+  h_N_p = vcat(h_N[1],h_N[2],h_N[3],h_N[4],h_N[5],h_N[6],h_N[10],h_N[11])  
+  h_v_p = vcat(h_v[1],h_v[2],h_v[3],h_v[4],h_v[5],h_v[6],h_v[10],h_v[11])
   
   # Generación de gráficos coloreados en función del rango de competencia:
   if j == 1 #Non competence
-     plot(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:blue, style=:solid, legend=:bottomleft,background=false)
+     plot(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:blue, style=:solid, legend=:bottomleft)#,background=false)
     else
     if j > 1 && j < 12 #10% of competence
      plot!(h_v_p,h_N_p, label=vcat("cij=",cij_span[j]),color=:green, style=:solid)
@@ -349,11 +392,11 @@ savefig("SLC_NA_H_cij_X1.png")
 =#
 
 
-
-plot(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1], label="cij=0.00", color=:blue, style=:solid)
-plot!(tiempos_totales[:,1,11],resultados_simulaciones[:,1,11],label="cij=0.10",  color=:blue, style=:dash)
-plot!(tiempos_totales[:,1,51],resultados_simulaciones[:,1,51],label="cij=0.50",  color=:blue, style=:dashdot)
-plot!(tiempos_totales[:,1,91],resultados_simulaciones[:,1,91],label="cij=0.90", color=:blue, style=:dashdotdot,
+#H=0.0
+plot(tiempos_totales[:, 1,1],resultados_simulaciones[:, 1,1], label="cij=0.00", color=:blue, style=:solid)
+plot!(tiempos_totales[:,1,11],resultados_simulaciones[:, 1,11],label="cij=0.10",  color=:blue, style=:dash)
+plot!(tiempos_totales[:,1,51],resultados_simulaciones[:, 1,51],label="cij=0.50",  color=:blue, style=:dashdot)
+plot!(tiempos_totales[:,1,91],resultados_simulaciones[:, 1,91],label="cij=0.90", color=:blue, style=:dashdotdot,
       background=nothing)
 
 xlims!(0,365.14*8)
@@ -363,12 +406,39 @@ ylabel!("Abundance (nº individuals)", font=12)
 title!("H=0.0")
 savefig("Figure_4c.png")
 
+#H=0.5
+plot(tiempos_totales[:, 51,1],resultados_simulaciones[:, 51,1], label="cij=0.00", color=:green, style=:solid)
+plot!(tiempos_totales[:, 51,11],resultados_simulaciones[:, 51,11],label="cij=0.10",  color=:green, style=:dash)
+plot!(tiempos_totales[:, 51,51],resultados_simulaciones[:, 51,51],label="cij=0.50",  color=:green, style=:dashdot)
+plot!(tiempos_totales[:, 51,91],resultados_simulaciones[:, 51,91],label="cij=0.90", color=:green, style=:dashdotdot,
+      background=nothing)
+
+xlims!(0,365.14*8)
+ylims!(5*10^4,7*10^4)
+xlabel!("Time (days)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
+title!("H=0.5")
+savefig("Figure_4d.png")
+
+#H=0.9
+plot(tiempos_totales[:, 91,1],resultados_simulaciones[:, 91,1], label="cij=0.00", color=:red, style=:solid)
+plot!(tiempos_totales[:, 91,11],resultados_simulaciones[:, 91,11],label="cij=0.10",  color=:red, style=:dash)
+plot!(tiempos_totales[:, 91,51],resultados_simulaciones[:, 91,51],label="cij=0.50",  color=:red, style=:dashdot)
+plot!(tiempos_totales[:, 91,91],resultados_simulaciones[:, 91,91],label="cij=0.90", color=:red, style=:dashdotdot,
+      background=nothing)
+
+xlims!(0,365.14*8)
+ylims!(5*10^4,7*10^4)
+xlabel!("Time (days)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
+title!("H=0.9")
+savefig("Figure_4e.png")
 
 
 
 
 
-#Simulations for Patella aspera and Patella ordinaria 
+#Simulations for Patella ordinaria and Patella asoera 
 oocytes_po = 385613 # Average: Patella ordinaria (nº of Eggs)
 oocytes_pa = 77404  # Average: Patella aspera (nº of Eggs)
 c_po = oocytes_po/(oocytes_pa + oocytes_po)
@@ -382,13 +452,13 @@ da_ = [0.55,0.59]    # Natural mortality rate for adults
 Sm = 56              # Maximum size for adults
 gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
-Naj_po = reggs[2]
-Naj_pa = reggs[1]
+Naj_po = reggs[1]
+Naj_pa = reggs[2]
 k_ = 0.42
 t0_ = 365.25
 
 
-p_span_po = [t0_, k_, reggs[1], K_, H_[1], da_[1], Smax_, gammas[1],c_po,Naj_po]  
+p_span_po = [t0_, k_, reggs[1], K_, H_[1], da_[1], Smax_, gammas[1],c_pa,Naj_pa]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^3, 49.25]
@@ -406,8 +476,10 @@ for j in 1:length(solve_.u)
       time2_po[j] = solve_.t[j]
     end 
 end
+vars_po
+time2_po
 
-p_span_pa = [t0_, k_, reggs[2], K_, H_[2], da_[2], Smax_, gammas[2],c_pa,Naj_pa]  
+p_span_pa = [t0_, k_, reggs[2], K_, H_[2], da_[2], Smax_, gammas[2],c_po,Naj_po]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^4, 49.25]
@@ -426,14 +498,51 @@ for j in 1:length(solve_.u)
     end 
 end
 
+#Patella ordinaria
+vars_po
+time2_po
+#Patella aspera
+vars_pa
+time2_pa
 
 
-plot(resultados_simulaciones[:,64,84],label="Patella aspera",  color=:blue, style=:solid)
-plot!(resultados_simulaciones[:,57,17],label="Patella ordinaria",  color=:yellow, style=:solid, background=nothing)
+#Igualar longitud de vectores para representar ambas señales en una misma gráfica
+
+#if length(vars_po[:,1]) > length(vars_pa[:,1])
+  mat_spp = zeros(length(time2_po),2) 
+  mat_spp_t = zeros(length(time2_po),2)
+  longitud_simulacion = length(time2_po)
+# Guardar los resultados de la simulación en la matriz cúbica
+  mat_spp[:,1] = vars_po[:,1] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+  mat_spp_t[:,1] = time2_po
+
+  lon_0 = length(mat_spp[:,1])
+  lon_c = length(vars_pa[:,1])
+  elementos_faltantes = lon_0 - lon_c
+  vector_corto = vcat(vars_pa[:,1],zeros(elementos_faltantes))
+  vector_corto_t = vcat(time2_pa,ones(elementos_faltantes)*maximum(time2_pa))
+  mat_spp[:,2] = vector_corto
+  mat_spp_t[:,2] = vector_corto_t
+
+
+
+
+
+plot(mat_spp_t[:,1],mat_spp[:,1],label="Patella ordinaria",  color=:blue, style=:solid)
+plot!(mat_spp_t[:,2],mat_spp[:,2],label="Patella aspera",  color=:orange, style=:solid, background=nothing)
+xlims!(000,2000)
+ylims!(3*10^4,6.4*10^4)
+xlabel!("Time (days)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
+
+
+plot(tiempos_totales[:,64,85],resultados_simulaciones[:,64,85],label="Patella aspera",  color=:orange, style=:solid)
+plot!(tiempos_totales[:,57,17],resultados_simulaciones[:,57,17],label="Patella ordinaria",  color=:blue, style=:solid, background=nothing)
 xlims!(000,2000)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
-savefig("Figure_4e.png")
+savefig("Figure_4b.png")
 
 
-cat(zeros(10,1),ones(10,1),dims=1)
+
+contour(tiempos_totales)
