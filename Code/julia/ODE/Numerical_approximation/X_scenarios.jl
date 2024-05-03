@@ -457,7 +457,7 @@ Naj_pa = reggs[2]
 k_ = 0.42
 t0_ = 365.25
 
-
+# Patella aspera simulation
 p_span_po = [t0_, k_, reggs[1], K_, H_[1], da_[1], Smax_, gammas[1],c_pa,Naj_pa]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
@@ -479,6 +479,7 @@ end
 vars_po
 time2_po
 
+# Patella aspera simulation
 p_span_pa = [t0_, k_, reggs[2], K_, H_[2], da_[2], Smax_, gammas[2],c_po,Naj_po]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
@@ -498,10 +499,10 @@ for j in 1:length(solve_.u)
     end 
 end
 
-#Patella ordinaria
+#Patella ordinaria outputs
 vars_po
 time2_po
-#Patella aspera
+#Patella aspera outputs
 vars_pa
 time2_pa
 
@@ -523,10 +524,25 @@ time2_pa
   vector_corto_t = vcat(time2_pa,ones(elementos_faltantes)*maximum(time2_pa))
   mat_spp[:,2] = vector_corto
   mat_spp_t[:,2] = vector_corto_t
+#=else
+  mat_spp = zeros(length(time2_pa),2) 
+  mat_spp_t = zeros(length(time2_pa),2)
+  longitud_simulacion = length(time2_pa)
+# Guardar los resultados de la simulación en la matriz cúbica
+  mat_spp[:,1] = vars_pa[:,1] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+  mat_spp_t[:,1] = time2_pa
 
+  lon_0 = length(mat_spp[:,1])
+  lon_c = length(vars_po[:,1])
+  elementos_faltantes = lon_0 - lon_c
+  vector_corto = vcat(vars_po[:,1],zeros(elementos_faltantes))
+  vector_corto_t = vcat(time2_po,ones(elementos_faltantes)*maximum(time2_po))
+  mat_spp[:,2] = vector_corto
+  mat_spp_t[:,2] = vector_corto_t
+# end
+=#
 
-
-
+#Plotting species
 
 plot(mat_spp_t[:,1],mat_spp[:,1],label="Patella ordinaria",  color=:blue, style=:solid)
 plot!(mat_spp_t[:,2],mat_spp[:,2],label="Patella aspera",  color=:orange, style=:solid, background=nothing)
@@ -546,3 +562,137 @@ savefig("Figure_4b.png")
 
 
 contour(tiempos_totales)
+
+
+
+
+
+
+
+# Non-trivial solution for Na and Sa on a Single Site.
+abun_loc #this matrix is filled by the average abundance obtained by a numerical aproximation
+
+#The exercise here is to obtain the same or at least a similar matrix from analitical aproximation.
+#As more similar, more presition will have the model.
+# Contrast between hexploitation traits on each competition values.
+#Parameters and initial conditions
+
+avg_oocytes = [77404, 385613] # This is the actual mean. 
+reggs = avg_oocytes / (365.14 * 0.42) # conversion rate of adults to eggs.
+r = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
+r_ = mean(r)
+
+K_ = 64000    # Carrying capacity
+d = [0.55,0.59]/365.14 #Valores individuales  (día^{-1})
+d_= mean(d) #valor promedio
+Smax_ = 56.0             # Maximum size for adults
+Naj = mean(r)
+Smat = mean([[33.4,37.4],[34.6,37.5]])
+Smat_ = mean(Smat)
+avg_size_0 = 33.4  #Average size as mean size at first maturity as an initial condition
+
+
+
+#Vectors for ploting and simulations
+n=10   #Number of years in the simulation
+t_span = length(zeros(Float64,size(1:365.14*n))) #Number of years in days for the analytical sumulations
+v_span = length(zeros(Float64, size(0:0.01:1)))   #Number of iintervals that our varables to contrast will be considered
+span = ones(Float64,size(1:365.14*n))
+
+#Kspan = ones(Float64,size(1:365.14*n))*K_ 
+#Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+
+#Storage exploitation matrix for a specific competition values cij=constant
+Nai_h = zeros(t_span,v_span)
+Sai_h = zeros(t_span,v_span)
+periodX = zeros(t_span)
+
+#Rangos de las variables a contrastar
+H_r = range(0, 1, length=v_span)
+t_r = range(0, t_span, length=t_span)
+
+#Theoretical values for exploitation and competiticon 
+
+H_span = ones(Float64,v_span)
+cij_span = ones(Float64,v_span)
+
+for i in 1:length(H_span)
+   
+  H_span[i] = H_r[i]
+  cij_span[i] = H_r[i]
+
+end
+#Outputs
+H_span
+cij_span
+
+
+# Time values for analitical stimation
+
+vector_t = ones(Float64,t_span)
+
+for i in 1:length(vector_t)
+ 
+  vector_t[i] = t_r[i]
+
+end
+#Output
+vector_t
+
+#Outputs of analitical aproximation
+Nai_h = zeros(Float64,length(H_span),length(cij_span))
+Sai_h = zeros(Float64,length(H_span),length(cij_span))
+
+
+# Analitical aproximation for Exploited scenario on the metacommunity dynamic0
+for j in 1:length(cij_span) 
+  cij_= cij_span[j]
+
+  Nai1=zeros(Float64,length(vector_t))
+  Sai1=zeros(Float64,length(vector_t))
+    
+ for  i in 1:length(H_span)
+  H_i = H_span[i]
+    avg_size = 49.25
+    k=0.42
+    t_0 = 365.24 
+    for t_ in 1:length(vector_t)
+      if (t_ % t_0)/t_0 >= k_
+        X=1.0
+      else
+        X=0.0
+      end
+
+    Smat = 1.34 * (avg_size) - 28.06
+    R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
+    #Nom trivial solution for Exploitation scenario (X=0)
+      #Abundance
+      Nai1[t_] = (K_- ((-H_i -cij_ * Naj - d_+ r_ * R_)*(r_ * R_ * 2)/K_))
+      #Adult Size
+      Sai1[t_] = (Smax_ * (1 - H_i))/2
+      avg_size = Sai1[t_]
+    end
+
+    Nai_h[i,j] = mean(Nai1)
+    Sai_h[i,j] = mean(Sai1)
+ end
+end
+
+   
+Nai_h
+
+plot(H_span,Nai_h[:,1])
+
+for i in 1:10:length(H_span)  
+    if i ==1
+    plot(H_span,Nai_h[:,i],color=:blue, label=vcat("cij =",cij_span[i]))  
+    else
+      if i < length(H_span)
+      plot!(H_span,Nai_h[:,i],color=:blue, label=vcat("cij =",cij_span[i]))
+      else i == length(H_span)
+      plot!(H_span,Nai_h[:,i],color=:blue, label=vcat("cij =",cij_span[i]))
+      end
+    end
+end
+xlims!(0.0,1)
+ylims!(0,6.4*10^4)
