@@ -38,7 +38,7 @@ oocytes_pa = 77404  # Average: Patella aspera (nº of Eggs)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 
 reggs = oocytes / (365 * 0.42)       # Population growth rate    
-g_ij = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629] #Instant conversion population growth rate between life stages for Patella species.
+g_ij = [reggs, 0.998611, 0.971057, 0.4820525, 0.00629] #Instant conversion population growth rate between life stages for Patella species. Data collected from empirical and genetic data.
 
 re = reggs*0.998611*0.971057*0.4820525*0.00629     # adult poplation growth rate vector considering previous life stages.
 
