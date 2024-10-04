@@ -19,7 +19,7 @@ The list of all parameter used in the simulation for Patella species life cycles
 ## Migration probability matrix (p_{kl}):
 "Lapacom/Code/julia/ODE/migration_probabilities_among_sites.csv
 
-# Parameters of initial states of the ststems simulation of CLC.
+## Parameters of initial states of the ststems simulation of CLC.
 "Lapacom/results/001/src/load_params.jl"
 
 ## Simulation of Complex Life Cycle for two species with competition:
