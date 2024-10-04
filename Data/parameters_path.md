@@ -1,5 +1,5 @@
-# List of file path which contains the parameter used in the simulation on life cycles compiled in the table 1 on working paper in overlead.
-The file paths for parameter estimated of simulations are:
+# List of file paths 
+The list of all parameter used in the simulation for Patella species life cycles are compiled in the table 1 on working paper in overlead. The file paths for parameter estimated of simulations are:
 
 ## Empirical data of Patella species:
 "Lapacom/Data/ToAnalyze/Madeira/BD_LIMPETS_MAD_1996-2018.xlsx"
@@ -28,7 +28,7 @@ The file paths for parameter estimated of simulations are:
 ## Simulations of Simple Life Cycle of two species with competition:
 "Lapacom/Code/julia/ODE/Numerical_aproximation/X_scenarios.jl"
 
-# Specific parameters used in Simulations for Patella ordinaria and Patella aspera for empirical data: 
+# Specific parameters used in Simulations for Patella ordinaria and Patella aspera from empirical data and as theoretical aproximations: 
 
 ## Average numbe of oocytes per spawning season (Empitical estimation from dempirical data.
 oocytes_po = 385613 # Average: Patella ordinaria (nº of Eggs)
