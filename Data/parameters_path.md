@@ -1,4 +1,4 @@
-# List of file path which contains the parameter used in the simulation on life cycles collectet in the table 1 on the working paper in overlead.
+# List of file path which contains the parameter used in the simulation on life cycles compiled in the table 1 on working paper in overlead.
 The files are mostly from the path of the fold called ODE, file paths for parameter estimated of simulations are:
 
 # Empirical data of Patella species:
