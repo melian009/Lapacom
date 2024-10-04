@@ -1,5 +1,5 @@
 # List of file paths 
-The list of all parameter used in the simulation for Patella species life cycles are compiled in the table 1 on working paper in overlead. The file paths for parameter estimated of simulations are:
+The list of all parameter used in the simulation for Patella species life cycles are compiled in the table 1 on working paper in overleaf. The file paths for parameter estimated used in simulations are:
 
 ## Empirical data of Patella species:
 "Lapacom/Data/ToAnalyze/Madeira/BD_LIMPETS_MAD_1996-2018.xlsx"
