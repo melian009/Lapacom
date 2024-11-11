@@ -1,0 +1,2 @@
+-d + ((K - Na)*R*r - Na*R*r) / K - H*(1 - X) - Nb*c,-Na*c
+-Nb*c,-d + ((K - Nb)*R*r - Nb*R*r) / K - H*(1 - X) - Na*c

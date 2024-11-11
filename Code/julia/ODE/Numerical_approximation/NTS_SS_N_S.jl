@@ -19,7 +19,8 @@ using Statistics
 #for H = 0:m:Exp_lim         #exploitation gradient
 #end
 function MSLC!(du, u, t, p)
-    Na, Sa,= u
+    Na,
+     Sa,= u
     X, re, K, H, R, d, c12, xj, Smax, g = p
     
   
@@ -109,7 +110,7 @@ avg_size = 33.4
 
 
 #Vectors for ploting and simulations
-n=1.5    #Number of years in the simulation
+n=10    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.1:1)))
 span = ones(Float64,size(1:365.14*n))
@@ -233,7 +234,7 @@ display(H_Na_)
 
 
 
-n=1.5    #Number of years in the simulation
+n=10    #Number of years in the simulation
 t_span = length(zeros(Float64,size(1:365.14*n)))
 h_span = length(zeros(Float64, size(0:0.1:1)))
 span = ones(Float64,size(1:365.14*n))
@@ -260,7 +261,7 @@ end
 
 for j in 1:length(H_span)
     H_j = H_span[j]
-    cij_i = cij_span[5]
+    cij_i = cij_span[1]
     c=1
     n=1.5 #Years
     Nai1 = zeros(Float64,size(1:365.14*n))
@@ -366,7 +367,7 @@ ylabel!("Adult abundances (nº individuals)")
 
 function CLC!(du, u, p, t)
   Ne, Nt, Nv, Nj, Na, Sa = u
-  t_0, k, r, K, H , d, Smax, gamma = p
+  t_0, k, r, K, H , d, Smax, gamma, cij, Naj = p
    
    
    
@@ -383,7 +384,7 @@ function CLC!(du, u, p, t)
   du[2] = dNt = periodX(t)*r[2] * Ne - r[3] * Nt - d[2] * Nt
   du[3] = dNv = periodX(t)*r[3] * Nt*((K - Nv)/ K) - r[4] * Nv - d[3] * Nv
   du[4] = dNj = periodX(t)*r[4] * Nv * ((K - Nj)/ K) - r[5] * Nj - d[4] * Nj
-  du[5] = dNa = periodX(t)*r[5]* R_ * Nj * ((K - Na)/ K) - d[5] * Na - (1 - periodX(t)) * H * Na
+  du[5] = dNa = periodX(t)*r[5]* R_ * Nj * ((K - Na)/ K) - d[5] * Na - (1 - periodX(t)) * H * Na - cij * Na * Naj
   du[6] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 
 end
@@ -397,14 +398,14 @@ size_growth_rate = 0.00014898749263737575
 t0_ = 365.14*0.42
 k_ = 0.42
 K_ = 64000.00    # Carrying capacity
-H1_ = 0.639
+H1_ = 0
 Smax_ = 56.0             # Maximum size for adults
-
+cij_ = 0.5
+Naj = 500
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma, cij, xj
-p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate] 
 
 
-
+p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate, cij_, Naj] 
 n=10   #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^7,0,0,0,10^4, 49.25]
@@ -433,11 +434,7 @@ Nj = vars[:,4]
 Na = vars[:,5]
 Sa = vars[:,6]
 
-
-
-
-
-
+plot!(days, Na, label="cij=0.5", legend=:outerright)
 
 
 CLC_NeNt_ = plot(days.-(0.7 + 1.3 + 7 + 230), Ne, label="Eggs", xlim=(0,365.25*1.5), legend=:outerright, color=:red)
@@ -487,6 +484,122 @@ ylabel!("Adult size (mm)")
 png("CLC_SAt")
 
 
+# Non-trivial solution for Na and Sa on a Single Site.
+#Parameters
+avg_oocytes = mean([92098, 804183]) # This is the actual mean. 
+reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
+r_= reggs
+K_ = 64000    # Carrying capacity
+d1_ = 0.590
+H1_ = 0.639
+#c12_ = 0.5 #competition term species 2 on 1
+Smax_ = 56.0             # Maximum size for adults
+Naj = 2500
+avg_size = 33.4
+
+
+
+
+#Vectors for ploting and simulations
+n=10    #Number of years in the simulation
+t_span = length(zeros(Float64,size(1:365.14*n)))
+h_span = length(zeros(Float64, size(0:0.1:1)))
+span = ones(Float64,size(1:365.14*n))
+Kspan = ones(Float64,size(1:365.14*n))*K_ 
+Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+
+H_r = range(0, 1, length=h_span)
+H_span = ones(Float64,h_span)
+cij_span = ones(Float64,h_span)
+
+zero_line = zeros(Float64,h_span)
+
+for i in 1:length(H_span)
+    H_span[i] = H_r[i]
+    cij_span[i] = H_r[i]
+end
+
+H_span
+cij_span 
+
+#Outputs of simulations
+Nai_h = zeros(t_span,h_span)
+Sai_h = zeros(t_span,h_span)
+periodX = zeros(t_span)
+Nai_h_c = zeros(h_span,h_span)
+Sai_h_c = zeros(h_span,h_span)
+
+
+#for m in 1:length(cij_span)
+m=1
+for i in 1:length(H_span)
+    cij_ = cij_span[m]
+    H_i = H_span[i]
+    c=1 
+
+    Nai1 = zeros(Float64,size(1:365.14*n))
+    Sai1 = zeros(Float64,size(1:365.14*n))
+    periodX = zeros(t_span)
+
+    for t_ in 1:(365.14*n)
+      t_0 = (365.14*0.42)
+      k=0.1
+      phi(t_) = 2*pi*(t_ - t_0)/(365.25)
+      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
+      Smat = 1.34 * (avg_size) - 28.06
+      R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
+      #Non trivial solution expresions
+        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_ * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
+        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
+    
+      avg_size = mean(Sai1)  
+      c=c+1
+    end
+    Nai_h[:,i] = Nai1
+    Sai_h[:,i] = Sai1 
+end
+
+
+  #Na and Sa vs H
+
+  Sa_H = ones(Float64,h_span)
+  Na_H = ones(Float64,h_span)
+
+  for j in 1:h_span
+  Sa_H[m] = minimum(Sai_h[:,j])
+  Na_H[m] = maximum(Nai_h[:,j])
+  end
+
+Sai_h_c[:,1] = Sa_H
+Nai_h_c[:,1] = Na_H
+
+
+
+
+
+plot(H_span,log(Nai_h_c), label="cij=0", legend=:outerright, color=:blue)
+xlabel!("Exploitation rate (H)")
+ylabel!("Adult abundance (nº individuals)")
+png("H_decay_for_cij_gradient_N_log")
+
+span_11 = ones(Float64,size(0:0.1:1))
+
+plot(H_span, Nai_h_c,
+      label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"],
+       legend=:outerright, 
+       ylims=(0,3*10^4),
+       xtickfont=font(12), 
+      ytickfont=font(12), 
+      guidefont=font(12), 
+      legendfont=font(12),
+      background=nothing)
+plot!(0.01*span_11,Nai_h_c[1,:], color=:black, style = :dash, label="H=0.01")
+plot!(0.1*span_11,Nai_h_c[1,:], color=:black, style = :dash, label="H=0.1")
+plot!(1*span_11,Nai_h_c[1,:], color=:black, style = :dash, label="H=1")
+
+xlabel!("Exploitation rate (H)")
+ylabel!("Abundance (nº individuals)")
+savefig("H_decay_for_cij_gradient_S.pdf")
 
 
 
@@ -511,6 +624,10 @@ function SLC!(du, u, p, t)
   du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 end
 
+
+
+
+
 avg_oocytes = mean([92098, 804183]) # This is the actual mean. mean([92098, 804183])
 reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
 r_ = reggs*0.998611*0.971057*0.4820525*0.00629
@@ -519,22 +636,22 @@ d = 0.000322/365.14  # see estimate_mortality_rates.jl for how these values were
 size_growth_rate = 0.00014898749263737575
 t0_ = 365.14*0.42
 k_= 0.42
-cij_= 0.05
-Naj_ = 500
-
+Naj_ = 2500
 K_ = 64000.00    # Carrying capacity
-H1_ = 0.639
-Smax_ = 56.0             # Maximum size for adults
-
+Smax_ = 53.0             # Maximum size for adults3
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
+
+
+
+H1_ = 1.0
+
+cij_= 1.0
 p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_] 
-
-
-n=1.5  #Number of years in the simulation
+n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^4, 49.25]
-prob_2 = ODEProblem(SLC!, U0_, tspan, p_span)
-solve_= solve(prob_2, Tsit5())
+prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
+solve_= solve(prob_, Tsit5())
 
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
@@ -548,15 +665,19 @@ for j in 1:length(solve_.u)
    end 
 end
 
-Na2 = vars[:,1]
-Sa2 = vars[:,2]
+Na1c0 = vars[:,1]
 
-SLC_NAt = plot(time2, Na2, label="Adults SLC", xlim=(0,365.25*1.5), ylims=(0,64000), legend=:outerright)
-plot!(days, Na, label="Adults CLC",color=:black)
-xlabel!("Time (days)")
-ylabel!("Abundance (nº individuals)")
-png("SLC_NAt")
 
+
+plot!(Na1c0, label="cij=1.0", color=:red, legend=:outerright, background=nothing)
+xlims!(0,100)
+ylims!(0,7*10^4)
+xlabel!("Time (days)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
+title!("H=0.1")
+savefig("SLC_NAt_H100_cij.png")
+
+#C:\\Users\\miste\\AppData\\Local\\Programs\\Julia-1.9.3\\bin\\julia.exe
 
 SLC_SAt = plot(time2, Sa2, label="Sa SLC")
 plot!(time, Sa, label="Sa CLC",xlims=(0,885))
@@ -565,103 +686,3 @@ ylabel!("Size (mm)")
 png("SLC_SAt")
 
 
-
-
-
-# Non-trivial solution for Na and Sa on a Single Site.
-#Parameters
-avg_oocytes = mean([92098, 804183]) # This is the actual mean. 
-reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-r_= reggs
-K_ = 64000    # Carrying capacity
-d1_ = 0.590
-H1_ = 0.639
-#c12_ = 0.5 #competition term species 2 on 1
-Smax_ = 56.0             # Maximum size for adults
-Naj = 2500
-avg_size = 33.4
-
-
-
-
-#Vectors for ploting and simulations
-n=1.5    #Number of years in the simulation
-t_span = length(zeros(Float64,size(1:365.14*n)))
-h_span = length(zeros(Float64, size(0:0.1:1)))
-span = ones(Float64,size(1:365.14*n))
-Kspan = ones(Float64,size(1:365.14*n))*K_ 
-Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
-
-H_r = range(0, 1, length=h_span)
-H_span = ones(Float64,h_span)
-cij_span = ones(Float64,h_span)
-
-zero_line = zeros(Float64,h_span)
-
-for i in 1:length(H_span)
-    H_span[i] = H_r[i]
-    cij_span[i] = H_r[i]
-end
-
-H_span
-cij_span
-
-#Outputs of simulations
-Nai_h = zeros(t_span,h_span)
-Sai_h = zeros(t_span,h_span)
-periodX = zeros(t_span)
-Nai_h_c = zeros(h_span,h_span)
-Sai_h_c = zeros(h_span,h_span)
-
-
-for m in 1:length(cij_span)
-  for i in 1:length(H_span)
-    cij_ = cij_span[m]
-    H_i = H_span[i]
-    c=1 
-
-    Nai1 = zeros(Float64,size(1:365.14*n))
-    Sai1 = zeros(Float64,size(1:365.14*n))
-    periodX = zeros(t_span)
-
-    for t_ in 1:(365.14*n)
-      t_0 = (365.14*0.42)
-      k=0.1
-      phi(t_) = 2*pi*(t_ - t_0)/(365.25)
-      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
-      Smat = 1.34 * (avg_size) - 28.06
-      R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
-      #Non trivial solution expresions
-        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_ * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
-        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
-    
-      avg_size = mean(Sai1)  
-      c=c+1
-    end
-    Nai_h[:,i] = Nai1
-    Sai_h[:,i] = Sai1
-
-  end
-  #Na and Sa vs H
-
-  Sa_H = ones(Float64,h_span)
-  Na_H = ones(Float64,h_span)
-
-  for j in 1:h_span
-  Sa_H[j] = minimum(Sai_h[:,j])
-  Na_H[j] = maximum(Nai_h[:,j])
-  end
- Sai_h_c[:,m] = Sa_H
- Nai_h_c[:,m] = Na_H
-end
- 
-real(log(Nai_h_c))
-
-plot(H_span,real(log(Nai_h_c)), label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
-xlabel!("Exploitation rate (H)")
-ylabel!("Adult abundance (nº individuals)")
-png("H_decay_for_cij_gradient_N_log")
-plot(H_span, Sai_h_c, label=["cij=0" "cij=0.1" "cij=0.2" "cij=0.3" "cij=0.4" "cij=0.5" "cij=0.6" "cij=0.7" "cij=0.8" "cij=0.9" "cij=1"], legend=:outerright)
-xlabel!("Exploitation rate (H)")
-ylabel!("Adult size (mm)")
-png("H_decay_for_cij_gradient_S")

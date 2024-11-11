@@ -124,7 +124,7 @@ end
 # Population Growth rate estimation (r=reggs):
 
 oocytes_po = 385613                  # Average: Patella ordinaria (nº of Eggs)
-oocytes_pa = 73029                   # Average: Patella aspera (nº of Eggs)
+oocytes_pa = 77404                  # Average: Patella aspera (nº of Eggs)
 oocytes = [oocytes_po,oocytes_pa]    # Patella ordinaria, Patella aspera
 reggs = oocytes / (365 * 0.42)       # conversion rate of adults to eggs.
 
