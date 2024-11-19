@@ -31,7 +31,7 @@ Non trivial solutuiin for the scenario of X=0
 
 
 function SLC!(du, u, p, t)
-  Na, Sa = u
+  Na1, Na2, Sa1, Sa2 = u
   t_0, k, r, K, H , d, Smax, gamma, cij = p
    
    
@@ -49,12 +49,19 @@ function SLC!(du, u, p, t)
   end
 
    # reproductive capacity
-   avg_size = du[2]
-   Smat = 1.34 * (avg_size) - 28.06
-   R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax - Smat)), 0.0), 1.0)
+   avg_size_1 = du[3]
+   Smat_1 = 1.34 * (avg_size_1) - 28.06
+   R_1 = min(max(0.5 * (1.0 + (avg_size_1 - Smat_1) / (Smax - Smat_1)), 0.0), 1.0)
+   
+   avg_size_2 = du[4]
+   Smat_2 = 1.34 * (avg_size_1) - 28.06
+   R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
+  
+   du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 #N1 
+  du[2] = dNa2 = r[2] * R_2 * Na2 * ((K - Na2)/ K) - d[2] * Na2 - (1 - periodX(t)) * H * Na2 - cij * Na1 #N2
+  du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
+  du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
 
-  du[1] = dNa = r * R_ * Na * ((K - Na)/ K) - d * Na - (1 - periodX(t)) * H * Na - cij * Na
-  du[2] = dSa = gamma * Sa * (1 - Sa / (Smax - Smax * H * (1 - periodX(t))))
 end
 
 
@@ -105,27 +112,36 @@ cijs = length(zeros(Float64,size(1:length(cij_span))))
 H1_ = H_span[1]
 cij_= cij_span[1]
 
-n1_p_span = [t0_, k_, r_[1], K_, H1_, d[1], Smax_, size_growth_rate[1],cij_,Naj_]  
+n1_p_span = [t0_, k_, r_[1], K_, H1_, d[1], Smax_, size_growth_rate[1],cij_]
+n2_p_span = [t0_, k_, r_[2], K_, H1_, d[2], Smax_, size_growth_rate[2],cij_]  
+
+p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_]
+
+
+
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
-U0_ = [10^4, 49.25]
-prob_ = ODEProblem(SLC!, U0_, tspan, n1_p_span)
+U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
+prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
 solve_= solve(prob_, Tsit5())
 
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
+
 vars = zeros(t_l,n_v)
 time_inicial = zeros(t_l)
 
 for j in 1:length(solve_.u)
-  for i in 1:2
+  for i in 1:4
     vars[j,i] = solve_.u[j][i]
     time_inicial[j] = solve_.t[j]
   end 
 end
 
 #Generacion de metrices cúbicas de almacenamiento 
-resultados_simulaciones = zeros(length(time_inicial), length(H_span), length(cij_span)) 
+resultados_simulacionesN1 = zeros(length(time_inicial), length(H_span), length(cij_span)) 
+resultados_simulacionesN2 = zeros(length(time_inicial), length(H_span), length(cij_span)) 
+
 tiempos_totales = zeros(length(time_inicial), length(H_span), length(cij_span))
 tiempos_maximos = zeros(length(H_span), length(cij_span))
 
@@ -135,8 +151,8 @@ for i in 1:length(H_span)
   for j in 1:length(cij_span)
 
     cij_= cij_span[j]
-
-    p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_]  
+    
+    p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_]  
     n=10  #Number of years in the simulation
     tspan = (0,365.14*n)
     U0_ = [10^4, 49.25]
@@ -149,7 +165,7 @@ for i in 1:length(H_span)
     time2 = zeros(t_l)
  
       for a in 1:length(solve_.u)
-        for b in 1:2
+        for b in 1:4
           vars[a,b] = solve_.u[a][b]
           time2[a] = solve_.t[a]
         end 
@@ -158,9 +174,11 @@ for i in 1:length(H_span)
     if i == 1 && j == 1
       longitud_simulacion = length(time2)
     # Guardar los resultados de la simulación en la matriz cúbica
-      resultados_simulaciones[:,i,j] = vars[:,1] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+      resultados_simulacionesN1[:,i,j] = vars[:,1] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+      resultados_simulacionesN2[:,i,j] = vars[:,2] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+
       tiempos_totales[:,i,j] = time2
-    else 
+    else #aCTUALIZAR LAS ENTRADAS DEL AJUSTE PARA RESULTADOS_SIMULACIONES N1 Y N2
       lon_0 = length(resultados_simulaciones[:,1,1])
       lon_c = length(vars[:,1])
       elementos_faltantes = lon_0 - lon_c
@@ -197,3 +215,20 @@ xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
 
 N1_mean(h_0_c0_[2])
+
+
+
+using Random, Distributions
+Random.seed(size_growth_rate[1]) # Setting the seed
+d = Normal(μ=0.32, σ=0.05)  #Media, Varianza
+n=rand(d,1000)             #Replicas aleatorioas, en este caso 1000 replicas.
+
+gr()
+data = rand(21,100)
+heatmap(1:size(data,1),
+    1:size(data,2), data,
+    c=cgrad([:blue, :white,:red, :yellow]),
+    xlabel="x values", ylabel="y values",
+    title="My title")
+
+    
