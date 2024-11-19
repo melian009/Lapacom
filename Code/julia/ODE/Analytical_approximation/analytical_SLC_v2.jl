@@ -16,7 +16,7 @@ using NonlinearSolve
 
 #Complex model
 @variables Na Nb Sa Sb X Ra Rb ra rb da db K H ga gb Smaxa Smaxb c
-J_SLC = Symbolics.jacobian([(ra * Ra * Na)*((K - Na)/K) - (da * Na) - H*(1 - X)*Na - c*Na*Nb, (rb * Rb * Nb)*((K - Nb)/K) - (db * Nb) - H*(1 - X)*Nb - c*Na*Nb,  (ga * Sa) * (1 - (Sa/(Smaxa - Smaxa * H * (1 - X)))), (gb* Sb) * (1 - (Sb/(Smaxb - Smaxb * H * (1 - X))))], [Na, Nb, Sa, Sb])
+J_SLC = Symbolics.jacobian([(ra * Ra * Na)*((1 - Na)/K) - (da * Na) - H*(1 - X)*Na - c*Na*Nb, (rb * Rb * Nb)*((1 - Nb)/K) - (db * Nb) - H*(1 - X)*Nb - c*Na*Nb,  (ga * Sa) * (1 - (Sa/(Smaxa - Smaxa * H * (1 - X)))), (gb* Sb) * (1 - (Sb/(Smaxb - Smaxb * H * (1 - X))))], [Na, Nb, Sa, Sb])
 
 #OUTPUT
 #-da + ((K - Na)*Ra*ra - Na*Ra*ra) / K - H*(1 - X) - Nb*c, -Na*c, 0, 0
@@ -36,7 +36,7 @@ M = Symbolics.simplify(det_jac)
 
 #Simplified model
 @variables Na Nb Sa Sb X R r d K H g Smax c
-X_SLC = Symbolics.jacobian([(r * R * Na)*((K - Na)/K) - (d * Na) - H*(1 - X)*Na - c*Na*Nb, (r * R * Nb)*((K - Nb)/K) - (d * Nb) - H*(1 - X)*Nb - c*Na*Nb,  (g * Sa) * (1 - (Sa/(Smax - Smax * H * (1 - X)))), (g* Sb) * (1 - (Sb/(Smax - Smax * H * (1 - X))))], [Na, Nb, Sa, Sb])
+X_SLC = Symbolics.jacobian([(r * R * Na)*((1 - Na)/K) - (d * Na) - H*(1 - X)*Na - c*Na*Nb, (r * R * Nb)*((1 - Nb)/K) - (d * Nb) - H*(1 - X)*Nb - c*Na*Nb,  (g * Sa) * (1 - (Sa/(Smax - Smax * H * (1 - X)))), (g* Sb) * (1 - (Sb/(Smax - Smax * H * (1 - X))))], [Na, Nb, Sa, Sb])
 
 #OUTPUT
 #-d + ((K - Na)*R*r - Na*R*r) / K - H*(1 - X) – Nb*c	-Na*c	0	0
