@@ -59,13 +59,13 @@ end
 
 
 
-
-avg_oocytes = mean([77404, 385613]) # This is the actual mean.
+avg_oocytes = [77404, 385613]
+ # This is the actual mean.
 reggs = avg_oocytes / (365 * 0.42) #aplication of the reproduction period stablish by law. (The time banned for extraction or exploitation for the species)
 r_ = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
 # natural death rates per life stage.
-d = mean([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
-size_growth_rate = mean([0.32,0.36]) #0.00014898749263737575
+d = ([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
+size_growth_rate = [0.32,0.36] #0.00014898749263737575
 t0_ = 365.14*0.42
 k_= 0.42
 Naj_ = 2500
@@ -105,11 +105,11 @@ cijs = length(zeros(Float64,size(1:length(cij_span))))
 H1_ = H_span[1]
 cij_= cij_span[1]
 
-p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_]  
+n1_p_span = [t0_, k_, r_[1], K_, H1_, d[1], Smax_, size_growth_rate[1],cij_,Naj_]  
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^4, 49.25]
-prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
+prob_ = ODEProblem(SLC!, U0_, tspan, n1_p_span)
 solve_= solve(prob_, Tsit5())
 
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
@@ -183,9 +183,9 @@ tiempos_totales
 tiempos_maximos
 
 h_0_c0_ = hcat(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1]) #H =0, c=0
-h_1_c0_ = hcat(tiempos_totales[:,100,1],resultados_simulaciones[:,100,1]) #H=0.99, c=0
+h_1_c0_ = hcat(tiempos_totales[:,101,1],resultados_simulaciones[:,101,1]) #H=0.99, c=0
 h_0_c1_ = hcat(tiempos_totales[:,1,101],resultados_simulaciones[:,1,101]) #H=0, c=1
-h_1_c1_ = hcat(tiempos_totales[:,100,101],resultados_simulaciones[:,100,101]) #H=0.99, C=1 
+h_1_c1_ = hcat(tiempos_totales[:,101,101],resultados_simulaciones[:,101,101]) #H=0.99, C=1 
 
 plot(h_0_c0_[:,1],h_0_c0_[:,2],label="H=0, c=0",  color=:blue, style=:solid)
 plot!(h_1_c0_[:,1],h_1_c0_[:,2],label="H=1, c=0",  color=:red, style=:solid)
@@ -195,3 +195,5 @@ plot!(h_1_c1_[:,1],h_1_c1_[:,2],label="H=1, c=1",  color=:brown, style=:solid)
 xlims!(000,2000)
 xlabel!("Time (days)", font=12)
 ylabel!("Abundance (nº individuals)", font=12)
+
+N1_mean(h_0_c0_[2])
