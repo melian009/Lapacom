@@ -134,7 +134,7 @@ for i in 1:length(H_span)
   H1_ = H_span[i]
   for j in 1:length(cij_span)
 
-   cij_= cij_span[j]
+    cij_= cij_span[j]
 
     p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_]  
     n=10  #Number of years in the simulation
@@ -181,3 +181,17 @@ end
 resultados_simulaciones
 tiempos_totales
 tiempos_maximos
+
+h_0_c0_ = hcat(tiempos_totales[:,1,1],resultados_simulaciones[:,1,1]) #H =0, c=0
+h_1_c0_ = hcat(tiempos_totales[:,100,1],resultados_simulaciones[:,100,1]) #H=0.99, c=0
+h_0_c1_ = hcat(tiempos_totales[:,1,101],resultados_simulaciones[:,1,101]) #H=0, c=1
+h_1_c1_ = hcat(tiempos_totales[:,100,101],resultados_simulaciones[:,100,101]) #H=0.99, C=1 
+
+plot(h_0_c0_[:,1],h_0_c0_[:,2],label="H=0, c=0",  color=:blue, style=:solid)
+plot!(h_1_c0_[:,1],h_1_c0_[:,2],label="H=1, c=0",  color=:red, style=:solid)
+plot!(h_0_c1_[:,1],h_0_c1_[:,2],label="H=0, c=1",  color=:green, style=:solid)
+plot!(h_1_c1_[:,1],h_1_c1_[:,2],label="H=1, c=1",  color=:brown, style=:solid)
+
+xlims!(000,2000)
+xlabel!("Time (days)", font=12)
+ylabel!("Abundance (nº individuals)", font=12)
