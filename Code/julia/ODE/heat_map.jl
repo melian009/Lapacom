@@ -57,7 +57,7 @@ function SLC!(du, u, p, t)
    Smat_2 = 1.34 * (avg_size_1) - 28.06
    R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
   
-   du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 #N1 
+  du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 #N1 
   du[2] = dNa2 = r[2] * R_2 * Na2 * ((K - Na2)/ K) - d[2] * Na2 - (1 - periodX(t)) * H * Na2 - cij * Na1 #N2
   du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
   du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
@@ -125,14 +125,38 @@ U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
 prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
 solve_= solve(prob_, Tsit5())
 
+
+#=Push variables in sigle vectors
+N1_values = Float64[]
+for i in 1:size(solve_.u , 1)
+  push!(N1_values, solve_.u[i][1])  
+end
+
+N2_values = Float64[]
+for i in 1:size(solve_.u , 1)
+  push!(N2_values, solve_.u[i][2]) 
+end
+t_values = Float64[]
+for i in 1:size(solve_.t , 1)
+  push!(t_values, solve_.t[i][1])  
+end
+=#
+t_l = length(solve_.t)
+n_v = length(solve_.u[1]) # Number of variables from the output of the ODE Problem Solve
+
+#=
+plot(t_values,N1_values)
+plot!(t_values,N2_values)
+ylims!(6.39*10^4,6.4*10^4)
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
+=#
 
-vars = zeros(t_l,n_v)
+vars = zeros(t_l,n_v-2)  #
 time_inicial = zeros(t_l)
 
-for j in 1:length(solve_.u)
-  for i in 1:4
+for j in 1:length(N1_values)
+  for i in 1:2
     vars[j,i] = solve_.u[j][i]
     time_inicial[j] = solve_.t[j]
   end 
@@ -143,33 +167,40 @@ resultados_simulacionesN1 = zeros(length(time_inicial), length(H_span), length(c
 resultados_simulacionesN2 = zeros(length(time_inicial), length(H_span), length(cij_span)) 
 
 tiempos_totales = zeros(length(time_inicial), length(H_span), length(cij_span))
-tiempos_maximos = zeros(length(H_span), length(cij_span))
+tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
 
 
-for i in 1:length(H_span)
-  H1_ = H_span[i]
-  for j in 1:length(cij_span)
 
-    cij_= cij_span[j]
+#for i in 1:length(H_span)
+  H1_ = H_span[1]
+#  for j in 1:length(cij_span)
+
+    cij_= cij_span[1]
     
     p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_]  
     n=10  #Number of years in the simulation
     tspan = (0,365.14*n)
-    U0_ = [10^4, 49.25]
+    U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
     prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
     solve_= solve(prob_, Tsit5())
 
     t_l = length(zeros(Float64,size(1:length(solve_.u))))
+    
     n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
-    vars = zeros(t_l,n_v)
+
+
+    vars = zeros(t_l,n_v-2)
     time2 = zeros(t_l)
  
+
       for a in 1:length(solve_.u)
-        for b in 1:4
+        for b in 1:2
           vars[a,b] = solve_.u[a][b]
           time2[a] = solve_.t[a]
         end 
       end
+
+
 
     if i == 1 && j == 1
       longitud_simulacion = length(time2)
@@ -178,25 +209,45 @@ for i in 1:length(H_span)
       resultados_simulacionesN2[:,i,j] = vars[:,2] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
 
       tiempos_totales[:,i,j] = time2
-    else #aCTUALIZAR LAS ENTRADAS DEL AJUSTE PARA RESULTADOS_SIMULACIONES N1 Y N2
-      lon_0 = length(resultados_simulaciones[:,1,1])
-      lon_c = length(vars[:,1])
-      elementos_faltantes = lon_0 - lon_c
-      if elementos_faltantes > 0 # Concadena el vector corto con zeros para tener la misma longitud del vector de las condiciones iniciales, el mas largo.
-        vector_corto = vcat(vars[:,1],zeros(elementos_faltantes))
-        vector_corto_t = vcat(time2,ones(elementos_faltantes)*maximum(time2))
+    else 
+      lon_0_1 = length(resultados_simulacionesN1[:,1,1])
+      lon_c_1 = length(vars[:,1])
+      elementos_faltantes_1 = lon_0_1 - lon_c_1
+
+
+      lon_0_2 = length(resultados_simulacionesN2[:,1,1])
+      lon_c_2 = length(vars[:,2])
+      elementos_faltantes_2 = lon_0_2 - lon_c_2
+
+      if elementos_faltantes_1 > 0 || elementos_faltantes_2 > 0 # Concadena el vector corto con zeros para tener la misma longitud del vector de las condiciones iniciales, el mas largo.
+        vector_corto_1 = vcat(vars[:,1],zeros(elementos_faltantes_1))
+        vector_corto_t_1 = vcat(time2,ones(elementos_faltantes_1)*maximum(time2))
+  
+        vector_corto_2 = vcat(vars[:,2],zeros(elementos_faltantes_2))
+        vector_corto_t_2 = vcat(time2,ones(elementos_faltantes_2)*maximum(time2))
       else
-        vector_corto = vars[:,1][1:lon_0] # Selecciona los valores del vector mas largo hasta la longitud de la simulación de las condiciones estandar (H=0,c=0)
-        vector_corto_t = time2[1:lon_0]
+        vector_corto_1 = vars[:,1][1:lon_0_1] # Selecciona los valores del vector mas largo hasta la longitud de la simulación de las condiciones estandar (H=0,c=0)
+        vector_corto_t_1 = time2[1:lon_0_1]
+
+        vector_corto_2 = vars[:,2][1:lon_0_2] # Selecciona los valores del vector mas largo hasta la longitud de la simulación de las condiciones estandar (H=0,c=0)
+        vector_corto_t_2 = time2[1:lon_0_2]
       end
-    resultados_simulaciones[:,i,j] = vector_corto
-    tiempos_totales[:,i,j] = vector_corto_t
-    tiempos_maximos[i,j] = maximum(vector_corto_t) #ultima iteración (nº máximo de días) por simulación
-    end
+
+    resultados_simulacionesN1[:,i,j] = vector_corto_1
+    resultados_simulacionesN2[:,i,j] = vector_corto_2
+
+    tiempos_totales[:,i,j] = vector_corto_t_1
+    
+    tiempos_maximos[i,j,1] = maximum(vector_corto_t_1) #ultima iteración (nº máximo de días) por simulación
+    
+    tiempos_maximos[i,j,2] = maximum(vector_corto_t_2) #ultima iteración (nº máximo de días) por simulación
+  end
   end
 end
 
-resultados_simulaciones
+resultados_simulacionesN1[:,2,1]
+resultados_simulacionesN2
+
 tiempos_totales
 tiempos_maximos
 
