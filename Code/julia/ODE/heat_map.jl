@@ -66,8 +66,7 @@ end
 
 
 
-avg_oocytes = [77404, 385613]
- # This is the actual mean.
+avg_oocytes = [77404, 385613] # This is the actual mean.
 reggs = avg_oocytes / (365 * 0.42) #aplication of the reproduction period stablish by law. (The time banned for extraction or exploitation for the species)
 r_ = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
 # natural death rates per life stage.
@@ -126,7 +125,7 @@ prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
 solve_= solve(prob_, Tsit5())
 
 
-#=Push variables in sigle vectors
+#Push variables in sigle vectors
 N1_values = Float64[]
 for i in 1:size(solve_.u , 1)
   push!(N1_values, solve_.u[i][1])  
@@ -140,7 +139,7 @@ t_values = Float64[]
 for i in 1:size(solve_.t , 1)
   push!(t_values, solve_.t[i][1])  
 end
-=#
+
 t_l = length(solve_.t)
 n_v = length(solve_.u[1]) # Number of variables from the output of the ODE Problem Solve
 
@@ -171,34 +170,34 @@ tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
 
 
 
-#for i in 1:length(H_span)
+#=for i in 1:length(H_span)
   H1_ = H_span[1]
-#  for j in 1:length(cij_span)
+# for j in 1:length(cij_span)
 
-    cij_= cij_span[1]
+   cij_= cij_span[2]
     
-    p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_]  
-    n=10  #Number of years in the simulation
-    tspan = (0,365.14*n)
-    U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
-    prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
-    solve_= solve(prob_, Tsit5())
+   p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_]  
+   n=10  #Number of years in the simulation
+   tspan = (0,365.14*n)
+   U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
+   prob_ = ODEProblem(SLC!, U0_, tspan, p_span)
+   solve_= solve(prob_, Tsit5())
 
-    t_l = length(zeros(Float64,size(1:length(solve_.u))))
+   t_l = length(zeros(Float64,size(1:length(solve_.u))))
     
-    n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
+   n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 
 
-    vars = zeros(t_l,n_v-2)
-    time2 = zeros(t_l)
+   vars = zeros(t_l,n_v-2)
+   time2 = zeros(t_l)
  
 
-      for a in 1:length(solve_.u)
-        for b in 1:2
-          vars[a,b] = solve_.u[a][b]
-          time2[a] = solve_.t[a]
-        end 
-      end
+    for a in 1:length(solve_.u)
+      for b in 1:2
+        vars[a,b] = solve_.u[a][b]
+         time2[a] = solve_.t[a]
+      end 
+    end
 
 
 
@@ -233,18 +232,18 @@ tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
         vector_corto_t_2 = time2[1:lon_0_2]
       end
 
-    resultados_simulacionesN1[:,i,j] = vector_corto_1
-    resultados_simulacionesN2[:,i,j] = vector_corto_2
+     resultados_simulacionesN1[:,i,j] = vector_corto_1
+     resultados_simulacionesN2[:,i,j] = vector_corto_2
 
     tiempos_totales[:,i,j] = vector_corto_t_1
     
     tiempos_maximos[i,j,1] = maximum(vector_corto_t_1) #ultima iteración (nº máximo de días) por simulación
     
     tiempos_maximos[i,j,2] = maximum(vector_corto_t_2) #ultima iteración (nº máximo de días) por simulación
-  end
+    end
   end
 end
-
+=#
 resultados_simulacionesN1[:,2,1]
 resultados_simulacionesN2
 
