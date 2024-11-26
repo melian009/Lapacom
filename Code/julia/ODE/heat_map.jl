@@ -4,6 +4,8 @@ using LinearAlgebra
 using DifferentialEquations
 using Plots
 using Statistics
+using Random
+using Distributions
 
 #=
 SLC general model
@@ -108,8 +110,8 @@ Hs=length(zeros(Float64,size(1:length(H_span))))
 cijs = length(zeros(Float64,size(1:length(cij_span))))
 
 #condiciones de estabilidad
-H1_ = H_span[1]
-cij_= cij_span[1]
+H1_ = H_span[101]
+cij_= cij_span[101]
 
 n1_p_span = [t0_, k_, r_[1], K_, H1_, d[1], Smax_, size_growth_rate[1],cij_]
 n2_p_span = [t0_, k_, r_[2], K_, H1_, d[2], Smax_, size_growth_rate[2],cij_]  
@@ -140,6 +142,35 @@ for i in 1:size(solve_.t , 1)
   push!(t_values, solve_.t[i][1])  
 end
 
+
+Random.seed(size_growth_rate[1]) # Setting the seed
+d = Normal(μ=0.32, σ=0.05)  #Media, Varianza
+n=rand(d,1000)             #Replicas aleatorioas, en este caso 1000 replicas.
+
+N1_H1_C1  = [min(N1_values),max() # min, max
+N2_H1_C1 # = mean(N2_values)
+
+N1_H1_C0 = 0 # = mean(N1_values) # min, max
+N2_H1_C0 = 0 # = mean(N2_values)
+
+
+N1_H0_C0 # = mean(N1_values) # min, max
+N2_H0_C0 # = mean(N2_values)
+Mat_freq_rep
+
+N1_H099_C0 # = mean(N1_values)
+N2_H099_C0 # = mean(N2_values)
+
+N1_H0_C099 #  = mean(N1_values)
+N2_H0_C099 # = mean(N2_values)
+
+N1_H099_C099 = mean(N1_values)
+N2_H099_C099 = mean(N2_values)
+
+
+heatmap()
+
+#=
 t_l = length(solve_.t)
 n_v = length(solve_.u[1]) # Number of variables from the output of the ODE Problem Solve
 
@@ -281,4 +312,4 @@ heatmap(1:size(data,1),
     xlabel="x values", ylabel="y values",
     title="My title")
 
-    
+= #
