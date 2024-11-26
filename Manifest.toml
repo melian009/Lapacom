@@ -2,7 +2,7 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "9271ab34f7f932396baaaee6d830d631b206ba67"
+project_hash = "ff2c480c35e2a772077840e2a7603294e4dd63a5"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "332e5d7baeff8497b923b730b994fa480601efc7"
@@ -70,6 +70,12 @@ deps = ["DelimitedFiles", "Pkg"]
 git-tree-sha1 = "d90a9c83fe96e3e93c66e1d3202877f0e92fcdfe"
 uuid = "715cd884-8f22-55db-b077-449d1f7eef73"
 version = "0.1.2"
+
+[[deps.AliasTables]]
+deps = ["PtrArrays", "Random"]
+git-tree-sha1 = "9876e1e164b144ca45e9e3198d0b689cadfed9ff"
+uuid = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
+version = "1.1.3"
 
 [[deps.Animations]]
 deps = ["Colors"]
@@ -608,10 +614,10 @@ deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
-deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "9242eec9b7e2e14f9952e8ea1c7e31a50501d587"
+deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
+git-tree-sha1 = "3101c32aab536e7a27b1763c0797dba151b899ad"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.104"
+version = "0.25.113"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -1968,6 +1974,11 @@ deps = ["Distributed", "Printf"]
 git-tree-sha1 = "00099623ffee15972c16111bcf84c58a0051257c"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.9.0"
+
+[[deps.PtrArrays]]
+git-tree-sha1 = "77a42d78b6a92df47ab37e177b2deac405e1c88f"
+uuid = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
+version = "1.2.1"
 
 [[deps.QOI]]
 deps = ["ColorTypes", "FileIO", "FixedPointNumbers"]
