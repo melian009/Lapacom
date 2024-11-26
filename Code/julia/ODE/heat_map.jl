@@ -152,7 +152,7 @@ t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 =#
 
-vars = zeros(t_l,n_v-2)  #
+vars = zeros(t_l,n_v-2)  # Takes only abundances from both species
 time_inicial = zeros(t_l)
 
 for j in 1:length(N1_values)
@@ -163,8 +163,8 @@ for j in 1:length(N1_values)
 end
 
 #Generacion de metrices cúbicas de almacenamiento 
-resultados_simulacionesN1 = zeros(length(time_inicial), length(H_span), length(cij_span)) 
-resultados_simulacionesN2 = zeros(length(time_inicial), length(H_span), length(cij_span)) 
+resultados_simulacionesN1 = zeros(length(time_inicial), length(H_span), length(cij_span)) #Matrix de salida para N1
+resultados_simulacionesN2 = zeros(length(time_inicial), length(H_span), length(cij_span)) #Matrix de salida para N2
 
 tiempos_totales = zeros(length(time_inicial), length(H_span), length(cij_span))
 tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
@@ -205,8 +205,8 @@ tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
     if i == 1 && j == 1
       longitud_simulacion = length(time2)
     # Guardar los resultados de la simulación en la matriz cúbica
-      resultados_simulacionesN1[:,i,j] = vars[:,1] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
-      resultados_simulacionesN2[:,i,j] = vars[:,2] # u = vars[:,1] = Abundancias // vars[:,2] = Tallas
+      resultados_simulacionesN1[:,i,j] = vars[:,1] # N1: u = vars[:,1] = Abundancias // vars[:,3] = Tallas
+      resultados_simulacionesN2[:,i,j] = vars[:,2] # N2: u = vars[:,2] = Abundancias // vars[:,4] = Tallas
 
       tiempos_totales[:,i,j] = time2
     else 
