@@ -87,7 +87,7 @@ Smax_ = 53.0             # Maximum size for adults
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
 
-n_simulaciones = 100 # Número de simulaciones
+n_simulaciones = 10 # Número de simulaciones
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 
@@ -106,30 +106,30 @@ end
 
 
 j=1
-k=1
+n=1
 
 
 # for j in 1:length(H_span)
   H = H_span[j] #Exploitation
 #  for k in 1:length(cij_span)
-  cij = cij_span[k]  #Simetric competence component
+  cij = cij_span[n]  #Simetric competence component
 
     
     # Almacenar los conjuntos resultados de las simulaciones
-    resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
+     resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
     
-    resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
-    resultados_Na2_concatenados = Float64[]  # Para almacenar los valores de Na2
-    resultados_Sa1_concatenados = Float64[]  # Para almacenar los valores de Sa1
-    resultados_Sa2_concatenados = Float64[]  # Para almacenar los valores de Sa2
+     resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
+     resultados_Na2_concatenados = Float64[]  # Para almacenar los valores de Na2
+     resultados_Sa1_concatenados = Float64[]  # Para almacenar los valores de Sa1
+     resultados_Sa2_concatenados = Float64[]  # Para almacenar los valores de Sa2
 
-    # Almacenar los conjuntos resultados de las simulaciones
-    resultados_t = Float64[]  # Para almacenar los valores de t
+    # # Almacenar los conjuntos resultados de las simulaciones
+     resultados_t = Float64[]  # Para almacenar los valores de t
     
     resultados_Na1 = Float64[]  # Para almacenar los valores de Na1
-    resultados_Na2 = Float64[]  # Para almacenar los valores de Na2
-    resultados_Sa1 = Float64[]  # Para almacenar los valores de Sa1
-    resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
+     resultados_Na2 = Float64[]  # Para almacenar los valores de Na2
+     resultados_Sa1 = Float64[]  # Para almacenar los valores de Sa1
+     resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
 
     # Realizamos las simulaciones
      for i in 1:n_simulaciones
@@ -171,13 +171,14 @@ k=1
     end 
 
     if j == 1 && k == 1 
-    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2")
+    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     else
-    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados)
+    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij))
     end
 #  end
 end
 
+plot(resultados_t_concatenados,resultados_Na1_concatenados, xlabel= "N1", ylabel = "N2")
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
