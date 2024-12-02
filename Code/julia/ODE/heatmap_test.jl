@@ -187,7 +187,7 @@ density!(resultados_Na2_concatenados, label="Na2", ylabel="Frecuencia", title="D
 xlims!(6.0*10^4,7.0*10^4)
 
 #Size
-density(resultados_Sa1_concatenados, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+density(resultados_Sa1_concatenados, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 density!(resultados_Sa2_concatenados, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 xlims!(50,55)
 
