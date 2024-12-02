@@ -201,7 +201,7 @@ tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
 
 
 
-#=for i in 1:length(H_span)
+# for i in 1:length(H_span)
   H1_ = H_span[1]
 # for j in 1:length(cij_span)
 
@@ -274,7 +274,7 @@ tiempos_maximos = zeros(length(H_span), length(cij_span),length(vars))
     end
   end
 end
-=#
+
 resultados_simulacionesN1[:,2,1]
 resultados_simulacionesN2
 
@@ -312,4 +312,4 @@ heatmap(1:size(data,1),
     xlabel="x values", ylabel="y values",
     title="My title")
 
-= #
+=#
