@@ -81,13 +81,13 @@ d_ = ([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these value
 size_growth_rate = [0.32,0.36] #0.00014898749263737575
 t0_ = 365.14*0.42
 k_= 0.42
-Naj_ = 2500
+
 K_ = 64000.00    # Carrying capacity
-Smax_ = 53.0             # Maximum size for adults3
+Smax_ = 53.0             # Maximum size for adults
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
 
-n_simulaciones = 100 # Número de simulaciones
+n_simulaciones = 10 # Número de simulaciones
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 
@@ -103,25 +103,26 @@ for i in 1:length(H_span)
 end
 
 
-# Almacenar los conjuntos resultados de las simulaciones
-resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
-    
-resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
-resultados_Na2_concatenados = Float64[]  # Para almacenar los valores de Na2
-resultados_Sa1_concatenados = Float64[]  # Para almacenar los valores de Sa1
-resultados_Sa2_concatenados = Float64[]  # Para almacenar los valores de Sa2
 
 
-j=1
-k=10
+j=2
+k=1
 
 
-#for j in 1:length(H_span)
+for j in 1:length(H_span)
   H = H_span[j] #Exploitation
 #  for k in 1:length(cij_span)
   cij = cij_span[k]  #Simetric competence component
 
     
+    # Almacenar los conjuntos resultados de las simulaciones
+    resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
+    
+    resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
+    resultados_Na2_concatenados = Float64[]  # Para almacenar los valores de Na2
+    resultados_Sa1_concatenados = Float64[]  # Para almacenar los valores de Sa1
+    resultados_Sa2_concatenados = Float64[]  # Para almacenar los valores de Sa2
+
     # Almacenar los conjuntos resultados de las simulaciones
     resultados_t = Float64[]  # Para almacenar los valores de t
     
@@ -133,13 +134,13 @@ k=10
     # Realizamos las simulaciones
      for i in 1:n_simulaciones
       # Generamos valores aleatorios para los parámetros (distribución normal)
-      t_0 = t0_ + 0.01 * randn()
-      K = k_ + 0.05 * randn()
-      r = [r_[1]+0.05 * randn(), r_[2] + 0.01 * randn()] 
+      t_0 = t0_ + 0.0001 * randn()
+      K = k_ + 0.01 * randn()
+      r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
       K = K_ + 0.1 * randn()
-      gamma = [size_growth_rate[1] + 0.05 * randn(),size_growth_rate[2] + 0.05 * randn()]
+      gamma = [size_growth_rate[1] + 0.01 * randn(),size_growth_rate[2] + 0.01 * randn()]
       d = [d_[1], d_[2]]
-      Smax = Smax_ - 0.1 * randn()
+      Smax = Smax_ + 0.1 * randn()
     
       # Condiciones iniciales
       U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
@@ -153,22 +154,10 @@ k=10
       # Almacenar las soluciones de t, Na1, Na2, Sa1, Sa2
       for m in 1:size(sol.t , 1)
         push!(resultados_t, sol.t[m])
-      end
-
-      for m in 1:size(sol.u , 1)
-      push!(resultados_Na1, sol.u[m][1])
-      end
-    
-      for m in 1:size(sol.u , 1)
-      push!(resultados_Na2, sol.u[m][2])
-      end
-
-      for m in 1:size(sol.u , 1)
-      push!(resultados_Sa1, sol.u[m][3])
-      end
-
-      for m in 1:size(sol.u , 1)
-      push!(resultados_Sa2, sol.u[m][4])
+        push!(resultados_Na1, sol.u[m][1])
+        push!(resultados_Na2, sol.u[m][2])
+        push!(resultados_Sa1, sol.u[m][3])
+        push!(resultados_Sa2, sol.u[m][4])
       end
     
       # Concatenar los resultados para obtener las soluciones completas de Na1, Na2, Sa1, Sa2
@@ -182,12 +171,17 @@ k=10
     end 
 
     if j == 1 && k == 1 
-    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label= "H=0.0, Cij=0.0")
+    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label= vcat("H =",H_span[j],"cij =",cij_span[k]))
     else
-    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,label= "H=1.0, Cij=0.0")
+    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,label= vcat("H =",H_span[j],"cij =",cij_span[k]))
     end
+
+    min_max_Na1 = vcat([minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)]...)
+    min_max_Na2 = vcat([minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)]...)
+    min_max_Sa1 = vcat([minimum(resultados_Sa1_concatenados), maximum(resultados_Sa1_concatenados)]...)
+    min_max_Sa2 = vcat([minimum(resultados_Sa2_concatenados), maximum(resultados_Sa2_concatenados)]...)
 #  end
-#end
+end
 
 
 # Generar la distribución de frecuencias de Na1 y Na2
