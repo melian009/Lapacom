@@ -182,7 +182,7 @@ k=10
     end 
 
     if j == 1 && k == 1 
-    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label= "H=0.0, Cij=0.0")
+    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label= "H=0.0, Cij=0.0")
     else
     plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,label= "H=1.0, Cij=0.0")
     end
