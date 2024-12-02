@@ -87,7 +87,7 @@ Smax_ = 53.0             # Maximum size for adults
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
 
-n_simulaciones = 10 # Número de simulaciones
+n_simulaciones = 100 # Número de simulaciones
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 
@@ -171,9 +171,9 @@ k=1
     end 
 
     if j == 1 && k == 1 
-    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label= vcat("H =",H_span[j],"cij =",cij_span[k]))
+    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2")
     else
-    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,label= vcat("H =",H_span[j],"cij =",cij_span[k]))
+    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados)
     end
 #  end
 end
