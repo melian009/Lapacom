@@ -105,11 +105,11 @@ end
 
 
 
-j=2
+j=1
 k=1
 
 
-for j in 1:length(H_span)
+# for j in 1:length(H_span)
   H = H_span[j] #Exploitation
 #  for k in 1:length(cij_span)
   cij = cij_span[k]  #Simetric competence component
@@ -135,7 +135,7 @@ for j in 1:length(H_span)
      for i in 1:n_simulaciones
       # Generamos valores aleatorios para los parámetros (distribución normal)
       t_0 = t0_ + 0.0001 * randn()
-      K = k_ + 0.01 * randn()
+      k = k_ + 0.01 * randn()
       r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
       K = K_ + 0.1 * randn()
       gamma = [size_growth_rate[1] + 0.01 * randn(),size_growth_rate[2] + 0.01 * randn()]
@@ -175,11 +175,6 @@ for j in 1:length(H_span)
     else
     plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,label= vcat("H =",H_span[j],"cij =",cij_span[k]))
     end
-
-    min_max_Na1 = vcat([minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)]...)
-    min_max_Na2 = vcat([minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)]...)
-    min_max_Sa1 = vcat([minimum(resultados_Sa1_concatenados), maximum(resultados_Sa1_concatenados)]...)
-    min_max_Sa2 = vcat([minimum(resultados_Sa2_concatenados), maximum(resultados_Sa2_concatenados)]...)
 #  end
 end
 
