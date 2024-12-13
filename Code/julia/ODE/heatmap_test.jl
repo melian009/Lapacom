@@ -176,14 +176,14 @@ k=1
     plot!(resultados_Na1_concatenados, resultados_Na2_concatenados)
     end
 #  end
-end
+#end
 
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
 density(resultados_Na1_concatenados, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
 density!(resultados_Na2_concatenados, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-#xlims!(6.0*10^4,7.0*10^4)
+xlims!(6.0*10^4,7.0*10^4)
 
 #Size
 density(resultados_Sa1_concatenados, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
