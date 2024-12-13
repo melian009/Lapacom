@@ -106,7 +106,7 @@ end
 
 
 j=1
-n=1
+n=11
 
 
 # for j in 1:length(H_span)
@@ -178,7 +178,7 @@ n=1
 #  end
 #end
 
-plot!(resultados_t,log.(resultados_Na2), xlabel= "t", ylabel = "N1")
+plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
