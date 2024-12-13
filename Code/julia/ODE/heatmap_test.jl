@@ -86,8 +86,7 @@ K_ = 64000.00    # Carrying capacity
 Smax_ = 53.0             # Maximum size for adults
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
-
-n_simulaciones = 100 # Número de simulaciones
+n_simulaciones = 500 # Número de simulaciones
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 
@@ -210,7 +209,7 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
 
 
 # Rango y la Resolución del grid para Na1 y Na2
-  n_bins = 100  # Número de bins para el histograma (resolución)
+  n_bins = 150 # Número de bins para el histograma (resolución)
   x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
   y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
   
@@ -239,7 +238,7 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
    y_bins, 
    frequencies_norm, xlabel="Na1", 
    ylabel="Na2", 
-   title="Heatmap de Frecuencia (Na1 vs Na2)", 
+   title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"), 
    color=:viridis,
    clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
 
@@ -251,7 +250,7 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
    log.(frequencies_norm.^(-1)), 
    xlabel="Na1",
    ylabel="Na2",
-   title="Heatmap de Frecuencia (Na1 vs Na2)",
+   title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"),
    color=:viridis,
    clims=(minimum(log.(frequencies_norm.^(-1))), maximum(log.(frequencies_norm.^(-1)))))
   savefig("Heatmap_log_h0_c0.png")
