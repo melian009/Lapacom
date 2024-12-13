@@ -104,13 +104,13 @@ end
 
 
 
-j=5
+j=11
 n=1
 
 
-# for j in 1:length(H_span)
+
   H = H_span[j] #Exploitation
-#  for k in 1:length(cij_span)
+
   cij = cij_span[n]  #Simetric competence component
 
     
@@ -125,7 +125,7 @@ n=1
     # # Almacenar los conjuntos resultados de las simulaciones
      resultados_t = Float64[]  # Para almacenar los valores de t
     
-    resultados_Na1 = Float64[]  # Para almacenar los valores de Na1
+     resultados_Na1 = Float64[]  # Para almacenar los valores de Na1
      resultados_Na2 = Float64[]  # Para almacenar los valores de Na2
      resultados_Sa1 = Float64[]  # Para almacenar los valores de Sa1
      resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
@@ -171,18 +171,75 @@ n=1
     end 
 
 
+ # Rango y la Resolución del grid para Na1 y Na2
+  n_bins = 100 # Número de bins para el histograma (resolución)
+  x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
+  y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
+  
+  # Grid de bins para Na1 y Na2
+  x_bins = range(x_min, stop=x_max, length=n_bins)
+  y_bins = range(y_min, stop=y_max, length=n_bins)
+  
+  # Matriz para almacenar las frecuencias
+  frequencies = zeros(Int, n_bins, n_bins)
+  
+  # Contabilización de las frecuencias de cada pares (Na1, Na2)
+  for i in 1:length(resultados_Na1_concatenados)
+      # Localización del bin correspondiente para Na1 y Na2
+      x_bin = searchsortedlast(x_bins, resultados_Na1_concatenados[i])
+      y_bin = searchsortedlast(y_bins, resultados_Na2_concatenados[i])
+  
+      # Incremento del contador en la posición correspondiente
+      frequencies[x_bin, y_bin] += 1
+  end
+  
+  # Matriz de frecuencias normalizada 
+  frequencies_norm = frequencies / sum(frequencies)
+  Bin_pos = argmax(frequencies_norm)
+
+ # if H==1 && cij==1
+# anotations_00 = hcat(cij,H,x_bins[Bin_pos[1]], y_bins[Bin_pos[2]],frequencies_norm[Bin_pos])
+# MATRIX = (anotations_00)
+ # else
+  anotations_ = hcat(cij,H,x_bins[Bin_pos[1]], y_bins[Bin_pos[2]],frequencies_norm[Bin_pos])
+  MATRIX = vcat(MATRIX,anotations_)
+ # end 
 
 
 
+  # Heatmap
+heatmap!(x_bins,
+ y_bins, 
+ frequencies_norm,
+ xlabel="Na1", 
+ ylabel="Na2", 
+ title="(Na1 vs Na2)", 
+ color=cgrad(:viridis, rev=true),
+ clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
+
+
+#annotate!(x_bins[Bin_pos[1]], y_bins[Bin_pos[2]], text("H=$H", 8))
+
+ 
+savefig("Heatmap_h0_4_c0.png")
+  
+# Heatmap LOG SCALE
+heatmap(x_bins,
+y_bins, 
+log.(frequencies_norm.^(-1)), 
+xlabel="Na1",
+ylabel="Na2",
+title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"),
+color=:viridis,
+clims=(minimum(log.(frequencies_norm.^(-1))), maximum(log.(frequencies_norm.^(-1)))))
+  
+savefig("Heatmap_log_h0_c0.png")
 
 #Plot line: limit cycle     
-    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
+plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     
-    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij),legend=:outerright)
-    savefig("line_plot_DRAF_H5C5_BACKGROUND.png")
-
-#  end
-#end
+plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij),legend=:outerright)
+savefig("line_plot_DRAF_H5C5_BACKGROUND.png")
 
 plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
 
@@ -212,56 +269,3 @@ println("Mínimo y máximo de Sa2: ", min_max_Sa2)
 
 density(resultados_Na1_concatenados, bins=300, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
 density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-
-
-# Rango y la Resolución del grid para Na1 y Na2
-  n_bins = 100 # Número de bins para el histograma (resolución)
-  x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
-  y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
-  
-  # Grid de bins para Na1 y Na2
-  x_bins = range(x_min, stop=x_max, length=n_bins)
-  y_bins = range(y_min, stop=y_max, length=n_bins)
-  
-  # Matriz para almacenar las frecuencias
-  frequencies = zeros(Int, n_bins, n_bins)
-  
-  # Contabilización de las frecuencias de cada pares (Na1, Na2)
-  for i in 1:length(resultados_Na1_concatenados)
-      # Localización del bin correspondiente para Na1 y Na2
-      x_bin = searchsortedlast(x_bins, resultados_Na1_concatenados[i])
-      y_bin = searchsortedlast(y_bins, resultados_Na2_concatenados[i])
-  
-      # Incremento del contador en la posición correspondiente
-      frequencies[x_bin, y_bin] += 1
-  end
-  
-  # Matriz de frecuencias normalizada 
-  frequencies_norm = frequencies / sum(frequencies)
-
-  Bin_pos = argmax(frequencies_norm)
-  
-  # Heatmap
-  heatmap!(x_bins,
-   y_bins, 
-   frequencies_norm, xlabel="Na1", 
-   ylabel="Na2", 
-   title=" (Na1 vs Na2) Cij=$cij, H=$H", 
-   color=cgrad(:viridis, rev=true),
-   clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
-   annotate!(x_bins[Bin_pos[1]-5], y_bins[Bin_pos[2]], text("H=$H", 8))
-
- 
-   savefig("Heatmap_h0_4_c0.png")
-  
-  # Heatmap LOG SCALE
-  heatmap(x_bins,
-   y_bins, 
-   log.(frequencies_norm.^(-1)), 
-   xlabel="Na1",
-   ylabel="Na2",
-   title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"),
-   color=:viridis,
-   clims=(minimum(log.(frequencies_norm.^(-1))), maximum(log.(frequencies_norm.^(-1)))))
-  
-   savefig("Heatmap_log_h0_c0.png")
