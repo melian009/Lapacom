@@ -105,7 +105,7 @@ end
 
 
 j=6
-n=6
+n=1
 
 
 # for j in 1:length(H_span)
@@ -170,7 +170,7 @@ n=6
 
     end 
 
-     
+#Plot line: limit cycle     
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij),legend=:outerright)
@@ -246,7 +246,7 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
   savefig("Heatmap_h0_c0.png")
   
   # Heatmap LOG SCALE
-  heatmap!(x_bins,
+  heatmap(x_bins,
    y_bins, 
    log.(frequencies_norm.^(-1)), 
    xlabel="Na1",
