@@ -236,6 +236,7 @@ xlims!(min_max_Na2[1],min_max_Na1[2])
   
   # Heatmap
   heatmap(x_bins, y_bins, frequencies_norm, xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis, clims=(0.8, 1))
-
+  savefig("Heatmap_h_c.png")
   # Heatmap LOG SCALE
   heatmap!(x_bins, y_bins, log.(frequencies_norm.^(-1)), xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis)
+  savefig("Heatmap_log_h_c.png")
