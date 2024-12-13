@@ -104,7 +104,7 @@ end
 
 
 
-j=6
+j=5
 n=1
 
 
@@ -170,6 +170,11 @@ n=1
 
     end 
 
+
+
+
+
+
 #Plot line: limit cycle     
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     
@@ -233,17 +238,21 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
   
   # Matriz de frecuencias normalizada 
   frequencies_norm = frequencies / sum(frequencies)
+
+  Bin_pos = argmax(frequencies_norm)
   
   # Heatmap
   heatmap!(x_bins,
    y_bins, 
    frequencies_norm, xlabel="Na1", 
    ylabel="Na2", 
-   title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"), 
+   title=" (Na1 vs Na2) Cij=$cij, H=$H", 
    color=cgrad(:viridis, rev=true),
    clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
+   annotate!(x_bins[Bin_pos[1]-5], y_bins[Bin_pos[2]], text("H=$H", 8))
 
-  savefig("Heatmap_h0_c0.png")
+ 
+   savefig("Heatmap_h0_4_c0.png")
   
   # Heatmap LOG SCALE
   heatmap(x_bins,
