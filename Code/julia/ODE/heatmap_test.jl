@@ -87,7 +87,7 @@ Smax_ = 53.0             # Maximum size for adults
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
 
-n_simulaciones = 10 # Número de simulaciones
+n_simulaciones = 100 # Número de simulaciones
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 
@@ -106,7 +106,7 @@ end
 
 
 j=1
-n=11
+n=1
 
 
 # for j in 1:length(H_span)
@@ -149,7 +149,7 @@ n=11
       prob = ODEProblem(SLC!, U0_, t_span, [t_0, k, r, K, H, d, Smax, gamma, cij])
     
       #  Resolver el problema
-      sol = solve(prob, Tsit5())
+      sol = solve(prob, maxiters=500)
     
       # Almacenar las soluciones de t, Na1, Na2, Sa1, Sa2
       for m in 1:size(sol.t , 1)
@@ -168,12 +168,13 @@ n=11
          resultados_Na2_concatenados = vcat(resultados_Na2...)
          resultados_Sa1_concatenados = vcat(resultados_Sa1...)
          resultados_Sa2_concatenados = vcat(resultados_Sa2...)
+
     end 
 
      
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     
-    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij))
+    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij), background=nothing,legend=:outerright)
     
 #  end
 #end
@@ -182,13 +183,13 @@ plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
-density(log.(resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
-density!(log.(resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-xlims!(6.0*10^4,7.0*10^4)
+density((resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
+density!((resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+xlims!(0,7.0*10^4)
 
 #Size
-density(log.(resultados_Sa1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-density!(log.(resultados_Sa2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+density((resultados_Sa1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+density!((resultados_Sa2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 xlims!(3.9,3.98)
 
 
@@ -206,7 +207,6 @@ println("Mínimo y máximo de Sa2: ", min_max_Sa2)
 
 density(resultados_Na1_concatenados, bins=300, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
 density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-xlims!(min_max_Na1[2]-10^3,min_max_Na2[2]+100)
 
 
 # Rango y la Resolución del grid para Na1 y Na2
@@ -235,8 +235,23 @@ xlims!(min_max_Na1[2]-10^3,min_max_Na2[2]+100)
   frequencies_norm = frequencies / sum(frequencies)
   
   # Heatmap
-  heatmap(x_bins, y_bins, frequencies_norm, xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis, clims=(0.8, 1))
+  heatmap(x_bins,
+   y_bins, 
+   frequencies_norm, xlabel="Na1", 
+   ylabel="Na2", 
+   title="Heatmap de Frecuencia (Na1 vs Na2)", 
+   color=:viridis,
+   clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
+
   savefig("Heatmap_h0_c0.png")
+  
   # Heatmap LOG SCALE
-  heatmap(x_bins, y_bins, log.(frequencies_norm.^(-1)), xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis)
+  heatmap(x_bins,
+   y_bins, 
+   log.(frequencies_norm.^(-1)), 
+   xlabel="Na1",
+   ylabel="Na2",
+   title="Heatmap de Frecuencia (Na1 vs Na2)",
+   color=:viridis,
+   clims=(minimum(log.(frequencies_norm.^(-1))), maximum(log.(frequencies_norm.^(-1)))))
   savefig("Heatmap_log_h0_c0.png")
