@@ -104,8 +104,8 @@ end
 
 
 
-j=1
-n=1
+j=6
+n=6
 
 
 # for j in 1:length(H_span)
@@ -173,8 +173,9 @@ n=1
      
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     
-    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij), background=nothing,legend=:outerright)
-    
+    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij),legend=:outerright)
+    savefig("line_plot_DRAF_H5C5_BACKGROUND.png")
+
 #  end
 #end
 
@@ -182,8 +183,8 @@ plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
-density((resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
-density!((resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+density((resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia")
+density!((resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia")
 xlims!(0,7.0*10^4)
 
 #Size
@@ -209,7 +210,7 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
 
 
 # Rango y la Resolución del grid para Na1 y Na2
-  n_bins = 150 # Número de bins para el histograma (resolución)
+  n_bins = 100 # Número de bins para el histograma (resolución)
   x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
   y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
   
@@ -234,18 +235,18 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
   frequencies_norm = frequencies / sum(frequencies)
   
   # Heatmap
-  heatmap(x_bins,
+  heatmap!(x_bins,
    y_bins, 
    frequencies_norm, xlabel="Na1", 
    ylabel="Na2", 
    title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"), 
-   color=:viridis,
+   color=cgrad(:viridis, rev=true),
    clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
 
   savefig("Heatmap_h0_c0.png")
   
   # Heatmap LOG SCALE
-  heatmap(x_bins,
+  heatmap!(x_bins,
    y_bins, 
    log.(frequencies_norm.^(-1)), 
    xlabel="Na1",
@@ -253,4 +254,5 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
    title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"),
    color=:viridis,
    clims=(minimum(log.(frequencies_norm.^(-1))), maximum(log.(frequencies_norm.^(-1)))))
-  savefig("Heatmap_log_h0_c0.png")
+  
+   savefig("Heatmap_log_h0_c0.png")
