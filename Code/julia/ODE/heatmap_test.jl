@@ -170,26 +170,26 @@ n=1
          resultados_Sa2_concatenados = vcat(resultados_Sa2...)
     end 
 
-    if j == 1 && k == 1 
+     
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
-    else
+    
     plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij))
-    end
+    
 #  end
 #end
 
-plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
+plot!(resultados_t,log.(resultados_Na2), xlabel= "t", ylabel = "N1")
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
-density(resultados_Na1_concatenados, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
-density!(resultados_Na2_concatenados, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+density(log.(resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
+density!(log.(resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 xlims!(6.0*10^4,7.0*10^4)
 
 #Size
-density(resultados_Sa1_concatenados, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-density!(resultados_Sa2_concatenados, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-xlims!(50,55)
+density(log.(resultados_Sa1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+density!(log.(resultados_Sa2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+xlims!(3.9,3.98)
 
 
 # Obtener el mínimo y máximo de las soluciones de las ecuaciones
@@ -206,7 +206,7 @@ println("Mínimo y máximo de Sa2: ", min_max_Sa2)
 
 density(resultados_Na1_concatenados, bins=300, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
 density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
-xlims!(min_max_Na2[1],min_max_Na1[2])
+xlims!(min_max_Na1[2]-10^3,min_max_Na2[2]+100)
 
 
 # Rango y la Resolución del grid para Na1 y Na2
@@ -236,7 +236,7 @@ xlims!(min_max_Na2[1],min_max_Na1[2])
   
   # Heatmap
   heatmap(x_bins, y_bins, frequencies_norm, xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis, clims=(0.8, 1))
-  savefig("Heatmap_h_c.png")
+  savefig("Heatmap_h0_c0.png")
   # Heatmap LOG SCALE
-  heatmap!(x_bins, y_bins, log.(frequencies_norm.^(-1)), xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis)
-  savefig("Heatmap_log_h_c.png")
+  heatmap(x_bins, y_bins, log.(frequencies_norm.^(-1)), xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis)
+  savefig("Heatmap_log_h0_c0.png")
