@@ -87,12 +87,3 @@ sol = solve(prob, solver) # Eros: There is an error when I run this line and I d
 N[c,] = sol[end]
 plot(H_,N, xlabel="Exploitation rate", ylabel="Abundance")
 
-
-#lines(H_,Ne_,label="N",colour="blue")
-#lines!(Expl,N_,label="N (adults)",colour="red")
-#xlims!(0.0,1)
-#ylims!(-1000,8500)
-#xlabel!("Exploitation rate (E)")
-#ylabel!("Abundance (N)")
-
-
