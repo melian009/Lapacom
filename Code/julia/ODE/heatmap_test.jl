@@ -173,8 +173,8 @@ n=6
      
     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
     
-    plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij), background=nothing,legend=:outerright)
-    savefig("line_plot_DRAF.png")
+    plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij),legend=:outerright)
+    savefig("line_plot_DRAF_H5C5_BACKGROUND.png")
 
 #  end
 #end
