@@ -176,9 +176,9 @@ n=1
     plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij))
     end
 #  end
-end
+#end
 
-plot(resultados_t,resultados_Na1, xlabel= "t", ylabel = "N1")
+plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
 
 # Generar la distribución de frecuencias de Na1 y Na2
 #Populations
@@ -207,3 +207,35 @@ println("Mínimo y máximo de Sa2: ", min_max_Sa2)
 density(resultados_Na1_concatenados, bins=300, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
 density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 xlims!(min_max_Na2[1],min_max_Na1[2])
+
+
+# Rango y la Resolución del grid para Na1 y Na2
+  n_bins = 100  # Número de bins para el histograma (resolución)
+  x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
+  y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
+  
+  # Grid de bins para Na1 y Na2
+  x_bins = range(x_min, stop=x_max, length=n_bins)
+  y_bins = range(y_min, stop=y_max, length=n_bins)
+  
+  # Matriz para almacenar las frecuencias
+  frequencies = zeros(Int, n_bins, n_bins)
+  
+  # Contabilización de las frecuencias de cada pares (Na1, Na2)
+  for i in 1:length(resultados_Na1_concatenados)
+      # Localización del bin correspondiente para Na1 y Na2
+      x_bin = searchsortedlast(x_bins, resultados_Na1_concatenados[i])
+      y_bin = searchsortedlast(y_bins, resultados_Na2_concatenados[i])
+  
+      # Incremento del contador en la posición correspondiente
+      frequencies[x_bin, y_bin] += 1
+  end
+  
+  # Matriz de frecuencias normalizada 
+  frequencies_norm = frequencies / sum(frequencies)
+  
+  # Heatmap
+  heatmap(x_bins, y_bins, frequencies_norm, xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis, clims=(0.8, 1))
+
+  # Heatmap LOG SCALE
+  heatmap!(x_bins, y_bins, log.(frequencies_norm.^(-1)), xlabel="Na1", ylabel="Na2", title="Heatmap de Frecuencia (Na1 vs Na2)", color=:viridis)
