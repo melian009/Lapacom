@@ -107,7 +107,7 @@ end
 
 
 j=1
-n=1
+n=4
 
 
 
@@ -218,9 +218,13 @@ heatmap(x_bins,
  title="(Na1 vs Na2)", 
  color=cgrad(:viridis, rev=true),
  clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
+ #xlims!(0,6.4*10^4)
+ #ylims!(0,6.4*10^4)
+ 
 
 
 #annotate!(x_bins[Bin_pos[1]], y_bins[Bin_pos[2]], text("H=$H", 8))
+
 heatmap!(x_bins,
  y_bins, 
  frequencies_norm,
