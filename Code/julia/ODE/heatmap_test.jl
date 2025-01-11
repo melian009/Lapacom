@@ -275,8 +275,6 @@ Bin_pos = argmax(frequencies_norm)
   MATRIX = vcat(MATRIX,anotations_)
  # end =# 
 
-
-
 # Heatmap
  heatmap(x_bins,
  y_bins, 
@@ -291,59 +289,45 @@ Bin_pos = argmax(frequencies_norm)
 
  #annotate!(x_bins[Bin_pos[1]], y_bins[Bin_pos[2]], text("H=$H", 8))
 
- heatmap!(x_bins,
- y_bins, 
- frequencies_norm,
- xlabel="Na1", 
- ylabel="Na2", 
- title="(Na1 vs Na2)", 
- color=cgrad(:viridis, rev=true),
- clims=(minimum(frequencies_norm), maximum(frequencies_norm)))
-
- savefig("Heatmap_h0_4_c0.png")
+# savefig("Heatmap_h0_4_c0.png")
   
-# Heatmap LOG SCALE
+# Heatmap LOG (SCALE^-1)
  heatmap(x_bins,
  y_bins, 
- log.(frequencies_norm.^(-1)), 
+ log.(frequencies_norm), 
  xlabel="Na1",
  ylabel="Na2",
  title=vcat("H=", H, "CIJ=",cij," (Na1 vs Na2)"),
  color=:viridis,
  clims=(minimum(log.(frequencies_norm.^(-1))), maximum(log.(frequencies_norm.^(-1)))))
   
- savefig("Heatmap_log_h0_c0.png")
+# savefig("Heatmap_log_h0_c0.png")
 
 
-# Plot line: limit cycle     
- plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij))
-    
- plot(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij),legend=:outerright)
- savefig("line_plot_DRAF_H5C5_BACKGROUND.png")
 
- plot(resultados_t,log.(resultados_Na1), xlabel= "t", ylabel = "N1")
 
 
 
 #Density diagrams for limit cycles
 #Frecuency distribution of: 
-# Populations Na1 y Na2
- density((resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia")
- density!((resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia")
- xlims!(0,7.0*10^4)
+#Populations Na1 y Na2
+density((resultados_Na1_concatenados), label="Na1", ylabel="Frecuencia")
+density!((resultados_Na2_concatenados), label="Na2", ylabel="Frecuencia")
+xlims!(0,7.0*10^4)
 
- # Size Sa1 y Sa2
+#Size Sa1 y Sa2
+
 density((resultados_Sa1_concatenados), label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 density!((resultados_Sa2_concatenados), label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 xlims!(3.9,3.98)
 
-# Obtain min and max of the equation solutions
+#Obtain min and max of the equation solutions
 min_max_Na1 = [minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)]
 min_max_Na2 = [minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)]
 min_max_Sa1 = [minimum(resultados_Sa1_concatenados), maximum(resultados_Sa1_concatenados)]
 min_max_Sa2 = [minimum(resultados_Sa2_concatenados), maximum(resultados_Sa2_concatenados)]
 
-# Showe min and max outputs
+#Showe min and max outputs
 println("Mínimo y máximo de Na1: ", min_max_Na1)
 println("Mínimo y máximo de Na2: ", min_max_Na2)
 println("Mínimo y máximo de Sa1: ", min_max_Sa1)
@@ -356,18 +340,26 @@ density!(resultados_Na2_concatenados, bins=300, label="Na2", ylabel="Frecuencia"
 
 
 
+
+# Heatmaps consolidados
 # Variables para almacenar las frecuencias consolidadas
+n_bins = 100
 consolidated_frequencies_H = zeros(Float64, n_bins, n_bins)
 consolidated_frequencies_cij = zeros(Float64, n_bins, n_bins)
 
-for j in 1:length(H_span)
-    for n in 1:length(cij_span)
-        H = H_span[j]  # Valor de explotación
-        cij = cij_span[n]  # Componente de competencia simétrica
+surf_plots = []
+heat_plots = []
+j=1
+n=1
+
+#for j in 1:length(cij_span)
+    for n in 1:length(H_span)
+        H = H_span[n]  # Valor de explotación
+        cij = cij_span[j]  # Componente de competencia simétrica
         
         # Reiniciar resultados para esta combinación de H y cij
-        resultados_Na1_concatenados = Float64[]
-        resultados_Na2_concatenados = Float64[]
+        resultados_Na1_concatenados =Float64[]
+        resultados_Na2_concatenados =Float64[]
 
         for i in 1:n_simulaciones
             # Generar valores aleatorios para parámetros
@@ -392,9 +384,16 @@ for j in 1:length(H_span)
                 push!(resultados_Na2_concatenados, sol.u[m][2])
             end
         end
-
+        # Rango y la Resolución del grid para Na1 y Na2
+        x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
+        y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
+        # Grid de bins para Na1 y Na2
+        x_bins = range(x_min, stop=x_max, length=n_bins)
+        y_bins = range(y_min, stop=y_max, length=n_bins)
         # Contabilizar frecuencias para esta combinación de H y cij
         local_frequencies = zeros(Int, n_bins, n_bins)
+        # Grid de bins para Na1 y Na2
+  
         for i in 1:length(resultados_Na1_concatenados)
           # Localización del bin correspondiente para Na1 y Na2
           x_bin = searchsortedlast(x_bins, resultados_Na1_concatenados[i])
@@ -404,34 +403,57 @@ for j in 1:length(H_span)
           if x_bin > 0 && x_bin <= n_bins && y_bin > 0 && y_bin <= n_bins
               local_frequencies[x_bin, y_bin] += 1
           end
-        end
+      end
 
         # Normalizar frecuencias locales
         local_frequencies_norm = local_frequencies / sum(local_frequencies)
+        local_frequencies_norm
 
         # Acumular en las frecuencias consolidadas
         consolidated_frequencies_H .+= local_frequencies_norm
         consolidated_frequencies_cij .+= local_frequencies_norm
+      # Crear gráfico de superficie
+    if n == 1
+      surf_0 = surface(
+          x_bins, y_bins, consolidated_frequencies_H,
+          xlabel = "Na1", ylabel = "Na2", 
+          title = "P(Na(H))", 
+          color = cgrad(:viridis, rev=true),
+          clims = (minimum(consolidated_frequencies_H), maximum(consolidated_frequencies_H))
+      )
+    else
+      surface!(
+          x_bins, y_bins, consolidated_frequencies_H,
+          xlabel = "Na1", ylabel = "Na2", 
+          title = "P(Na(H))", 
+          color = cgrad(:viridis, rev=true),
+          clims = (minimum(consolidated_frequencies_H), maximum(consolidated_frequencies_H))
+      )
     end
-end
+    if j == 1
+      heat_0 = heatmap(
+        x_bins, y_bins, consolidated_frequencies_cij,
+        xlabel = "Na1", ylabel = "Na2",
+        title = "P(Na(Cij))", 
+        color = cgrad(:viridis),
+        clims = (minimum(consolidated_frequencies_cij), maximum(consolidated_frequencies_cij))
+        )
+    else
+      heat_0 = heatmap!(
+      x_bins, y_bins, consolidated_frequencies_cij,
+      xlabel = "Na1", ylabel = "Na2",
+      title = "P(Na(Cij))", 
+      color = cgrad(:viridis),
+      clims = (minimum(consolidated_frequencies_cij), maximum(consolidated_frequencies_cij))
+      )
+    end
+  end
 
-# Normalizar frecuencias consolidadas
-consolidated_frequencies_H ./= sum(consolidated_frequencies_H)
-consolidated_frequencies_cij ./= sum(consolidated_frequencies_cij)
+#end
+
 
 # Graficar heatmaps consolidados
-heatmap(
-    x_bins, y_bins, consolidated_frequencies_H,
-    xlabel = "Na1", ylabel = "Na2", 
-    title = "(Consolidated Heatmap for H_span)", 
-    color = cgrad(:viridis, rev = true),
-    clims = (minimum(consolidated_frequencies_H), maximum(consolidated_frequencies_H))
-)
+# P([dNA]
+surf_0
+heat_0
 
-heatmap(
-    x_bins, y_bins, consolidated_frequencies_cij,
-    xlabel = "Na1", ylabel = "Na2", 
-    title = "(Consolidated Heatmap for cij_span)", 
-    color = cgrad(:viridis, rev = true),
-    clims = (minimum(consolidated_frequencies_cij), maximum(consolidated_frequencies_cij))
-)
