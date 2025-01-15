@@ -39,6 +39,9 @@ function SLC!(du, u, p, t)
    
    
    
+   ## UPDATE for two species 
+   
+   
    #reproductive cycle
    #phi(t) = 2*pi*(t - t_0)/(365)
    #periodX(t) = 1/2*(1+tanh(2*sin(phi(t)) - k))
@@ -62,7 +65,7 @@ end
 
 
 
-
+## LIST OF PARAMETERS
 avg_oocytes = mean([77404, 385613]) # This is the actual mean.
 reggs = avg_oocytes / (365 * 0.42) #aplication of the reproduction period stablish by law. (The time banned for extraction or exploitation for the species)
 r_ = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
