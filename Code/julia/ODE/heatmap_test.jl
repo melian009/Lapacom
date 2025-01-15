@@ -106,11 +106,19 @@ end
 
 #Fig 4a: with discrete leyend.
 
-for j in 1:11
-  for n in 1:11 
-  H = H_span[j] #Exploitation
+# Definir una lista de colores específicos para H y las formas de marcadores para cij
+colors_H = cgrad(:viridis, 11)
+marker_shapes = [:circle, :rect, :diamond, :cross, :xcross, :star5, :hexagon, :utriangle, :dtriangle, :pentagon, :hline]
 
-  cij = cij_span[n]  #Simetric competence component
+# Mostrar solo un subconjunto de combinaciones en la leyenda
+legend_entries = Set{Tuple{Float64, Float64}}()
+
+
+for j in 1:length(cij_span)
+  for n in 1:length(H_span)
+  H = H_span[n] #Exploitation
+
+  cij = cij_span[j]  #Simetric competence component
 
     
     # Almacenar los conjuntos resultados de las simulaciones
@@ -169,18 +177,24 @@ for j in 1:11
 
     end 
 
-    if j == 1 && n == 1 
-     plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H=", H, "CIJ=",cij), legend=:outerright)
-    else 
-     plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H=", H, "CIJ=",cij))
+   
+    color_H = colors_H[n]
+    marker_shape = marker_shapes[j]
+
+    if j == 1 && n == 1
+        plot(resultados_Na1_concatenados, resultados_Na2_concatenados,
+            color=color_H, marker=marker_shape,
+            xlabel="N1", ylabel="N2",
+            label="H=$H, cij=$cij", legend=:outerright)
+    else
+        plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,
+              color=color_H, marker=marker_shape,
+              label="H=$H, cij=$cij")
     end
   end
 end
-savefig(heatmap_plots[i], "lymitcycle_plot_cij_$i.png")
+display(fig)
 
-
-
-#Heatmaps: by specific conditions
 
 j = 1
 n = 1 
