@@ -105,21 +105,22 @@ end
 
 
 #Fig 4a: with discrete leyend.
+# Crear un mapa de formas para los valores de `j` (Cij)
+marker_shapes = [:circle, :rect, :diamond, :utriangle, :dtriangle, :star5, :pentagon, :hexagon, :cross, :xcross, :vline]
 
-# Definir una lista de colores específicos para H y las formas de marcadores para cij
-colors_H = cgrad(:viridis, 11)
-marker_shapes = [:circle, :rect, :diamond, :cross, :xcross, :star5, :hexagon, :utriangle, :dtriangle, :pentagon, :hline]
+# Crear el gradiente continuo para los valores de `H`
+colors_H = cgrad(:viridis, 11; categorical=true)
 
-# Mostrar solo un subconjunto de combinaciones en la leyenda
-legend_entries = Set{Tuple{Float64, Float64}}()
-plot()
+# Inicializar la figura principal
+plot(title="Relación entre N1 y N2",
+     xlabel="N1", ylabel="N2", legend=false)
 
-for j in 1:11
-  for n in 1:11
-
-
+for j in 1:11 # Cij
+  cij = cij_span[j]  #Simetric competence component
+  marker = marker_shapes[j]
+  for n in 1:11 # H
     H = H_span[n] #Exploitation
-    cij = cij_span[j]  #Simetric competence component
+    
     
     # Almacenar los conjuntos resultados de las simulaciones
      resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
@@ -177,16 +178,66 @@ for j in 1:11
 
     end 
 
-    if j == 1 && n == 1 
-      plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H= $H", "Cij=$cij"))
-      else 
-      plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H= $H", "Cij=$cij"))
+    # Generar el gradiente continuo de colores para los valores de `n`
+    color_value = n / 11  # Normalizar entre 0 y 1
+    color = cgrad(:viridis)[floor(Int, color_value * length(cgrad(:viridis)))]
+    
+    # Seleccionar la forma correspondiente a `j`
+    marker = marker_shapes[j]
+    
+    # Graficar los resultados
+    if j == 1 && n == 1
+        plot(resultados_Na1_concatenados, resultados_Na2_concatenados, 
+             xlabel="N1", ylabel="N2", 
+             label="H=$H, Cij=$cij", 
+             color=color, marker=marker, markersize=5)
+    else
+        plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
+              label="H=$H, Cij=$cij", 
+              color=color, marker=marker, markersize=5)
     end
-
   end
 end
 
-plot!()
+plot!(legend=:topright)
+
+# Crear vectores para los valores de `j` y `n`
+j_values = 1:11  # Valores de `j`
+n_values = 1:11  # Valores de `n`
+
+# Crear un gradiente de colores para `n`
+colors_n = cgrad(:viridis, length(n_values))  # Colores para `n`
+
+# Crear un mapa de formas para `j`
+marker_shapes = [:circle, :rect, :diamond, :utriangle, :dtriangle, :star5, :pentagon, :hexagon, :cross, :xcross, :vline]
+
+# Crear la figura
+plot(title="Simulaciones con colores para n y formas para j",
+     xlabel="N1", ylabel="N2")
+
+# Agregar datos al gráfico principal
+for j in j_values
+    for n in n_values
+        # Simular datos (puedes reemplazar esto con tus resultados reales)
+        resultados_Na1_concatenados = rand(10) .+ j  # Datos ficticios
+        resultados_Na2_concatenados = rand(10) .+ n  # Datos ficticios
+
+        # Añadir al gráfico
+        plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
+              color=colors_n[n], marker=marker_shapes[j], label="")
+    end
+end
+
+# Crear leyenda personalizada para `n` (colores)
+for n in n_values
+    scatter!(NaN, NaN, color=colors_n[n], marker=:circle, label="n = $n")
+end
+
+# Crear leyenda personalizada para `j` (formas)
++for j in j_values
+    scatter!(NaN, NaN, color=:black, marker=marker_shapes[j], label="j = $j")
+end
+
 
 j = 1
 n = 1 
