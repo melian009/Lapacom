@@ -112,14 +112,14 @@ marker_shapes = [:circle, :rect, :diamond, :cross, :xcross, :star5, :hexagon, :u
 
 # Mostrar solo un subconjunto de combinaciones en la leyenda
 legend_entries = Set{Tuple{Float64, Float64}}()
+plot()
+
+for j in 1:11
+  for n in 1:11
 
 
-for j in 1:length(cij_span)
-  for n in 1:length(H_span)
-  H = H_span[n] #Exploitation
-
-  cij = cij_span[j]  #Simetric competence component
-
+    H = H_span[n] #Exploitation
+    cij = cij_span[j]  #Simetric competence component
     
     # Almacenar los conjuntos resultados de las simulaciones
      resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
@@ -177,24 +177,16 @@ for j in 1:length(cij_span)
 
     end 
 
-   
-    color_H = colors_H[n]
-    marker_shape = marker_shapes[j]
-
-    if j == 1 && n == 1
-        plot(resultados_Na1_concatenados, resultados_Na2_concatenados,
-            color=color_H, marker=marker_shape,
-            xlabel="N1", ylabel="N2",
-            label="H=$H, cij=$cij", legend=:outerright)
-    else
-        plot!(resultados_Na1_concatenados, resultados_Na2_concatenados,
-              color=color_H, marker=marker_shape,
-              label="H=$H, cij=$cij")
+    if j == 1 && n == 1 
+      plot(resultados_Na1_concatenados, resultados_Na2_concatenados, xlabel= "N1", ylabel = "N2", label=vcat("H= $H", "Cij=$cij"))
+      else 
+      plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, label=vcat("H= $H", "Cij=$cij"))
     end
+
   end
 end
-display(fig)
 
+plot!()
 
 j = 1
 n = 1 
