@@ -107,7 +107,7 @@ limt_cycle = plot()
 H_span 
 
 #Fig 4a: with discrete leyend
-for j in 1 # Cij
+for j in 11 # Cij
 cij = cij_span[j]  #Simetric competence component
 
   for n in 11 # H 
@@ -182,12 +182,12 @@ cij = cij_span[j]  #Simetric competence component
   end
 end
 
-plot!(legend=:bottomleft)
+plot!(legend=:bottomright)
 
 xlims!(0, 7.0*10^4)
 ylims!(0, 7.0*10^4)
 plot!(background_color=:transparent, grid=true)
-savefig("Figure_4a_4scenarios.png")
+savefig("Figure_4a.png")
 
 j = 1
 n = 2
@@ -357,7 +357,7 @@ heat_0=surface()
 j=1
 #n=1
 
-for j in 1
+for j in 1:11
   cij = cij_span[j]  # Componente de competencia simétrica
   for n in 1:11
       H = H_span[n]  # Valor de explotación      
