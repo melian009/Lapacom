@@ -357,7 +357,7 @@ heat_0=surface()
 j=1
 #n=1
 
-for j in 1:1
+for j in 1
   cij = cij_span[j]  # Componente de competencia simétrica
   for n in 1:11
       H = H_span[n]  # Valor de explotación      
