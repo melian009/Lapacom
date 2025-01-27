@@ -104,12 +104,14 @@ for i in 1:length(H_span)
 end
 
 limt_cycle = plot()
+H_span 
 
 #Fig 4a: with discrete leyend
-for j in 1:11 # Cij
-  cij = cij_span[j]  #Simetric competence component
-  for n in 1 # H
-    H = H_span[n] #Exploitation
+for j in 11 # Cij
+cij = cij_span[j]  #Simetric competence component
+
+  for n in 11 # H 
+  H = H_span[n] #Exploitation
     
     
     # Almacenar los conjuntos resultados de las simulaciones
@@ -171,20 +173,21 @@ for j in 1:11 # Cij
     if j == 1 && n == 1
       limt_cycle = plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
              xlabel="N1", ylabel="N2", 
-             label="H=$H, Cij=$cij")
+             label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=5)
     else
       limt_cycle =  plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-              label="H=$H, Cij=$cij")
+              label="H=$H, Cij=$cij", linewidth=5)
     end
     display(limt_cycle)
   end
 end
 
-plot!(legend=:outerright)
+plot!(legend=:bottomright)
+
 xlims!(0, 7.0*10^4)
 ylims!(0, 7.0*10^4)
 plot!(background_color=:transparent, grid=true)
-savefig("Figure_4a_asimetric_cij.png")
+savefig("Figure_4a.png")
 
 j = 1
 n = 2
@@ -356,7 +359,7 @@ j=1
 
 for j in 1:11
   cij = cij_span[j]  # Componente de competencia simétrica
-  for n in 1
+  for n in 1:11
       H = H_span[n]  # Valor de explotación      
       # Reiniciar resultados para esta combinación de H y cij
       resultados_Na1_concatenados = Float64[]
