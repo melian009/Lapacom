@@ -98,7 +98,7 @@ Cij_r = range(0, 1, length=h_span)
 H_span = ones(Float64,h_span)
 cij_span = ones(Float64,h_span)
 
-for i in 1:length(H_span)
+for i in 1:length(h_span)
   H_span[i] = H_r[i]
   cij_span[i] = Cij_r[i]
 end
@@ -107,10 +107,10 @@ limt_cycle = plot()
 H_span 
 
 #Fig 4a: with discrete leyend
-for j in 11 # Cij
+for j in 1:11 # Cij
 cij = cij_span[j]  #Simetric competence component
 
-  for n in 11 # H 
+  for n in 1:11 # H 
   H = H_span[n] #Exploitation
     
     
@@ -182,7 +182,7 @@ cij = cij_span[j]  #Simetric competence component
   end
 end
 
-plot!(legend=:bottomright)
+plot!(legend=:outerright)
 
 xlims!(0, 7.0*10^4)
 ylims!(0, 7.0*10^4)
@@ -340,9 +340,9 @@ println("Mínimo y máximo de Na2: ", min_max_Na2)
 println("Mínimo y máximo de Sa1: ", min_max_Sa1)
 println("Mínimo y máximo de Sa2: ", min_max_Sa2)
 
-#Frecuency distribution of Populations Na1 y Na2 with title
-density(resultados_Na1_concatenados.^(-1), bins=300, label="Na1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
-density!(resultados_Na2_concatenados.^(-1), bins=300, label="Na2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
+#Frecuency distribution of Size Sa1 y sa2 
+density(resultados_Sa1_concatenados.^(-1), bins=300, label="Sa1", ylabel="Frecuencia", title="Distribución de frecuencias de Na1")
+density!(resultados_Sa2_concatenados.^(-1), bins=300, label="Sa2", ylabel="Frecuencia", title="Distribución de frecuencias de Na2")
 
 
 
@@ -357,7 +357,7 @@ heat_0=surface()
 j=1
 #n=1
 
-for j in 1:11
+for j in 1
   cij = cij_span[j]  # Componente de competencia simétrica
   for n in 1:11
       H = H_span[n]  # Valor de explotación      
@@ -421,7 +421,7 @@ for j in 1:11
          xlabel="Na1", 
          ylabel="Na2", 
          title="(Na1 vs Na2)", 
-         color=cgrad(:viridis, rev=true),
+         color=cgrad(:thermal, rev=true),
          clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
       else
         heat_0 = surface(x_bins,
@@ -430,7 +430,7 @@ for j in 1:11
          xlabel="Na1", 
          ylabel="Na2", 
          title="(Na1 vs Na2)", 
-         color=cgrad(:viridis, rev=true),
+         color=cgrad(:thermal, rev=true),
          clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
       end
       display(heat_0)
