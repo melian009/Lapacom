@@ -223,7 +223,7 @@ end
     end
 end
     
-plot!(legend=:outerright)
+plot!(legend=false)
 xlims!(0, 7.0*10^4)
 ylims!(0, 7.0*10^4)
 plot!(background_color=:transparent, grid=true)
@@ -245,6 +245,8 @@ for j in 1
       # Reiniciar resultados para esta combinación de H y cij
       resultados_Na1_concatenados = Float64[]
       resultados_Na2_concatenados = Float64[]
+      resultados_Sa1_concatenados = Float64[]
+      resultados_Sa2_concatenados = Float64[]
 
       for i in 1:n_simulaciones
           # Generar valores aleatorios para parámetros
@@ -267,6 +269,9 @@ for j in 1
           for m in 1:length(sol.t)
               push!(resultados_Na1_concatenados, sol.u[m][1])
               push!(resultados_Na2_concatenados, sol.u[m][2])
+              push!(resultados_Sa1_concatenados, sol.u[m][3])
+              push!(resultados_Sa2_concatenados, sol.u[m][4])
+
           end
       end
 
@@ -302,7 +307,7 @@ for j in 1
          xlabel="Na1", 
          ylabel="Na2", 
          title="(Na1 vs Na2)", 
-         color=cgrad(:thermal, rev=true),
+         color=cgrad(:thermal, rev=false),
          clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
       else
         heat_0 = surface(x_bins,
@@ -311,7 +316,7 @@ for j in 1
          xlabel="Na1", 
          ylabel="Na2", 
          title="(Na1 vs Na2)", 
-         color=cgrad(:thermal, rev=true),
+         color=cgrad(:thermal, rev=false),
          clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
       end
       display(heat_0)
