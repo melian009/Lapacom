@@ -14,59 +14,81 @@ using Symbolics
 import ForwardDiff.jacobian
 using NonlinearSolve
 
+#EQ 5 ms 
+#\begin{equation}\label{eq:1}
+#\frac{dN_i}{dt} =  r_i R_i N_i (1-N_{A_i}/K) - \mu_i N_i - \mathcal{H}_i (\mathcal{X})N_i - N_i \sum_{j=i:2} c_{ij} N_j~,     
+#\end{equation}
 
-@variables Na Sa r X R d K H g Smax
-J_SLC = Symbolics.jacobian([(X * r * R * Na)*((K - Na)/K) - (d * Na) - H*(1 - X)*Na, (g * Sa) * (1 - (Sa/(Smax * (1 - H * (1-X)))))], [Na, Sa])
-#OUTPUT
-# [Na, Sa])
+#Session
+#https://chatgpt.com/share/67a4af63-be44-800a-a843-b4b6746e99a6
+#https://discourse.julialang.org/t/modeling-and-solving-systems-of-nonlinear-dynamic-equations/108556/12
+
+#-----------------------------------------------------------
+# for Hi(X) == 0, reproduction is not occurring so species can be exploited
+#The reproductive cycle is introduced as a binary factor, $\mathcal{X}$, which equals 1 when species reproduces and exploitation is forbidden and 0 when the species are exploited.
+
+@variables N1 N2 r1 R1 r2 R2 K mu1 mu2 H1 H2 c11 c12 c21 c22
+
+# Define the system of ODEs
+f1 = (r1 * R1 * N1) * ((1 - N1) / K) - (mu1 * N1) - (H1 * N1) - (N1 * N2 * c11) - (N1 * N2 * c12) - (N1 * N2 * c21) - (N1 * N2 * c22)
+f2 = (r2 * R2 * N2) * ((1 - N2) / K) - (mu2 * N2) - (H2 * N2) - (N1 * N2 * c11) - (N1 * N2 * c12) - (N1 * N2 * c21) - (N1 * N2 * c22)
+
+# Compute the Jacobian matrix
+J_SLC = Symbolics.jacobian([f1, f2], [N1, N2])
+
+#OUTPUT 
+#julia> J_SLC = Symbolics.jacobian([f1, f2], [N1, N2])
 #2×2 Matrix{Num}:
-# (R*X*r*(K - Na) - Na*R*X*r) / K - d - H*(1 - X)                                                                          0
-#                                               0  g*(1 + (-Sa) / (Smax*(1 - H*(1 - X)))) + (-Sa*g) / (Smax*(1 - H*(1 - X)))
+# -H1 - mu1 + (-N1*R1*r1 + (1 - N1)*R1*r1) / K - N2*c11 - N2*c12 - N2*c21 - N2*c22                                                -N1*c11 - N1*c12 - N1*c21 - N1*c22
+#                                               -N2*c11 - N2*c12 - N2*c21 - N2*c22  -H2 - mu2 + (-N2*R2*r2 + (1 - N2)*R2*r2) / K - N1*c11 - N1*c12 - N1*c21 - N1*c22
 
-@variables Na Nb Sa Sb X Ra Rb ra rb da db K H ga gb Smaxa Smaxb c
-J_SLC = Symbolics.jacobian([(ra * Ra * Na)*((K - Na)/K) - (da * Na) - H*(1 - X)*Na - c*Na*Nb, (rb * Rb * Nb)*((K - Nb)/K) - (db * Nb) - H*(1 - X)*Nb - c*Na*Nb,  (ga * Sa) * (1 - (Sa/(Smaxa - Smaxa * H * (1 - X)))), (gb* Sb) * (1 - (Sb/(Smaxb - Smaxb * H * (1 - X))))], [Na, Nb, Sa, Sb])
+# Display the result
+display(J_SLC)
 
-@variables Na Nb Sa Sb X R r d K H g Smax c
-J_SLC = Symbolics.jacobian([(r * R * Na)*((K - Na)/K) - (d * Na) - H*(1 - X)*Na - c*Na*Nb, (r * R * Nb)*((K - Nb)/K) - (d * Nb) - H*(1 - X)*Nb - c*Na*Nb,  (g * Sa) * (1 - (Sa/(Smax - Smax * H * (1 - X)))), (g* Sb) * (1 - (Sb/(Smax - Smax * H * (1 - X))))], [Na, Nb, Sa, Sb])
+#julia> det_jac = det(J_SLC) 
+#-(-N1*c11 - N1*c12 - N1*c21 - N1*c22)*(-N2*c11 - N2*c12 - N2*c21 - N2*c22) + (-H2 - mu2 + (-N2*R2*r2 + (1 - N2)*R2*r2) / K - N1*c11 - N1*c12 - N1*c21 - N1*c22)*(-H1 - mu1 + (-N1*R1*r1 + #(1 - N1)*R1*r1) / K - N2*c11 - N2*c12 - N2*c21 - N2*c22)
 
-det_jac = det(J_SLC)
+#To find the steady states of the system, we need to solve for N1​ and N2​ where both f1 and f2​ are equal to zero:
+#f1(N1,N2)=0
+#f2​(N1​,N2​)=0
 
-X_SLC = Symbolics.jacobian([-d + ((K - Na)*R*r - Na*R*r) / K - H*(1 - X) - Nb*c,-Na*c,-Nb*c,-d + ((K - Nb)*R*r - Nb*R*r) / K - H*(1 - X) - Na*c], [Na, Nb])
+
+#-------------------------------------------------------
+
+#---------------------------------------------------------------
+# for Hi(X) == 1, reproduction is occurring so species can not be exploited
+#The reproductive cycle is introduced as a binary factor, $\mathcal{X}$, which equals 1 when species reproduces and exploitation is forbidden and 0 when the species are exploited. 
+@variables N1 N2 r1 R1 r2 R2 K mu1 mu2 c11 c12 c21 c22
+
+# Define the system of ODEs
+f1 = (r1 * R1 * N1) * ((1 - N1) / K) - (mu1 * N1) - (N1 * N2 * c11) - (N1 * N2 * c12) - (N1 * N2 * c21) - (N1 * N2 * c22)
+f2 = (r2 * R2 * N2) * ((1 - N2) / K) - (mu2 * N2) - (N1 * N2 * c11) - (N1 * N2 * c12) - (N1 * N2 * c21) - (N1 * N2 * c22)
+
+# Compute the Jacobian matrix
+J_SLC = Symbolics.jacobian([f1, f2], [N1, N2])
+
+# Display the result
+display(J_SLC)
 
 #OUTPUT
-#-da + ((K - Na)*Ra*ra - Na*Ra*ra) / K - H*(1 - X) - Nb*c, -Na*c, 0, 0
-#-Nb*c    ,-db + ((K - Nb)*Rb*rb - Nb*Rb*rb) / K - H*(1 - X) - Na*c,  0, 0
-#0,0,(-Sa*g) / (Smaxa - H*Smaxa*(1 - X)) + g*(1 + (-Sa) / (Smaxa - H*Smaxa*(1 - X))),0
-#0,0,0,(-Sb*gb) / (Smaxb - H*Smaxb*(1 - X)) + gb*(1 + (-Sb) / (Smaxb - H*Smaxb*(1 - X)))
+#julia> J_SLC = Symbolics.jacobian([f1, f2], [N1, N2])
+#2×2 Matrix{Num}:
+# -mu1 + (-N1*R1*r1 + (1 - N1)*R1*r1) / K - N2*c11 - N2*c12 - N2*c21 - N2*c22                                           -N1*c11 - N1*c12 - N1*c21 - N1*c22
+#                                          -N2*c11 - N2*c12 - N2*c21 - N2*c22  -mu2 + (-N2*R2*r2 + (1 - N2)*R2*r2) / K - N1*c11 - N1*c12 - N1*c21 - N1*c22
 
-#Overleaf
-#\begin{eqnarray}\label{eq:1}
-#\frac{dN_{a_i}}{dt} &=&  r_{i} R_{i} N_{a_{i}} (K-N_{a_i}/K) - d_{i} N_{a_{i}} - \mathcal{H}_{i} (1 - \mathcal{X})N_{a_{i}} - c_{ij} N_{a_i} N_{a_j} \nonumber 
-#\\
-#\frac{dS_{a_{i}}}{dt} &=& \gamma_{i} S_{a_i} \Big(1-\frac{S_{a_i}}{S_{max_i}-S_{max_i} \mathcal{H}_{i} (1-\mathcal{X})} \Big),
-#\end{eqnarray}
+# det_jac = det(J_SLC) 
+#julia> det_jac = det(J_SLC) 
+#-(-N1*c11 - N1*c12 - N1*c21 - N1*c22)*(-N2*c11 - N2*c12 - N2*c21 - N2*c22) + (-mu2 + (-N2*R2*r2 + (1 - N2)*R2*r2) / K - N1*c11 - N1*c12 - N1*c21 - N1*c22)*(-mu1 + (-N1*R1*r1 + (1 - N1)*R1*r1) / K - N2*c11 - N2*c12 - N2*c21 - N2*c22)
 
+#To find the steady states of the system, we need to solve for N1​ and N2​ where both f1 and f2​ are equal to zero:
+#f1(N1,N2)=0
+#f2​(N1​,N2​)=0
 
-det_jac = det(J_SLC)
+#--------------------------------------------------------------
 
-#OUTPUT
-#(g*(1 + (-Sa) / (Smax*(1 - H*(1 - X)))) + (-Sa*g) / (Smax*(1 - H*(1 - X))))*((R*X*r*(K - Na) - Na*R*X*r) / K - d - H*(1 - X))
-
-#OUTPUT
-(-da + ((K - Na)*Ra*ra - Na*Ra*ra) / K - H*(1 - X) - Nb*c)*(-db + ((K - Nb)*Rb*rb - Nb*Rb*rb) / K - H*(1 - X) - Na*c)*((-Sa*g) / (Smaxa - H*Smaxa*(1 - X)) + g*(1 + (-Sa) / (Smaxa - H*Smaxa*(1 - X))))*((-Sb*gb) / (Smaxb - H*Smaxb*(1 - X)) + gb*(1 + (-Sb) / (Smaxb - H*Smaxb*(1 - X)))) - Na*Nb*(c^2)*((-Sa*g) / (Smaxa - H*Smaxa*(1 - X)) + g*(1 + (-Sa) / (Smaxa - H*Smaxa*(1 - X))))*((-Sb*gb) / (Smaxb - H*Smaxb*(1 - X)) + gb*(1 + (-Sb) / (Smaxb - H*Smaxb*(1 - X))))
-
-   
+#TODO
 M = Symbolics.simplify(det_jac)
+Symbolics.solve_for([det_jac], [N1,N2]; simplify=true)
+symbolic_linear_solve([eq],[a])
 
-#OUTPUT
-#((Smax*g + H*Smax*X*g - 2.0Sa*g - H*Smax*g)*(H*K*X + K*R*X*r - H*K - K*d - 2Na*R*X*r)) / (K*Smax*(1 + H*X - H))
-
-Symbolics.solve_for([(X * r * R * Na)*((K - Na)/K) - d * Na - H*(1 - X)*Na, g * Sa * (1 - (Sa/(Smax * (1 - H * (1-X)))))], [Na,Sa]; simplify=true)
-
-#OUTPUT
-
-#EXAMPLE
-#https://github.com/JuliaSymbolics/Symbolics.jl/issues/381
-#@variables r y x₂ h₁ g₁ x₁ g₂ h₂ g₄ g₃ f;
-#Symbolics.solve_for([(r - y - x₂ * h₁) * g₁ ~ x₁,(x₁ - h₂ * y) * g₂ ~ x₂,x₂ * g₃ + x₁ * g₄ + f ~ y], [x₁,x₂,y]; simplify=false)
 
