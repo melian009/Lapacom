@@ -37,8 +37,6 @@ function SLC!(du, u, p, t)
     Na1, Na2, Sa1, Sa2 = u
     t_0, k, r, K, H , d, Smax, gamma, cij = p
      
-     
-     
      #reproductive cycle
      #phi(t) = 2*pi*(t - t_0)/(365)
      #periodX(t) = 1/2*(1+tanh(2*sin(phi(t)) - k))
@@ -61,6 +59,7 @@ function SLC!(du, u, p, t)
      Smat_2 = 1.34 * (avg_size_1) - 28.06
      R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
     
+    # Dynamics of the SLC
     du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 * Na1 #N1 
     du[2] = dNa2 = r[2] * R_2 * Na2 * ((K - Na2)/ K) - d[2] * Na2 - (1 - periodX(t)) * H * Na2 - cij * Na1 * Na2 #N2
     du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
