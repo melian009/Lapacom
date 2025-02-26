@@ -11,11 +11,11 @@ using StatsPlots
 
 ```
 Parameters and variables:
- - Ne = eggs abundance
- - Nt = trocophore abuncance
- - Nv = veliger abuncance
- - Nj = juvenile abuncance
- - Na = adults abuncance
+ - Ne = eggs abundance (CLC)
+ - Nt = trocophore abuncance (CLC)
+ - Nv = veliger abuncance (CLC)
+ - Nj = juvenile abuncance (CLC)
+ - Na = adults abuncance (SLC and CLC)
 
  - Sa = adults size (Average sizes Before MPS+FULL = [46.44,44.45])
  - r = population growth rate [9.17,5.03]
@@ -227,101 +227,3 @@ xlims!(0, 7.0*10^4)
 ylims!(0, 7.0*10^4)
 plot!(background_color=:transparent, grid=true)
 
-
-# #Fig 4b: with discrete leyend
-# Variables para almacenar las frecuencias consolidadas
-n_simulaciones = 100
-n_bins = 100
-consolidated_frequencies_ = zeros(Float64, n_bins, n_bins)
-heat_0=surface()
-j=1
-#n=1
-
-for j in 1
-  cij = cij_span[j]  # Componente de competencia simétrica
-  for n in 1:11
-      H = H_span[n]  # Valor de explotación      
-      # Reiniciar resultados para esta combinación de H y cij
-      resultados_Na1_concatenados = Float64[]
-      resultados_Na2_concatenados = Float64[]
-      resultados_Sa1_concatenados = Float64[]
-      resultados_Sa2_concatenados = Float64[]
-
-      for i in 1:n_simulaciones
-          # Generar valores aleatorios para parámetros
-          t_0 = t0_ + 0.0001 * randn()
-          k = k_ + 0.01 * randn()
-          r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
-          K = K_ + 0.1 * randn()
-          gamma = [size_growth_rate[1] + 0.01 * randn(), size_growth_rate[2] + 0.01 * randn()]
-          d = [d_[1], d_[2]]
-          Smax = Smax_ + 0.1 * randn()
-
-          # Condiciones iniciales
-          U0_ = [10^4, 10^4, mean([33.4, 37.4]), mean([34.6, 37.5])]
-
-          # Resolver el problema diferencial
-          prob = ODEProblem(SLC!, U0_, t_span, [t_0, k, r, K, H, d, Smax, gamma, cij])
-          sol = solve(prob, maxiters=1000)
-
-          # Almacenar resultados de Na1 y Na2
-          for m in 1:length(sol.t)
-              push!(resultados_Na1_concatenados, sol.u[m][1])
-              push!(resultados_Na2_concatenados, sol.u[m][2])
-              push!(resultados_Sa1_concatenados, sol.u[m][3])
-              push!(resultados_Sa2_concatenados, sol.u[m][4])
-
-          end
-      end
-
-      # Rango y la Resolución del grid para Na1 y Na2
-      x_min, x_max = 0, 6.7*10^4
-      y_min, y_max = 0, 6.7*10^4
-      # Grid de bins para Na1 y Na2
-      x_bins = range(x_min, stop=x_max, length=n_bins)
-      y_bins = range(y_min, stop=y_max, length=n_bins)
-      # Contabilizar frecuencias para esta combinación de H y cij
-      local_frequencies = zeros(Int, n_bins, n_bins)
-
-      for i in 1:length(resultados_Na1_concatenados)
-          # Localización del bin correspondiente para Na1 y Na2
-          x_bin = searchsortedlast(x_bins, resultados_Na1_concatenados[i])
-          y_bin = searchsortedlast(y_bins, resultados_Na2_concatenados[i])
-      
-          # Verificar que los índices estén dentro de los límites
-          if x_bin > 0 && x_bin <= n_bins && y_bin > 0 && y_bin <= n_bins
-              local_frequencies[x_bin, y_bin] += 1
-          end
-      end
-
-      # Normalizar frecuencias 
-      frequencies_norm = local_frequencies / sum(local_frequencies)
-      # Acumular en las frecuencias consolidadas
-      consolidated_frequencies_.+= frequencies_norm
-      # Crear heatmap
-      if j == 1 && n == 1
-        heat_0 = surface!(x_bins,
-         y_bins, 
-         consolidated_frequencies_,
-         xlabel="Na1", 
-         ylabel="Na2", 
-         title="(Na1 vs Na2)", 
-         color=cgrad(:thermal, rev=false),
-         clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
-      else
-        heat_0 = surface(x_bins,
-         y_bins, 
-         consolidated_frequencies_,
-         xlabel="Na1", 
-         ylabel="Na2", 
-         title="(Na1 vs Na2)", 
-         color=cgrad(:thermal, rev=false),
-         clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
-      end
-      display(heat_0)
-  end
-end
-
-# Mostrar gráfico final
-heat_0
-surface!(background_color=:transparent, grid=true)
