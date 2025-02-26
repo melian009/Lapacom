@@ -7,8 +7,7 @@ using Statistics
 using Random
 using Distributions
 using StatsPlots
-
-
+using DataFrames
 ```
 Parameters and variables:
  - Ne = eggs abundance (CLC)
@@ -29,45 +28,7 @@ Parameters and variables:
  - da = natural mortality rate or death rate for adults (da = [0.55,0.59]) # Note: empirical estimated values
  - Smax = maximum adult size estimated (56.0mm) # Note: Empirical value from the sample analized
  - gamma = adult growth rate (gamma=[0.32,0.36] year^{-1})
-```
 
-#Simple Life Cycle ([Na1,Sa1], Patella aspera, [Na2,Sa2], Patella ordinaria)
-
-function SLC!(du, u, p, t)
-    Na1, Na2, Sa1, Sa2 = u
-    t_0, k, r, K, H , d, Smax, gamma, cij = p
-     
-     #reproductive cycle
-     #phi(t) = 2*pi*(t - t_0)/(365)
-     #periodX(t) = 1/2*(1+tanh(2*sin(phi(t)) - k))
-     
-    function periodX(t)
-     if (t % t_0 / t_0) >= k
-        return 1.0 # Reproductive Cycle
-      else
-        return 0.0 # Exploitation Cycle
-      end
-    end
-  
-     # reproductive capacity
-     # N1 Patella aspera
-     avg_size_1 = du[3]
-     Smat_1 = 1.34 * (avg_size_1) - 28.06
-     R_1 = min(max(0.5 * (1.0 + (avg_size_1 - Smat_1) / (Smax - Smat_1)), 0.0), 1.0)
-     # N2 Patella Ordinaria
-     avg_size_2 = du[4]
-     Smat_2 = 1.34 * (avg_size_1) - 28.06
-     R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
-    
-    # Dynamics of the SLC
-    du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 * Na1 #N1 
-    du[2] = dNa2 = r[2] * R_2 * Na2 * ((K - Na2)/ K) - d[2] * Na2 - (1 - periodX(t)) * H * Na2 - cij * Na1 * Na2 #N2
-    du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
-    du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
-  
-end
-
-```
 Empirical estimated mortalities (Z,d,F) and exploitation rates (E):
 
  {Patella ordinaria} (Henriques, 2012)
@@ -105,125 +66,222 @@ Average sizes before and after marine protected area implementations
  Patella aspera = 43.41mm
  Patella ordinaria = 45.72mm
 
+ SLC simplified ecuation
+ dN_i/dt = r_i * R_i * N_i * ((K - N_i)/ K) - d_i * N_i - (1 - periodX(t)) * H * N_i - N_i * sum(c_ij * N_j)
+ 
+ Stability Scenarios for:
+ N1 = Patella ordinaria
+ N2 = Patella aspera
+
+ Total extiontion scenarios
+ N1* = N2* = 0
+
+ One species extinction scenario
+ Patella ordinaria survives
+ N2* = 0; N1* = (r_1*R_1 - d_1 - H_1*(1-X))/(r_1*R_1*gamma)
+ 
+ Patella aspera survives
+ N1* = 0; N2* = (r_2*R_2 - d_2 - H_2*(1-X))/(r_2*R_2*gamma)
+
+ Where:
+ z_i = c_ij + r_i*R_i*gamma
+ rho_i = r_i*R_i - d_i - H*(1-X)
+ gamma = K^{-1}
+
+ Cohexistance scenario cij = 0
+ N1* = (c21*rho1 - z1*rho2)/(c12*c21 - z1*z2)
+ N2* = (c12*rho2 - z2*rho1)/(21*c12 - z2*z1)
 ```
-  
-#   Parameters for SLC
 
-avg_oocytes = [77404, 385613] # This is the actual mean.
-reggs = avg_oocytes / (365 * 0.42) #aplication of the reproduction period stablish by law. (The time banned for extraction or exploitation for the species)
-r_ = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
-# natural death rates per life stage.
-d_ = ([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
-size_growth_rate = [0.32,0.36] #0.00014898749263737575
-t0_ = 365.14*0.42
-k_= 0.42
-
-K_ = 64000.00    # Carrying capacity
-Smax_ = 53.0             # Maximum size for adults
-#         t_0, k,  r,  K,  H ,  d, Smax,  gamma
-
-n_simulaciones = 100 # Número de simulaciones
-t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
-t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
+# Parámetros iniciales
+avg_oocytes = [77404, 385613]
+reggs = avg_oocytes ./ (365 * 0.42)
+r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629
+d_ = [0.55, 0.59] ./ 365.14
+size_growth_rate = [0.32, 0.36]
+k_ = 0.42
+K_ = 64000.0
+Smax_ = 53.0
+N_span = 11  # Número de valores
+H_r = range(0, 1, length=N_span)
+Cij_r = range(0, 1, length=N_span)
+H_span = collect(H_r)
+cij_span = collect(Cij_r)
 
 
-h_span = length(zeros(Float64, size(0:0.1:1)))
-H_r = range(0, 1, length=h_span)
-Cij_r = range(0, 1, length=h_span)
 
-H_span = ones(Float64,h_span)
-cij_span = ones(Float64,h_span)
-
-for i in 1:length(h_span)
-  H_span[i] = H_r[i]
-  cij_span[i] = Cij_r[i]
+# Funciones para calcular soluciones numéricas de los escenarios de estabilidad
+function extinction_scenario()
+    return (0.0, 0.0)
 end
 
-
-#Fig 4a: with discrete leyend
-
- for j in 1:11 # Cij
-    cij = cij_span[j]  #Simetric competence component
-    
-    for n in 1:11 # H 
-        H = H_span[n] #Exploitation
-        
-        # Almacenar los conjuntos resultados de cada simulación
-        
-        resultados_t = Float64[]  # Para almacenar los valores de t
-        
-        resultados_Na1 = Float64[]  # Para almacenar los valores de Na1
-        resultados_Na2 = Float64[]  # Para almacenar los valores de Na2
-
-        resultados_Sa1 = Float64[]  # Para almacenar los valores de Sa1
-        resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
-
-        # Almacenar los conjuntos resultados de todas las simulaciones del escenario
-        resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
-        
-        resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
-        resultados_Na2_concatenados = Float64[]  # Para almacenar los valores de Na2
-        resultados_Sa1_concatenados = Float64[]  # Para almacenar los valores de Sa1
-        resultados_Sa2_concatenados = Float64[]  # Para almacenar los valores de Sa2
-    
-       
-    
-        # Realizamos las simulaciones
-        for i in 1:n_simulaciones
-        # Generamos valores aleatorios para los parámetros (distribución normal)
-        t_0 = t0_ + 0.0001 * randn()
-        k = k_ + 0.01 * randn()
-        r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
-        K = K_ + 0.1 * randn()
-        gamma = [size_growth_rate[1] + 0.01 * randn(),size_growth_rate[2] + 0.01 * randn()]
-        d = [d_[1], d_[2]]
-        Smax = Smax_ + 0.1 * randn()
-        
-        #Condiciones iniciales
-        U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
-        
-        #Definir el problema diferencial
-        prob = ODEProblem(SLC!, U0_, t_span, [t_0, k, r, K, H, d, Smax, gamma, cij])
-        
-        #Resolver el problema
-        sol = solve(prob, maxiters=500)
-        
-        #Almacenar las soluciones de t, Na1, Na2, Sa1, Sa2
-        for m in 1:size(sol.t , 1)
-        push!(resultados_t, sol.t[m])
-        push!(resultados_Na1, sol.u[m][1])
-        push!(resultados_Na2, sol.u[m][2])
-        push!(resultados_Sa1, sol.u[m][3])
-        push!(resultados_Sa2, sol.u[m][4])
-        end
-        
-        #Concatenar los resultados para obtener las soluciones completas de Na1, Na2, Sa1, Sa2
-        #Iterations (days)
-        resultados_t_concatenados = vcat(resultados_t...)
-        #Abundance (individuals)
-        resultados_Na1_concatenados = vcat(resultados_Na1...)
-        resultados_Na2_concatenados = vcat(resultados_Na2...)
-        #Size (mm)
-        resultados_Sa1_concatenados = vcat(resultados_Sa1...)
-        resultados_Sa2_concatenados = vcat(resultados_Sa2...)
-    
-        end  #fin del bucle de simulaciones
-
-        #Graficar los resultados
-        if j == 1 && n == 1
-        limt_cycle = plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-            xlabel="N1", ylabel="N2", 
-            label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=5)
-        else
-        limt_cycle =  plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-        label="H=$H, Cij=$cij", linewidth=5)
-        end
-    display(limt_cycle)
+function one_species_extinction_scenario(r, R, d, H, Gamma, survivor)
+    if survivor == 1
+        return ((r[1] * R[1] - d[1] - H) / (r[1] * R[1] * Gamma), 0.0)
+    else
+        return (0.0, (r[2] * R[2] - d[2] - H) / (r[2] * R[2] * Gamma))
     end
 end
-    
-plot!(legend=false)
-xlims!(0, 7.0*10^4)
-ylims!(0, 7.0*10^4)
-plot!(background_color=:transparent, grid=true)
 
+function coexistence_scenario(cij, r, R, d, H, Gamma)
+    if cij == 0
+        N1 = ((r[1] * R[1] - d[1] - H) / (r[1] * R[1] * Gamma), 0.0)
+        N2 = (0.0, (r[2] * R[2] - d[2] - H) / (r[2] * R[2] * Gamma))
+        return (N1, N2)
+    else
+    rho1 = r[1] * R[1] - d[1] - H
+    rho2 = r[2] * R[2] - d[2] - H 
+    z1 = cij + r[1] * R[1] * Gamma
+    z2 = cij + r[2] * R[2] * Gamma
+    
+    N1 = (cij * rho1 - z1 * rho2) / (cij*cji - z1 * z2)
+    N2 = (cji * rho2 - z2 * rho1) / (cji*cij - z1 * z2)
+    return (N1, N2)
+    end
+end
+
+# Simulación de escenarios
+extinction_results = []
+one_species_results = []
+coexistence_results = []
+
+N_simulations = 500
+
+# Bucle que recorre solo un valor de H y un valor de cij por vuelta
+for j in 1:N_span  # Esto es para recorrer los valores de cij
+    cij = cij_span[j]
+    
+    for h in 1:N_span  # Esto es para recorrer los valores de H
+        H = H_span[h]
+        for i in 1:N_simulations
+        # Parámetros con ruido
+        k = k_ + 0.1 * randn()
+        r = [r_[1] + 0.1 * randn(), r_[2] + 0.1 * randn()] 
+        K = K_ + 0.1 * randn()
+        gamma = [size_growth_rate[1] + 0.1 * randn(), size_growth_rate[2] + 0.1 * randn()]
+        d = [d_[1], d_[2]]
+        Smax = Smax_ + 1 * randn()
+        Gamma = 1 / K_
+        
+        # Obtener soluciones de cada escenario
+        ext = extinction_scenario()
+        patella_ord_survives = one_species_extinction_scenario(r_, [0.5, 0.5], d_, H, Gamma, 1)
+        patella_asp_survives = one_species_extinction_scenario(r_, [0.5, 0.5], d_, H, Gamma, 2)
+        coexist = coexistence_scenario(cij, r_, [0.5, 0.5], d_, H, X, Gamma)
+        
+        # Almacenar los resultados para N1 y N2 en cada escenario
+        push!(extinction_results, (cij, H, ext))
+        push!(one_species_results, (cij, H, patella_ord_survives, patella_asp_survives))
+        push!(coexistence_results, (cij, H, coexist))
+        end
+    end
+end
+
+# Visualizar resultados en tablas
+ # extinction scenario
+ df1 = DataFrame(cij = [r[1] for r in extinction_results], 
+                H = [r[2] for r in extinction_results], 
+                N_1 = [r[3][1] for r in extinction_results], 
+                N_2 = [r[3][2] for r in extinction_results]) 
+ show(df1, allrows=true) 
+ # Filter positive values
+ df1_positive = df1[df1.N_1 .>= 0 .&& df1.N_2 .>= 0, :]
+ show(df1_positive, allrows=true) 
+
+ # One species extinction scenario
+df2 = DataFrame(cij = [r[1] for r in one_species_results], 
+                H = [r[2] for r in one_species_results], 
+                N1_PRIMA = [r[3][1] for r in one_species_results], 
+                N2_0 = [r[3][2] for r in one_species_results],
+                N1_0 = [r[4][1] for r in one_species_results], 
+                N2_PRIMA = [r[4][2] for r in one_species_results])
+ show(df2, allrows=true)
+ #Filter positive values
+ df2_positive = df2[df2.N1_PRIMA .>= 0 .&& df2.N2_0 .>= 0 .&& df2.N1_0 .>= 0 .&& df2.N2_PRIMA .>= 0, :]
+ show(df2_positive, allrows=true)
+
+# Coexistence scenario
+df3 = DataFrame(cij = [r[1] for r in coexistence_results], 
+                H = [r[2] for r in coexistence_results], 
+                N_1 = [r[3][1] for r in coexistence_results], 
+                N_2 = [r[3][2] for r in coexistence_results])
+ show(df3, allrows=true)
+ # Filter positive values
+ df3_positive = df3[df3.N_1 .>= 0 .&& df3.N_2 .>= 0, :]
+ show(df3_positive, allrows=true)
+
+
+#Graficar los valores filtrados
+
+# Extinción
+scatter(df1_positive.cij, df1_positive.H, label="Extinción", xlabel="N1", ylabel="N2", color=:black)
+
+# Un solo sobreviviente - Patella ordinaria
+scatter!([r.N1_PRIMA for r in eachrow(df2_positive)], [r.N2_0 for r in eachrow(df2_positive)], label="N1 Prima (Patella ordinaria)", color=:blue)
+
+# Un solo sobreviviente - Patella aspera
+scatter!([r.N1_0 for r in eachrow(df2_positive)], [r.N2_PRIMA for r in eachrow(df2_positive)], label="N1 (Patella aspera)", color=:red)
+
+# Coexistencia
+scatter!([r.N_1 for r in eachrow(df3_positive)], [r.N_2 for r in eachrow(df3_positive)], label="Coexistencia", color=:green, legend=:outerright)
+
+
+
+# Colores discretos para diferentes valores de cij y H. Aquí mapeamos los valores únicos de cij y H a colores distintos.
+cij_values = unique(df1.cij)
+H_values = unique(df1.H)
+
+# Mapeamos cada combinación única de cij y H a un color distinto.
+color_map = Dict()
+
+# Función para asignar un color a cada combinación (cij, H)
+function get_color(cij, H)
+    key = (cij, H)
+    if !haskey(color_map, key)
+        # Si no tiene un color asignado, generamos uno aleatorio
+        color_map[key] = RGB(rand(), rand(), rand())
+    end
+    return color_map[key]
+end
+
+# Función para obtener la opacidad (en base a cij y H)
+function get_opacity(cij, H)
+    # Normalizamos los valores de cij y H para obtener una opacidad entre 0 y 1.
+    cij_norm = (cij - minimum(cij_values)) / (maximum(cij_values) - minimum(cij_values))
+    H_norm = (H - minimum(H_values)) / (maximum(H_values) - minimum(H_values))
+    # Usamos un promedio de la normalización para la opacidad.
+    return (cij_norm + H_norm) / 2
+end
+
+
+# Graficar los puntos del primer escenario (df1_positive) con colores y opacidad según cij y H
+scatter(df1.cij, df1.H, label="Total extinction", 
+        xlabel="N1", ylabel="N2",
+        markers=(:diamond, 5),
+        color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
+        marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
+
+# Un solo sobreviviente - Patella ordinaria (df2_positive)
+scatter!([r.N1_PRIMA for r in eachrow(df2)], 
+         [r.N2_0 for r in eachrow(df2)], 
+         label="N1* (Patella ordinaria)", 
+         color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
+         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
+        markers=(:circle, 5))
+
+
+# Un solo sobreviviente - Patella aspera (df2_positive)
+scatter!([r.N1_0 for r in eachrow(df2)], 
+         [r.N2_PRIMA for r in eachrow(df2)], 
+         label="N1 (Patella aspera)", 
+         color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
+         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
+         markers=(:square, 5))
+
+# Coexistencia (df3_positive)
+scatter!([r.N_1 for r in eachrow(df3)], 
+         [r.N_2 for r in eachrow(df3)], 
+         label="Coexistencia", 
+         color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
+         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
+markers=(:hexagon, 5))
