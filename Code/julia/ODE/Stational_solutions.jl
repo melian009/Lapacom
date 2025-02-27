@@ -8,6 +8,7 @@ using Random
 using Distributions
 using StatsPlots
 using DataFrames
+
 ```
 Parameters and variables:
  - Ne = eggs abundance (CLC)
@@ -78,10 +79,10 @@ Average sizes before and after marine protected area implementations
 
  One species extinction scenario
  Patella ordinaria survives
- N2* = 0; N1* = (r_1*R_1 - d_1 - H_1*(1-X))/(r_1*R_1*gamma)
+ N2* = 0; N1* = (r_1*R_1 - d_1 - H_1*(1-X))/(cij + r_1*R_1*gamma)
  
  Patella aspera survives
- N1* = 0; N2* = (r_2*R_2 - d_2 - H_2*(1-X))/(r_2*R_2*gamma)
+ N1* = 0; N2* = (r_2*R_2 - d_2 - H_2*(1-X))/(cji + r_2*R_2*gamma)
 
  Where:
  z_i = c_ij + r_i*R_i*gamma
@@ -90,7 +91,8 @@ Average sizes before and after marine protected area implementations
 
  Cohexistance scenario cij = 0
  N1* = (c21*rho1 - z1*rho2)/(c12*c21 - z1*z2)
- N2* = (c12*rho2 - z2*rho1)/(21*c12 - z2*z1)
+ N2* = (c12*rho2 - z2*rho1)/(c21*c12 - z2*z1)
+
 ```
 
 # Simple Life Cycle (SLC) model
