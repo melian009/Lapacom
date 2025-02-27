@@ -248,7 +248,7 @@ df3 = DataFrame(cij = [r[1] for r in coexistence_results],
                 N_1 = [r[3][1] for r in coexistence_results], 
                 N_2 = [r[3][2] for r in coexistence_results])
  
-                # Filter positive values
+# Filter positive values
  df3_positive = df3[df3.N_1 .>= 0 .&& df3.N_2 .>= 0, :]
  #show(df3, allrows=true)
 
@@ -289,23 +289,23 @@ for j in 1:11 # Cij
         H = H_span[n] #Exploitation rate
 
         # Storing the simulation result sets
-         resultados_t_concatenados = Float64[]  # To store the values ​​of t
+        resultados_t_concatenados = Float64[]  # To store the values ​​of t
         
-         resultados_Na1_concatenados = Float64[]  # To store the values ​​of Na1
-         resultados_Na2_concatenados = Float64[]  # To store the values ​​of Na2
-         resultados_Sa1_concatenados = Float64[]  # To store the values ​​of Sa1
-         resultados_Sa2_concatenados = Float64[]  # To store the values ​​of Sa2
+        resultados_Na1_concatenados = Float64[]  # To store the values ​​of Na1
+        resultados_Na2_concatenados = Float64[]  # To store the values ​​of Na2
+        resultados_Sa1_concatenados = Float64[]  # To store the values ​​of Sa1
+        resultados_Sa2_concatenados = Float64[]  # To store the values ​​of Sa2
     
         # Storing the simulation result sets
-         resultados_t = Float64[]  # To store the values ​​of t
+        resultados_t = Float64[]  # To store the values ​​of t
         
-         resultados_Na1 = Float64[]  # To store the values ​​of Na1
-         resultados_Na2 = Float64[]  # To store the values ​​of Na2
-         resultados_Sa1 = Float64[]  # To store the values ​​of Sa1
-         resultados_Sa2 = Float64[]  # To store the values ​​of Sa2
+        resultados_Na1 = Float64[]  # To store the values ​​of Na1
+        resultados_Na2 = Float64[]  # To store the values ​​of Na2
+        resultados_Sa1 = Float64[]  # To store the values ​​of Sa1
+        resultados_Sa2 = Float64[]  # To store the values ​​of Sa2
     
         # Simulations
-         for i in 1:N_simulations
+        for i in 1:N_simulations
           # Generate random values ​​for parameters from a normalized distribution
           t_0 = t0_ + 0.0001 * randn()
           k = k_ + 0.01 * randn()
@@ -347,22 +347,19 @@ for j in 1:11 # Cij
         if j == 1 && n == 1
           limt_cycle = plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
                  xlabel="N1", ylabel="N2", 
-                 label="H=$H, Cij=$cij",  color = [get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-                 marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
+                 label="H=$H, Cij=$cij",  color = [get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
         else
           limt_cycle =  plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-                  label="H=$H, Cij=$cij", color = [get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-                  marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
+                  label="H=$H, Cij=$cij", color = [get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
         end
-        display(limt_cycle)
-      end
     end
-
+end
+display(limt_cycle)
 # Plot stability scenarios over the limit cycles
 
 
 # Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and H
-scatter(df1.cij, df1.H, label="N1 = N2 = 0", 
+scatter!(df1.cij, df1.H, label="N1 = N2 = 0", 
         xlabel="N1", ylabel="N2",
         markers=(:diamond, 5),
         color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],

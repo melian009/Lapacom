@@ -95,10 +95,11 @@ h_span = length(zeros(Float64, size(0:0.1:1)))
 H_r = range(0, 1, length=h_span)
 Cij_r = range(0, 1, length=h_span)
 
+
 H_span = ones(Float64,h_span)
 cij_span = ones(Float64,h_span)
 
-for i in 1:length(h_span)
+for i in 1:h_span
   H_span[i] = H_r[i]
   cij_span[i] = Cij_r[i]
 end
