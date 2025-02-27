@@ -361,7 +361,8 @@ for j in 1:11 # Cij
 # Plot stability scenarios over the limit cycles
 
 
-# Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and Hscatter(df1.cij, df1.H, label="N1 = N2 = 0", 
+# Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and H
+scatter(df1.cij, df1.H, label="N1 = N2 = 0", 
         xlabel="N1", ylabel="N2",
         markers=(:diamond, 5),
         color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
