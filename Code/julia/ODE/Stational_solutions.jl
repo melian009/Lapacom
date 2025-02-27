@@ -130,7 +130,7 @@ function SLC!(du, u, p, t)
 end
 
 
-# Parámetros iniciales
+# Parámetros iniciales [Na1, Na2]
 avg_oocytes = [77404, 385613]
 reggs = avg_oocytes ./ (365 * 0.42)
 r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629
@@ -154,16 +154,16 @@ function extinction_scenario()
 end
 
 # N1 = 0; N2 = N2* or N2 = 0; N1 = N1* 
-function one_species_extinction_scenario(r, R, d, H, Gamma, survivor)
+function one_species_extinction_scenario(cij, cji, r, R, d, H, Gamma, survivor)
     if survivor == 1
-        return ((r[1] * R[1] - d[1] - H) / (r[1] * R[1] * Gamma), 0.0)
+        return ((r[1] * R[1] - d[1] - H) / (cij + r[1] * R[1] * Gamma), 0.0)
     else
-        return (0.0, (r[2] * R[2] - d[2] - H) / (r[2] * R[2] * Gamma))
+        return (0.0, (r[2] * R[2] - d[2] - H) / (cji + r[2] * R[2] * Gamma))
     end
 end
 
 #N1 = N1*; N2 = N2* || Cij = 0 & Cij =! 0
-function coexistence_scenario(cij,cji, r, R, d, H, Gamma)
+function coexistence_scenario(cij, cji, r, R, d, H, Gamma)
     if cij == 0 # Cij = 0
         N1 = ((r[1] * R[1] - d[1] - H) / (r[1] * R[1] * Gamma))
         N2 = ((r[2] * R[2] - d[2] - H) / (r[2] * R[2] * Gamma))
@@ -193,10 +193,10 @@ t0_ = 365.14*0.42
 # Loops for descrete values of cij and H
 for j in 1:N_span  # Run cij values
     cij = cij_span[j]
-    cji = (1-cij)
-    for h in 1:N_span  # Run H values
+    cji = (cij)
+    for h in 1  # Run H values
         H = H_span[h]
-        for i in 1:N_simulations
+        #r i in 1:N_simulations
         # Noised parameters
         k = k_ + 0.1 * randn()
         r = [r_[1] + 0.1 * randn(), r_[2] + 0.1 * randn()] 
@@ -206,17 +206,28 @@ for j in 1:N_span  # Run cij values
         Smax = Smax_ + 1 * randn()
         Gamma = 1 / K_
         
+
+        # N_1
+        avg_size_1 = 46.44 
+        Smat_1 = 1.34 * (avg_size_1) - 28.06
+        R_1 = min(max(0.5 * (1.0 + (avg_size_1 - Smat_1) / (Smax - Smat_1)), 0.0), 1.0)
+        
+        # N_2
+        avg_size_2 = 44.45
+        Smat_2 = 1.34 * (avg_size_1) - 28.06
+        R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
+        R_ = [R_1, R_2]
         # Solutions for each scenario
         ext = extinction_scenario()
-        patella_ord_survives = one_species_extinction_scenario(r_, [0.5, 0.5], d_, H, Gamma, 1)
-        patella_asp_survives = one_species_extinction_scenario(r_, [0.5, 0.5], d_, H, Gamma, 2)
+        patella_ord_survives = one_species_extinction_scenario(cij, cji, r_, R_, d_, H, Gamma, 1)
+        patella_asp_survives = one_species_extinction_scenario(cij, cji, r_, R_, d_, H, Gamma, 2)
         coexist = coexistence_scenario(cij, cji, r_, [0.5, 0.5], d_, H, Gamma)
         
         # Store the results for N1 and N2 in each scenario
         push!(extinction_results, (cij, H, ext))
         push!(one_species_results, (cij, H, patella_ord_survives, patella_asp_survives))
         push!(coexistence_results, (cij, H, coexist))
-        end
+        #end
     end
 end
 
@@ -226,10 +237,11 @@ end
                 H = [r[2] for r in extinction_results], 
                 N_1 = [r[3][1] for r in extinction_results], 
                 N_2 = [r[3][2] for r in extinction_results]) 
- 
+ show(df1, allrows=true)
+
  # Filter positive values 
  df1_positive = df1[df1.N_1 .>= 0 .&& df1.N_2 .>= 0, :]
- #show(df1_positive, allrows=true) 
+ show(df1_positive, allrows=true) 
 
  # One species extinction scenario (N2 = 0; N1 = N1* or N1 = 0; N2 = N2*)
  df2 = DataFrame(cij = [r[1] for r in one_species_results], 
@@ -238,9 +250,10 @@ end
                 N2_0 = [r[3][2] for r in one_species_results],
                 N1_0 = [r[4][1] for r in one_species_results], 
                 N2_PRIMA = [r[4][2] for r in one_species_results])
+ 
  #Filter positive values
  df2_positive = df2[df2.N1_PRIMA .>= 0 .&& df2.N2_0 .>= 0 .&& df2.N1_0 .>= 0 .&& df2.N2_PRIMA .>= 0, :]
- #show(df2_positive, allrows=true)
+ show(df2_positive, allrows=true)
 
 # Coexistence scenario (N1 = N1* and N2 = N2*)
 df3 = DataFrame(cij = [r[1] for r in coexistence_results], 
@@ -281,9 +294,9 @@ end
 
 
 
-# Limit Cycles without leyend
+#= Limit Cycles without leyend
 limt_cycle = plot()
-for j in 1:11 # Cij
+for j in 1:10:11 # Cij
     cij = cij_span[j]  #Simetric competence component
     for n in 1:11 # H 
         H = H_span[n] #Exploitation rate
@@ -354,20 +367,19 @@ for j in 1:11 # Cij
         end
     end
 end
-display(limt_cycle)
+display(limt_cycle) =#
+
 # Plot stability scenarios over the limit cycles
-
-
 # Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and H
-scatter!(df1.cij, df1.H, label="N1 = N2 = 0", 
+scatter(df1_positive.N_1, df1_positive.N_2, label="N1 = N2 = 0", 
         xlabel="N1", ylabel="N2",
         markers=(:diamond, 5),
         color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
 
 # Only one survivor - Patella ordinaris (df2_positive)
-scatter!([r.N1_PRIMA for r in eachrow(df2)], 
-         [r.N2_0 for r in eachrow(df2)], 
+scatter!([r.N1_PRIMA for r in eachrow(df2_positive)], 
+         [r.N2_0 for r in eachrow(df2_positive)], 
          label="N2 = 0;  N1 = N1*", 
          color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
@@ -375,17 +387,18 @@ scatter!([r.N1_PRIMA for r in eachrow(df2)],
 
 
 # Only one survivor - Patella aspera (df2_positive)
-scatter!([r.N1_0 for r in eachrow(df2)], 
-         [r.N2_PRIMA for r in eachrow(df2)], 
+scatter!([r.N1_0 for r in eachrow(df2_positive)], 
+         [r.N2_PRIMA for r in eachrow(df2_positive)], 
          label="N1 = 0;  N2 = N2*", 
          color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          markers=(:square, 5))
 
 # Coexistence (df3_positive)
-scatter!([r.N_1 for r in eachrow(df3)], 
-         [r.N_2 for r in eachrow(df3)], 
+scatter!([r.N_1 for r in eachrow(df3_positive)], 
+         [r.N_2 for r in eachrow(df3_positive)], 
          label="N1 = N1* ;  N2 = N2*", 
          color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-markers=(:hexagon, 5))
+markers=(:hexagon, 5), legend=:outerright)
+
