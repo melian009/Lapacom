@@ -60,7 +60,7 @@ function SLC!(du, u, p, t)
    R_1 = min(max(0.5 * (1.0 + (avg_size_1 - Smat_1) / (Smax - Smat_1)), 0.0), 1.0)
    # N_2
    avg_size_2 = du[4]
-   Smat_2 = 1.34 * (avg_size_1) - 28.06
+   Smat_2 = 1.34 * (avg_size_2) - 28.06
    R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
   
   du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 * Na1 #N1 

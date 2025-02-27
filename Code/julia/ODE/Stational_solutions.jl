@@ -51,22 +51,21 @@ For numerical simulation use these rates (d and E).
 Average sizes before and after marine protected area implementations
 
  Before (1996-2006): FULL ACCESS.
- Patella apera = 43.53mm
  Patella ordinaria = 46.26mm
-
+ Patella apera = 43.53mm
+ 
  After  (2007-2017): MPA+FULL
- Patella aspera = 44.45mm
  Patella ordinaria = 46.44mm
-
+ Patella aspera = 44.45mm
+ 
  Only MPS (2007-2017)
- Patella aspera = 50.61mm
  Patella ordinaria = 49.25mm
-
+ Patella aspera = 50.61mm
+ 
  Only Full Access (2007-2017) 
-
- Patella aspera = 43.41mm
  Patella ordinaria = 45.72mm
-
+ Patella aspera = 43.41mm
+ 
  SLC simplified ecuation
  dN_i/dt = r_i * R_i * N_i * ((K - N_i)/ K) - d_i * N_i - (1 - periodX(t)) * H * N_i - N_i * sum(c_ij * N_j)
  
