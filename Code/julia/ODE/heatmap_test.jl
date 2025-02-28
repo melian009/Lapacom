@@ -104,7 +104,7 @@ end
 
 
 
-j=11
+j=9
 n=1
 
 
@@ -202,13 +202,13 @@ n=1
 # MATRIX = (anotations_00)
  # else
   anotations_ = hcat(cij,H,x_bins[Bin_pos[1]], y_bins[Bin_pos[2]],frequencies_norm[Bin_pos])
-  MATRIX = vcat(MATRIX,anotations_)
+#  MATRIX = vcat(MATRIX,anotations_)
  # end 
 
 
 
   # Heatmap
-heatmap!(x_bins,
+heatmap(x_bins,
  y_bins, 
  frequencies_norm,
  xlabel="Na1", 
