@@ -110,24 +110,8 @@ H_span
 #Fig 4a: with discrete leyend
 for j in 1:11 # Cij
 cij = cij_span[j]  #Simetric competence component
-
-<<<<<<< HEAD
-
-j=9
-n=1
-
-
-
-  H = H_span[j] #Exploitation
-
-  cij = cij_span[n]  #Simetric competence component
-
-=======
   for n in 1:11 # H 
-  H = H_span[n] #Exploitation
-    
->>>>>>> 15b74d212e2b100f959ef2a3ca1b3e513cfd39cb
-    
+  H = H_span[n] #Exploitation    
     # Almacenar los conjuntos resultados de las simulaciones
      resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
     
@@ -145,7 +129,7 @@ n=1
      resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
 
     # Realizamos las simulaciones
-     for i in 1:n_simulaciones
+    # for i in 1:n_simulaciones
       # Generamos valores aleatorios para los parámetros (distribución normal)
       t_0 = t0_ + 0.0001 * randn()
       k = k_ + 0.01 * randn()
@@ -182,15 +166,15 @@ n=1
          resultados_Sa1_concatenados = vcat(resultados_Sa1...)
          resultados_Sa2_concatenados = vcat(resultados_Sa2...)
 
-    end 
+    #end 
     # Graficar los resultados
     if j == 1 && n == 1
       limt_cycle = plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
              xlabel="N1", ylabel="N2", 
-             label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=5)
+             label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=3)
     else
       limt_cycle =  plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-              label="H=$H, Cij=$cij", linewidth=5)
+              label="H=$H, Cij=$cij", linewidth=3)
     end
     display(limt_cycle)
   end
@@ -294,7 +278,6 @@ Bin_pos = argmax(frequencies_norm)
  MATRIX = (anotations_00)
  # else
   anotations_ = hcat(cij,H,x_bins[Bin_pos[1]], y_bins[Bin_pos[2]],frequencies_norm[Bin_pos])
-<<<<<<< HEAD
 #  MATRIX = vcat(MATRIX,anotations_)
  # end 
 
@@ -302,13 +285,11 @@ Bin_pos = argmax(frequencies_norm)
 
   # Heatmap
 heatmap(x_bins,
-=======
   MATRIX = vcat(MATRIX,anotations_)
  # end =# 
 
 # Heatmap
  heatmap!(x_bins,
->>>>>>> 15b74d212e2b100f959ef2a3ca1b3e513cfd39cb
  y_bins, 
  frequencies_norm,
  xlabel="Na1", 
@@ -381,7 +362,7 @@ heat_0=surface()
 j=1
 #n=1
 
-for j in 1
+for j in 1:11
   cij = cij_span[j]  # Componente de competencia simétrica
   for n in 1:11
       H = H_span[n]  # Valor de explotación      

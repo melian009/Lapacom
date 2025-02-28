@@ -155,36 +155,37 @@ function extinction_scenario()
 end
 
 # N1 = 0; N2 = N2* or N2 = 0; N1 = N1* 
-function one_species_extinction_scenario(cii, cjj, r, R, d, H, Gamma, survivor)
+function one_species_extinction_scenario(cii, cjj, r, R, d, H, K, survivor)
     if survivor == 1
-        return ((r[1] * R[1] - d[1] - H) / (cii + r[1] * R[1] * Gamma), 0.0)
+        return (K*(r[1] * R[1] - d[1] - H) / (cii + r[1] * R[1]), 0.0)
     else
-        return (0.0, (r[2] * R[2] - d[2] - H) / (cjj + r[2] * R[2] * Gamma))
+        return (0.0, K*(r[2] * R[2] - d[2] - H) / (cjj + r[2] * R[2]))
     end
 end
 
 #N1 = N1*; N2 = N2* || Cij = 0 & Cij =! 0
-function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, Gamma)
+function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, K)
     if cij == 0
-        N1 = ((r[1] * R[1] - d[1] - H) / (r[1] * R[1] * Gamma))
-        N2 = ((r[2] * R[2] - d[2] - H) / (r[2] * R[2] * Gamma))
-        return (N1, N2)
+        N1 = (K*(r[1] * R[1] - d[1] - H) / (r[1] * R[1]))
+        N2 = (K*(r[2] * R[2] - d[2] - H) / (r[2] * R[2]))
+        return (abs(N1), abs(N2))
 
     else
+    Gamma = K^(-1)
     rho1 = r[1] * R[1] - d[1] - H
     rho2 = r[2] * R[2] - d[2] - H 
     z1 = cii + r[1] * R[1] * Gamma
     z2 = cjj + r[2] * R[2] * Gamma
     N1 = (cij * rho1 - z1 * rho2) / (cij*cji - z1 * z2)
     N2 = (cji * rho2 - z2 * rho1) / (cji*cij - z1 * z2)
-    return (N1, N2)
+    return (abs(N1), abs(N2))
     end
 end
 
 # Simulated scenarios
 extinction_results, one_species_results, coexistence_results = [], [], []
 
-N_simulations = 500
+N_simulations = 100
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 t0_ = 365.14*0.42
@@ -195,7 +196,7 @@ for j in 1:N_span  # Run cij values
     cji = (cij)
     for h in 1:N_span # Run H values
         H = H_span[h]
-        #r i in 1:N_simulations
+    #    for i in 1:N_simulations
         # Noised parameters
         k = k_ + 0.1 * randn()
         r = [r_[1] + 0.1 * randn(), r_[2] + 0.1 * randn()] 
@@ -205,7 +206,6 @@ for j in 1:N_span  # Run cij values
         gamma = [size_growth_rate[1] + 0.1 * randn(), size_growth_rate[2] + 0.1 * randn()]
         d = [d_[1], d_[2]]
         Smax = Smax_ + 1 * randn()
-        Gamma = K_^(-1)
         
 
         # N_1
@@ -220,15 +220,15 @@ for j in 1:N_span  # Run cij values
         R_ = [R_1, R_2]
         # Solutions for each scenario
         ext = extinction_scenario()
-        patella_ord_survives = one_species_extinction_scenario(c_ii,c_jj, r_, R_, d_, H, Gamma, 1)
-        patella_asp_survives = one_species_extinction_scenario(c_ii,c_jj, r_, R_, d_, H, Gamma, 2)
-        coexist = coexistence_scenario(cij, cji,c_ii,c_jj, r_, R_, d_, H, Gamma)
+        patella_ord_survives = one_species_extinction_scenario(c_ii,c_jj, r_, R_, d_, H, K_, 1)
+        patella_asp_survives = one_species_extinction_scenario(c_ii,c_jj, r_, R_, d_, H, K_, 2)
+        coexist = coexistence_scenario(cij, cji,c_ii,c_jj, r_, R_, d_, H, K_)
         
         # Store the results for N1 and N2 in each scenario
         push!(extinction_results, (cij, H, ext))
         push!(one_species_results, (cij, H, patella_ord_survives, patella_asp_survives))
         push!(coexistence_results, (cij, H, coexist))
-        #end
+    #    end
     end
 end
 
@@ -261,7 +261,7 @@ df3 = DataFrame(cij = [r[1] for r in coexistence_results],
                 H = [r[2] for r in coexistence_results], 
                 N_1 = [r[3][1] for r in coexistence_results], 
                 N_2 = [r[3][2] for r in coexistence_results])
- 
+ show(df3, allrows=true)
 # Filter positive values
  df3_positive = df3[df3.N_1 .>= 0 .&& df3.N_2 .>= 0, :]
  #show(df3, allrows=true)
@@ -372,7 +372,7 @@ display(limt_cycle) =#
 
 # Plot stability scenarios over the limit cycles
 # Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and H
-scatter(df1.N_1, df1.N_2, label="N1 = N2 = 0", 
+scatter!(df1.N_1, df1.N_2, label="N1 = N2 = 0", 
         xlabel="N1", ylabel="N2",
         markers=(:diamond, 5),
         color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
