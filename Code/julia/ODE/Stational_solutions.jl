@@ -140,7 +140,7 @@ size_growth_rate = [0.32, 0.36]
 k_ = 0.42
 K_ = 64000.0
 Smax_ = 53.0
-N_span = 11  # Número de valores
+N_span = 101  # Número de valores
 H_r = range(0, 1, length=N_span)
 Cij_r = range(0, 1, length=N_span)
 H_span = collect(H_r)
@@ -155,26 +155,26 @@ function extinction_scenario()
 end
 
 # N1 = 0; N2 = N2* or N2 = 0; N1 = N1* 
-function one_species_extinction_scenario(cij, cji, r, R, d, H, Gamma, survivor)
+function one_species_extinction_scenario(cii, cjj, r, R, d, H, Gamma, survivor)
     if survivor == 1
-        return ((r[1] * R[1] - d[1] - H) / (cij + r[1] * R[1] * Gamma), 0.0)
+        return ((r[1] * R[1] - d[1] - H) / (cii + r[1] * R[1] * Gamma), 0.0)
     else
-        return (0.0, (r[2] * R[2] - d[2] - H) / (cji + r[2] * R[2] * Gamma))
+        return (0.0, (r[2] * R[2] - d[2] - H) / (cjj + r[2] * R[2] * Gamma))
     end
 end
 
 #N1 = N1*; N2 = N2* || Cij = 0 & Cij =! 0
-function coexistence_scenario(cij, cji, r, R, d, H, Gamma)
-    if cij == 0 # Cij = 0
+function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, Gamma)
+    if cij == 0
         N1 = ((r[1] * R[1] - d[1] - H) / (r[1] * R[1] * Gamma))
         N2 = ((r[2] * R[2] - d[2] - H) / (r[2] * R[2] * Gamma))
         return (N1, N2)
 
-    else # Cij != 0
+    else
     rho1 = r[1] * R[1] - d[1] - H
     rho2 = r[2] * R[2] - d[2] - H 
-    z1 = cij + r[1] * R[1] * Gamma
-    z2 = cij + r[2] * R[2] * Gamma
+    z1 = cii + r[1] * R[1] * Gamma
+    z2 = cjj + r[2] * R[2] * Gamma
     N1 = (cij * rho1 - z1 * rho2) / (cij*cji - z1 * z2)
     N2 = (cji * rho2 - z2 * rho1) / (cji*cij - z1 * z2)
     return (N1, N2)
@@ -182,9 +182,7 @@ function coexistence_scenario(cij, cji, r, R, d, H, Gamma)
 end
 
 # Simulated scenarios
-extinction_results = []
-one_species_results = []
-coexistence_results = []
+extinction_results, one_species_results, coexistence_results = [], [], []
 
 N_simulations = 500
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
@@ -195,17 +193,19 @@ t0_ = 365.14*0.42
 for j in 1:N_span  # Run cij values
     cij = cij_span[j]
     cji = (cij)
-    for h in 1  # Run H values
+    for h in 1:N_span # Run H values
         H = H_span[h]
         #r i in 1:N_simulations
         # Noised parameters
         k = k_ + 0.1 * randn()
         r = [r_[1] + 0.1 * randn(), r_[2] + 0.1 * randn()] 
+        r_overlap = minimum(r) / sum(r) * sum(r)
+        c_ii, c_jj = r[1] / (r[1] + r_overlap), r[2] / (r[2] + r_overlap)
         K = K_ + 0.1 * randn()
         gamma = [size_growth_rate[1] + 0.1 * randn(), size_growth_rate[2] + 0.1 * randn()]
         d = [d_[1], d_[2]]
         Smax = Smax_ + 1 * randn()
-        Gamma = 1 / K_
+        Gamma = K_^(-1)
         
 
         # N_1
@@ -220,9 +220,9 @@ for j in 1:N_span  # Run cij values
         R_ = [R_1, R_2]
         # Solutions for each scenario
         ext = extinction_scenario()
-        patella_ord_survives = one_species_extinction_scenario(cij, cji, r_, R_, d_, H, Gamma, 1)
-        patella_asp_survives = one_species_extinction_scenario(cij, cji, r_, R_, d_, H, Gamma, 2)
-        coexist = coexistence_scenario(cij, cji, r_, [0.5, 0.5], d_, H, Gamma)
+        patella_ord_survives = one_species_extinction_scenario(c_ii,c_jj, r_, R_, d_, H, Gamma, 1)
+        patella_asp_survives = one_species_extinction_scenario(c_ii,c_jj, r_, R_, d_, H, Gamma, 2)
+        coexist = coexistence_scenario(cij, cji,c_ii,c_jj, r_, R_, d_, H, Gamma)
         
         # Store the results for N1 and N2 in each scenario
         push!(extinction_results, (cij, H, ext))
@@ -372,15 +372,14 @@ display(limt_cycle) =#
 
 # Plot stability scenarios over the limit cycles
 # Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and H
-scatter(df1_positive.N_1, df1_positive.N_2, label="N1 = N2 = 0", 
+scatter(df1.N_1, df1.N_2, label="N1 = N2 = 0", 
         xlabel="N1", ylabel="N2",
         markers=(:diamond, 5),
         color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
 
 # Only one survivor - Patella ordinaris (df2_positive)
-scatter!([r.N1_PRIMA for r in eachrow(df2_positive)], 
-         [r.N2_0 for r in eachrow(df2_positive)], 
+scatter!(df2.N1_PRIMA, df2.N2_0, 
          label="N2 = 0;  N1 = N1*", 
          color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
@@ -388,18 +387,16 @@ scatter!([r.N1_PRIMA for r in eachrow(df2_positive)],
 
 
 # Only one survivor - Patella aspera (df2_positive)
-scatter!([r.N1_0 for r in eachrow(df2_positive)], 
-         [r.N2_PRIMA for r in eachrow(df2_positive)], 
+scatter!(df2.N1_0, df2.N2_PRIMA, 
          label="N1 = 0;  N2 = N2*", 
          color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          markers=(:square, 5))
 
 # Coexistence (df3_positive)
-scatter!([r.N_1 for r in eachrow(df3_positive)], 
-         [r.N_2 for r in eachrow(df3_positive)], 
+scatter!(df3.N_1, df3.N_2, 
          label="N1 = N1* ;  N2 = N2*", 
          color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-markers=(:hexagon, 5), legend=:outerright)
+markers=(:hexagon, 5), legend=:outertop)
 
