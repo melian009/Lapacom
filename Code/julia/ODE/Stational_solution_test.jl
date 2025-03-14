@@ -88,18 +88,19 @@ end
 # -----------------------------
 # Simulaciones
 # -----------------------------
-N_simulations = 10
+N_simulations = 1
 t0_ = 365.14 * 0.42
 
 extinction_results, one_species_results, coexistence_results = [], [], []
 
-Threads.@threads for n in 1:N_span
+Threads.@threads for n in 1:10:11
     cij = cij_span[n]
     cji = cij
-    for j in 1:N_span  
+    for j in 1:10:11  
     H = H_span[j]
-    k, r, K = k_ + 0.1 * randn(), [r_[1] + 0.1 * randn(), r_[2] + 0.1 * randn()], K_ + 0.1 * randn()
-    Smax = Smax_ + randn()
+    for i in 1:N_simulations
+    k, r, K = k_ + 0.001 * randn(), [r_[1] + 0.001 * randn(), r_[2] + 0.001 * randn()], K_ + 0.001 * randn()
+    Smax = Smax_ + 0.001 * randn()
     R_ = [reproductive_capacity(S_A_MPA_FA[1], Smax), reproductive_capacity(S_A_MPA_FA[2], Smax)]
     
     push!(extinction_results, (cij, H, extinction_scenario()))
@@ -107,6 +108,7 @@ Threads.@threads for n in 1:N_span
                                 one_species_extinction(c_11,c_22, r, R_, d_, H, K_, 2)))
     push!(coexistence_results, (cij, H, coexistence_scenario(cij, cji,c_11,c_22, r_, R_, d_, H, K_)))
     end
+end
 end
 
 # -----------------------------
@@ -128,10 +130,24 @@ df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 N_2 = getindex.(getindex.(coexistence_results, 3),2))
 
 # Filtrar valores positivos
-df1_positive = filter(row -> row.N_1 >= 0 && row.N_2 >= 0, df1)
-df2_positive = filter(row -> row.N1_PRIMA > 1 && row.N2_PRIMA > 1, df2)
-df3_positive = filter(row -> row.N_1 > 0 && row.N_2 > 0, df3)
-df3_NO_0 = filter(row -> row.H > 0 && row.cij > 0, df3)
+df1_H_0_c0 = filter(row -> row.H = 0 && row.cij = 0, df1)
+df1_H_0_c1 = filter(row -> row.H = 0 && row.cij = 1, df1)
+df1_H_1_c0 = filter(row -> row.H = 1 && row.cij = 0, df1)
+df1_H_1_c1 = filter(row -> row.H = 1 && row.cij = 1, df1)
+
+
+df2_H_0_c0 = filter(row -> row.H = 0 && row.cij = 0, df2)
+df2_H_0_c1 = filter(row -> row.H = 0 && row.cij = 1, df2)
+df2_H_1_c0 = filter(row -> row.H = 1 && row.cij = 0, df2)
+df2_H_1_c1 = filter(row -> row.H = 1 && row.cij = 1, df2)
+
+
+df3_H_0_c0 = filter(row -> row.H = 0 && row.cij = 0, df3)
+df3_H_0_c1 = filter(row -> row.H = 0 && row.cij = 1, df3)
+df3_H_1_c0 = filter(row -> row.H = 1 && row.cij = 0, df3)
+df3_H_1_c1 = filter(row -> row.H = 1 && row.cij = 1, df3)
+
+
 
 # -----------------------------
 # Visualización
@@ -139,6 +155,15 @@ df3_NO_0 = filter(row -> row.H > 0 && row.cij > 0, df3)
 scatter(df2.N1_PRIMA, df2.N2_0, label="N2 = 0;  N1 = N1*", color=:red)
 scatter!(df2.N1_0, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:green)
 scatter!(df3.N_1, df3.N_2, label="N1 = N1*; N2 = N2*", color=:blue, legend=:outertop)
+scatter!(df1.N_1, df1.N_2, label="N1 = N2 = 0", color=:black)
+xlabel!("N1")
+ylabel!("N2")
+savefig("Figure_4a.png")
+
+
+heatmap(df2.H, df2.cij,df2.N1_PRIMA, label="N2 = 0;  N1 = N1*", color=:redsblues)
+Heatmap(df2.H, df2.cij,df2.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:green)
+scatter!(df3.H, df3.cij,df3.N_1 label="N1 = N1*; N2 = N2*", color=:blue, legend=:outertop)
 scatter!(df1.N_1, df1.N_2, label="N1 = N2 = 0", color=:black)
 xlabel!("N1")
 ylabel!("N2")
@@ -203,7 +228,7 @@ scatter(df1.N_1, df1.N_2, label="N1 = N2 = 0",
         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)])
 
 # Only one survivor - Patella ordinaris (df2_positive)
-scatter!(df2.N1_PRIMA, df2.N2_0, 
+scatter(df2.N1_PRIMA, df2.N2_0, 
          label="N2 = 0;  N1 = N1*", 
          color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
@@ -211,11 +236,13 @@ scatter!(df2.N1_PRIMA, df2.N2_0,
 
 
 # Only one survivor - Patella aspera (df2_positive)
-scatter!(df2.N1_0, df2.N2_PRIMA, 
+scatter(df2.N1_0, df2.N2_PRIMA, 
          label="N1 = 0;  N2 = N2*", 
          color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          markers=(:square, 5))
+         ylims!(5.6075*10^4,5.61*10^4)
+
 
 # Coexistence (df3_positive)
 scatter!(df3.N_1, df3.N_2, 
@@ -224,7 +251,10 @@ scatter!(df3.N_1, df3.N_2,
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
 markers=(:hexagon, 5), legend=:outertop)
 
-savefig("figure_4_a.png")
+
+xlims!(0,1.5)
+ylims!(0,2)
+savefig("Figure_4_a.png")
 # -----------------------------
 
 
