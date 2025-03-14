@@ -37,7 +37,7 @@ Non trivial solutuiin for the scenario of X=0
 
 function SLC!(du, u, p, t)
   Na1, Na2, Sa1, Sa2 = u
-  t_0, k, r, K, H , d, Smax, gamma, cij = p
+ t_0, k, r, K, H , d, Smax, gamma, cij = p
    
    
    
