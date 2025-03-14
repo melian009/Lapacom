@@ -32,7 +32,7 @@ k_ = 0.42
 Smax_ = 53.0
 
 # Intervalo y tasas de crecimiento
-N_span = 101
+N_span = 11
 H_span = range(0, 1, length=N_span) |> collect
 cij_span = range(0, 1, length=N_span) |> collect
 
@@ -61,6 +61,7 @@ function one_species_extinction(cii,cjj, r, R, d, H, K, survivor)
     return survivor == 1 ? (K*(r[1] * R[1] - d[1] - H) / (cii + r[1] * R[1]), 0.0) :
                            (0.0, K*(r[2] * R[2] - d[2] - H) / (cjj + r[2] * R[2]))
 end
+
 
 function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, K)
 if cij == 0.0 || cji == 0.0
@@ -150,6 +151,8 @@ scatter!(df2_positive.H, df2_positive.N1_PRIMA, label="N2 = 0;  N1 = N1*", color
 scatter!(df2_positive.H, df2_positive.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:pink)
 scatter!(df3_positive.H, df3_positive.N_1, label="N1 = N1* Coexistencia", color=:darkblue)
 scatter!(df3_positive.H, df3_positive.N_2, label="N2 = N2* Coexistencia", color=:blue,legend=:outertop)
+ylabel!("N2")
+xlabel!("H")
 ylims!(0,100)
 
 # Competence gradient
@@ -160,6 +163,8 @@ scatter!(df2.cij, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:pink)
 scatter!(df3.cij, df3.N_1, label="N1 = N1* Coexistencia", color=:darkblue)
 scatter!(df3.cij, df3.N_2, label="N2 = N2* Coexistencia", color=:yellow)
 ylims!(0,100)
+ylabel!("N2")
+xlabel!("H")
 
 
 # Discrete colors for competence and exploitation range values. 
@@ -219,8 +224,8 @@ scatter!(df3.N_1, df3.N_2,
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
 markers=(:hexagon, 5), legend=:outertop)
 
-
-
+savefig("figure_4_a.png")
+# -----------------------------
 
 
 # Exploitation Gradient
@@ -252,7 +257,7 @@ scatter!(df3.H, df3.N_1, label="N1 = N1* Coexistencia",
  markers=(:diamond, 5))
 
 
-scatter(df3.H, df3.N_2, label="N2 = N2* Coexistencia",  color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
+scatter!(df3.H, df3.N_2, label="N2 = N2* Coexistencia",  color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
  marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
 markers=(:pentagon, 5), legend=:outertop)
 
@@ -269,7 +274,7 @@ color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
         markers=(:dtriangle, 5))
 
-scatter!(df2.cij, df2.N1_PRIMA, label="N2 = 0;  N1 = N1*", 
+scatter(df2.cij, df2.N1_PRIMA, label="N2 = 0;  N1 = N1*", 
 color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
          marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
         markers=(:square, 5))
@@ -281,7 +286,7 @@ scatter!(df2.cij, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*",
         markers=(:hentagon, 5))
 
 
-scatter!(df3.cij, df3.N_1, label="N1 = N1* Coexistencia",
+scatter(df3.cij, df3.N_1, label="N1 = N1* Coexistencia",
  color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
  marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
  markers=(:diamond, 5))
@@ -291,6 +296,6 @@ scatter!(df3.cij, df3.N_2, label="N2 = N2* Coexistencia",  color=[get_color(cij,
  marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
 markers=(:pentagon, 5), legend=:outertop)
 
-ylims!(0,10)
-
+xlabel!("Cij")
+ylabel!("Na")
 
