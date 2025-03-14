@@ -60,13 +60,13 @@ function SLC!(du, u, p, t)
    R_1 = min(max(0.5 * (1.0 + (avg_size_1 - Smat_1) / (Smax - Smat_1)), 0.0), 1.0)
    # N_2
    avg_size_2 = du[4]
-   Smat_2 = 1.34 * (avg_size_2) - 28.06
+   Smat_2 = 1.34 * (avg_size_1) - 28.06
    R_2 = min(max(0.5 * (1.0 + (avg_size_2 - Smat_2) / (Smax - Smat_2)), 0.0), 1.0)
   
   du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 * Na1 #N1 
   du[2] = dNa2 = r[2] * R_2 * Na2 * ((K - Na2)/ K) - d[2] * Na2 - (1 - periodX(t)) * H * Na2 - cij * Na1 * Na2 #N2
-  du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
-  du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
+   # du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
+   # du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
 
 end
 
@@ -95,11 +95,10 @@ h_span = length(zeros(Float64, size(0:0.1:1)))
 H_r = range(0, 1, length=h_span)
 Cij_r = range(0, 1, length=h_span)
 
-
 H_span = ones(Float64,h_span)
 cij_span = ones(Float64,h_span)
 
-for i in 1:h_span
+for i in 1:length(h_span)
   H_span[i] = H_r[i]
   cij_span[i] = Cij_r[i]
 end
@@ -110,8 +109,11 @@ H_span
 #Fig 4a: with discrete leyend
 for j in 1:11 # Cij
 cij = cij_span[j]  #Simetric competence component
+
   for n in 1:11 # H 
-  H = H_span[n] #Exploitation    
+  H = H_span[n] #Exploitation
+    
+    
     # Almacenar los conjuntos resultados de las simulaciones
      resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
     
@@ -129,7 +131,7 @@ cij = cij_span[j]  #Simetric competence component
      resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
 
     # Realizamos las simulaciones
-    # for i in 1:n_simulaciones
+     for i in 1:n_simulaciones
       # Generamos valores aleatorios para los parámetros (distribución normal)
       t_0 = t0_ + 0.0001 * randn()
       k = k_ + 0.01 * randn()
@@ -166,15 +168,15 @@ cij = cij_span[j]  #Simetric competence component
          resultados_Sa1_concatenados = vcat(resultados_Sa1...)
          resultados_Sa2_concatenados = vcat(resultados_Sa2...)
 
-    #end 
+    end 
     # Graficar los resultados
     if j == 1 && n == 1
       limt_cycle = plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
              xlabel="N1", ylabel="N2", 
-             label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=3)
+             label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=5)
     else
       limt_cycle =  plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-              label="H=$H, Cij=$cij", linewidth=3)
+              label="H=$H, Cij=$cij", linewidth=5)
     end
     display(limt_cycle)
   end
@@ -278,13 +280,6 @@ Bin_pos = argmax(frequencies_norm)
  MATRIX = (anotations_00)
  # else
   anotations_ = hcat(cij,H,x_bins[Bin_pos[1]], y_bins[Bin_pos[2]],frequencies_norm[Bin_pos])
-#  MATRIX = vcat(MATRIX,anotations_)
- # end 
-
-
-
-  # Heatmap
-heatmap(x_bins,
   MATRIX = vcat(MATRIX,anotations_)
  # end =# 
 
@@ -362,7 +357,7 @@ heat_0=surface()
 j=1
 #n=1
 
-for j in 1:11
+for j in 1
   cij = cij_span[j]  # Componente de competencia simétrica
   for n in 1:11
       H = H_span[n]  # Valor de explotación      
