@@ -445,18 +445,19 @@ savefig("Figure_4b_surface.png")
 
 
 
-n_simulaciones = 100
-n_H = length(H_span)
-n_Cij = length(cij_span)
+
+N_span = 101
+H_span = range(0, 1, length=N_span) |> collect
+cij_span = range(0, 1, length=N_span) |> collect
 
 # Matrices para almacenar la abundancia promediada de cada especie
-abundance_matrix_N1 = zeros(n_H, n_Cij)
-abundance_matrix_N2 = zeros(n_H, n_Cij)
+abundance_matrix_N1 = zeros(length(H_span), length(cij_span))
+abundance_matrix_N2 = zeros(length(H_span), length(cij_span))
 
-for j in 1:n_Cij
+for j in 1:N_span
     cij = cij_span[j]  # Componente de competencia simétrica
 
-    for n in 1:n_H
+    for n in 1:N_span
         H = H_span[n]  # Valor de explotación
         
         # Variables para acumular abundancias
@@ -497,13 +498,22 @@ for j in 1:n_Cij
     end
 end
 
-# Crear heatmaps
-p1 = heatmap(H_span, cij_span, abundance_matrix_N1',
+# Escalar valores para mejorar la visibilidad en el heatmap
+abundance_matrix_N1 .*= 1e+4  # Ajusta este factor según el orden de magnitud de los datos
+abundance_matrix_N2 .*= 1e+4
+
+# Límites de color (para mejorar la visualización)
+clims_N1 = (minimum(abundance_matrix_N1[(2:11),(2:11)]), maximum(abundance_matrix_N1[2:11]))
+clims_N2 = (minimum(abundance_matrix_N2[2:11]), maximum(abundance_matrix_N2[2:11]))
+
+# Crear heatmaps con escala ajustada
+p1 = heatmap(H_span, cij_span, abundance_matrix_N1,
              xlabel="H", ylabel="Cij", 
              title="Abundancia Promediada de N1",
-             color=cgrad(:thermal, rev=true))
+             color=cgrad(:thermal, rev=true),
+             clims=clims_N1)
 
-p2 = heatmap(H_span, cij_span, abundance_matrix_N2',
+p2 = heatmap(H_span, cij_span, abundance_matrix_N2,
              xlabel="H", ylabel="Cij", 
              title="Abundancia Promediada de N2",
              color=cgrad(:thermal, rev=true))
