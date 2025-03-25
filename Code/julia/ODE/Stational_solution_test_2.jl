@@ -20,8 +20,8 @@ r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629
 r_overlap = minimum(r_) / sum(r_) * sum(r_)
 
 # Coeficientes de competencia
-# c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)
-c_11, c_22 = r_[1] / (r_[1] + r_overlap), r_[2] / (r_[2] + r_overlap)
+# c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
+c_11, c_22 = r_[1] / (r_[1] + r_overlap), r_[2] / (r_[2] + r_overlap)        #Intraspecific competition
 
 # Parámetros biológicos
 g_ = [0.998611, 0.971057, 0.4820525, 0.00629] 
@@ -36,7 +36,7 @@ Smax_ = 53.0
 #H_span = range(0, 1, length=N_span) |> collect
 #cij_span = range(0, 1, length=N_span) |> collect
 
-N_span = 1
+N_span = 11
 H_span = range(1, 1, length=N_span) |> collect
 cij_span = range(1, 1, length=N_span) |> collect
 
@@ -105,8 +105,8 @@ Threads.@threads for n in 1:1
         for j in 1:1  
     H = H_span[j]
     for i in 1:N_simulations
-    k, r, K = k_ + 25 * randn(), [r_[1] + 25 * randn(), r_[2] + 25 * randn()], K_ + 25 * randn()
-    Smax = Smax_ + 25 * randn()
+    k, r, K = k_ + 0.1 * randn(), [r_[1] + 0.4 * randn(), r_[2] + 3 * randn()], K_ + 250 * randn()
+    Smax = Smax_ + 10 * randn()
     R_ = [reproductive_capacity(S_A_MPA_FA[1], Smax), reproductive_capacity(S_A_MPA_FA[2], Smax)]
     
     push!(extinction_results, (cij, H, extinction_scenario()))
@@ -160,7 +160,7 @@ df3 = DataFrame(cij= getindex.(coexistence_results, 1),
 # -----------------------------
 #scatter(df2.N1_PRIMA, df2.N2_0, label="N2 = 0;  N1 = N1*", color=:red)
 #scatter!(df2.N1_0, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:green)
-scatter!(df3.N_1, df3.N_2, label="H = 1; cij = 1", color=:yellow, legend=:outertop)
+scatter(df3.N_1, df3.N_2, label="H = 1; cij = 1", color=:yellow, legend=:outertop)
 #scatter!(df1.N_1, df1.N_2, label="N1 = N2 = 0", color=:black)
 xlabel!("N1")
 ylabel!("N2")

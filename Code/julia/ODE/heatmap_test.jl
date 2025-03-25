@@ -353,7 +353,7 @@ density!(resultados_Sa2_concatenados.^(-1), bins=300, label="Sa2", ylabel="Frecu
 n_simulaciones = 100
 n_bins = 100
 consolidated_frequencies_ = zeros(Float64, n_bins, n_bins)
-heat_0=surface()
+heat_0=heatmap()
 j=1
 #n=1
 
@@ -415,7 +415,7 @@ for j in 1
       consolidated_frequencies_.+= frequencies_norm
       # Crear heatmap
       if j == 1 && n == 1
-        heat_0 = surface!(x_bins,
+        heat_0 = heatmap(x_bins,
          y_bins, 
          consolidated_frequencies_,
          xlabel="Na1", 
@@ -424,7 +424,7 @@ for j in 1
          color=cgrad(:thermal, rev=true),
          clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
       else
-        heat_0 = surface(x_bins,
+        heat_0 = heatmap!(x_bins,
          y_bins, 
          consolidated_frequencies_,
          xlabel="Na1", 
@@ -441,3 +441,72 @@ end
 heat_0
 surface!(background_color=:transparent, grid=true)
 savefig("Figure_4b_surface.png")
+
+
+
+
+n_simulaciones = 100
+n_H = length(H_span)
+n_Cij = length(cij_span)
+
+# Matrices para almacenar la abundancia promediada de cada especie
+abundance_matrix_N1 = zeros(n_H, n_Cij)
+abundance_matrix_N2 = zeros(n_H, n_Cij)
+
+for j in 1:n_Cij
+    cij = cij_span[j]  # Componente de competencia simétrica
+
+    for n in 1:n_H
+        H = H_span[n]  # Valor de explotación
+        
+        # Variables para acumular abundancias
+        total_N1 = 0.0
+        total_N2 = 0.0
+        total_count = 0
+
+        for i in 1:n_simulaciones
+            # Generar valores aleatorios para parámetros
+            t_0 = t0_ + 0.0001 * randn()
+            k = k_ + 0.01 * randn()
+            r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
+            K = K_ + 0.1 * randn()
+            gamma = [size_growth_rate[1] + 0.01 * randn(), size_growth_rate[2] + 0.01 * randn()]
+            d = [d_[1], d_[2]]
+            Smax = Smax_ + 0.1 * randn()
+
+            # Condiciones iniciales
+            U0_ = [10^4, 10^4, mean([33.4, 37.4]), mean([34.6, 37.5])]
+
+            # Resolver el problema diferencial
+            prob = ODEProblem(SLC!, U0_, t_span, [t_0, k, r, K, H, d, Smax, gamma, cij])
+            sol = solve(prob, maxiters=1000)
+
+            # Calcular la abundancia final (o promedio en el tiempo)
+            Na1_final = mean([sol.u[m][1] for m in 1:length(sol.t)])
+            Na2_final = mean([sol.u[m][2] for m in 1:length(sol.t)])
+
+            # Sumar a las abundancias totales
+            total_N1 += Na1_final
+            total_N2 += Na2_final
+            total_count += 1
+        end
+
+        # Promediar abundancia y almacenar en la matriz correspondiente
+        abundance_matrix_N1[n, j] = total_N1 / total_count
+        abundance_matrix_N2[n, j] = total_N2 / total_count
+    end
+end
+
+# Crear heatmaps
+p1 = heatmap(H_span, cij_span, abundance_matrix_N1',
+             xlabel="H", ylabel="Cij", 
+             title="Abundancia Promediada de N1",
+             color=cgrad(:thermal, rev=true))
+
+p2 = heatmap(H_span, cij_span, abundance_matrix_N2',
+             xlabel="H", ylabel="Cij", 
+             title="Abundancia Promediada de N2",
+             color=cgrad(:thermal, rev=true))
+
+display(p1)
+display(p2)
