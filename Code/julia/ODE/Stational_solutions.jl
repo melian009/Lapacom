@@ -310,10 +310,11 @@ max_N2 = maximum(df3.N_2)
 color_gradient = cgrad(:viridis)  # Puedes cambiar a otras paletas como :plasma, :inferno, etc.
 
 # Crear heatmaps con el gradiente basado en el rango de valores de df3
-heatmap(H_span, cij_span, mean_N1.^(-1),
+heatmap(H_span, cij_span, mean_N1,
         xlabel="H", ylabel="cij", title="N1",
         color=color_gradient, clims=(min_N1, max_N1))
-
+savefig("N1_heatmap.png")
 heatmap(H_span, cij_span, mean_N2,
         xlabel="H", ylabel="cij", title="N2",
         color=color_gradient, clims=(min_N2, max_N2))
+savefig("N2_heatmap.png")
