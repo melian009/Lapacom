@@ -65,8 +65,8 @@ function SLC!(du, u, p, t)
   
   du[1] = dNa1 = r[1] * R_1 * Na1 * ((K - Na1)/ K) - d[1] * Na1 - (1 - periodX(t)) * H * Na1 - cij * Na2 * Na1 #N1 
   du[2] = dNa2 = r[2] * R_2 * Na2 * ((K - Na2)/ K) - d[2] * Na2 - (1 - periodX(t)) * H * Na2 - cij * Na1 * Na2 #N2
-   # du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
-   # du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
+  du[3] = dSa1 = gamma[1] * Sa1 * (1 - Sa1 / (Smax - Smax * H * (1 - periodX(t))))
+  du[4] = dSa2 = gamma[2] * Sa2 * (1 - Sa2 / (Smax - Smax * H * (1 - periodX(t))))
 
 end
 
@@ -82,18 +82,20 @@ size_growth_rate = [0.32,0.36] #0.00014898749263737575
 t0_ = 365.14*0.42
 k_= 0.42
 
+
 K_ = 64000.00    # Carrying capacity
 Smax_ = 53.0             # Maximum size for adults
 #         t_0, k,  r,  K,  H ,  d, Smax,  gamma
 
 n_simulaciones = 100 # Número de simulaciones
 t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
-t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
+t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución (10 years)
 
 
 h_span = length(0:0.1:1)  # Número de elementos en el rango
 H_r = range(0, 1, length=h_span)  # Rango de H
 Cij_r = range(0, 1, length=h_span)  # Rango de Cij
+
 
 # Convertir los rangos en vectores
 H_span = collect(H_r)
@@ -128,13 +130,13 @@ cij = cij_span[j]  #Simetric competence component
     # Realizamos las simulaciones
      for i in 1:n_simulaciones
       # Generamos valores aleatorios para los parámetros (distribución normal)
-      t_0 = t0_ + 0.0001 * randn()
-      k = k_ + 0.01 * randn()
-      r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
-      K = K_ + 0.1 * randn()
-      gamma = [size_growth_rate[1] + 0.01 * randn(),size_growth_rate[2] + 0.01 * randn()]
-      d = [d_[1], d_[2]]
-      Smax = Smax_ + 0.1 * randn()
+      t_0 = t0_ + t0_/3 * randn()
+      k = k_ + k_/3 * randn()
+      r = [r_[1] + r_[1]/3 * randn(), r_[2] + r_[2]/3 * randn()] 
+      K = K_ + K_/30 * randn()
+      gamma = [size_growth_rate[1] + size_growth_rate[1]/3 * randn(),size_growth_rate[2] + size_growth_rate[2]/3 * randn()]
+      d = [d_[1]+d_[1]/3*randn(), d_[2]+d_[2]/3*randn()]
+      Smax = Smax_ + Smax_/3 * randn()
     
       # Condiciones iniciales
       U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
@@ -186,6 +188,7 @@ savefig("Figure_4a.png")
 
 
 # Almacenar los conjuntos resultados de las simulaciones
+n_simulaciones = 10 # Número de simulaciones
 resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
     
 resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
@@ -201,15 +204,19 @@ resultados_Sa1 = Float64[]  # Para almacenar los valores de Sa1
 resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
 
 # Realizamos las simulaciones
+i=1
+j=1
+cij = cij_span[j]  #Simetric competence component
+H = H_span[i] #Exploitation
 for i in 1:n_simulaciones
   # Generamos valores aleatorios para los parámetros (distribución normal)
-  t_0 = t0_ + 0.0001 * randn()
-  k = k_ + 0.01 * randn()
-  r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
-  K = K_ + 0.1 * randn()
-  gamma = [size_growth_rate[1] + 0.01 * randn(),size_growth_rate[2] + 0.01 * randn()]
-  d = [d_[1], d_[2]]
-  Smax = Smax_ + 0.1 * randn()
+  t_0 = t0_ + t0_/3 * randn()
+  k = k_ + k_/3 * randn()
+  r = [r_[1] + r_[1]/3 * randn(), r_[2] + r_[2]/3 * randn()] 
+  K = K_ + K_/30 * randn()
+  gamma = [size_growth_rate[1] + size_growth_rate[1]/3 * randn(),size_growth_rate[2] + size_growth_rate[2]/3 * randn()]
+  d = [d_[1]+d_[1]/3*randn(), d_[2]+d_[2]/3*randn()]
+  Smax = Smax_ + Smax_/3 * randn()
     
   # Condiciones iniciales
   U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
@@ -243,6 +250,8 @@ end
 n_bins = 100 # Número de bins para el histograma (resolución)
 x_min, x_max = minimum(resultados_Na1_concatenados), maximum(resultados_Na1_concatenados)
 y_min, y_max = minimum(resultados_Na2_concatenados), maximum(resultados_Na2_concatenados)
+x_min_2, x_max_2 = minimum(resultados_Sa1_concatenados), maximum(resultados_Sa1_concatenados)
+y_min_2, y_max_2 = minimum(resultados_Sa2_concatenados), maximum(resultados_Sa2_concatenados)
   
 # Grid de bins para Na1 y Na2
 x_bins = range(x_min, stop=x_max, length=n_bins)
@@ -273,7 +282,7 @@ Bin_pos = argmax(frequencies_norm)
  # end =# 
 
 # Heatmap
- heatmap!(x_bins,
+ heatmap(x_bins,
  y_bins, 
  frequencies_norm,
  xlabel="Na1", 

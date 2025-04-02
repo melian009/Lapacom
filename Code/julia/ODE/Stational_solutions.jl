@@ -7,7 +7,7 @@ using Statistics
 using Random
 using Distributions
 using StatsPlots
-
+using DataFrames
 
 ```
 Parameters and variables:
@@ -108,222 +108,212 @@ Average sizes before and after marine protected area implementations
 
 ```
   
-#   Parameters for SLC
+#   Parameters for SLC 
+avg_oocytes = [77404, 385613] 
+reggs = avg_oocytes ./ (365.14 * 0.42) 
+r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629  
 
-avg_oocytes = [77404, 385613] # This is the actual mean.
-reggs = avg_oocytes / (365 * 0.42) #aplication of the reproduction period stablish by law. (The time banned for extraction or exploitation for the species)
-r_ = reggs*0.998611*0.971057*0.4820525*0.00629 # conversion rate of adults to eggs.
-# natural death rates per life stage.
-d_ = ([0.55,0.59])/365.14  # see estimate_mortality_rates.jl for how these values were estimated.
-size_growth_rate = [0.32,0.36] #0.00014898749263737575
-t0_ = 365.14*0.42
-k_= 0.42
+# Superposición reproductiva (mínimo esfuerzo reproductivo)
+r_overlap = minimum(r_) / sum(r_) * sum(r_)
 
-K_ = 64000.00    # Carrying capacity
-Smax_ = 53.0             # Maximum size for adults
-#         t_0, k,  r,  K,  H ,  d, Smax,  gamma
+# Coeficientes de competencia
+# c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
+c_11, c_22 = r_[1] / (r_[1] + r_overlap), r_[2] / (r_[2] + r_overlap)        #Intraspecific competition
 
-n_simulaciones = 100 # Número de simulaciones
-t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
-t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
+# Parámetros biológicos
+g_ = [0.998611, 0.971057, 0.4820525, 0.00629] 
+d_ = [0.55, 0.59] ./ 365.14
+size_growth_rate = [0.32, 0.36]
+K_ = 64000.0 
+k_ = 0.42
+Smax_ = 53.0
+
+# Intervalo y tasas de crecimiento
+#N_span = 11
+#H_span = range(0, 1, length=N_span) |> collect
+#cij_span = range(0, 1, length=N_span) |> collect
+
+N_span = 101
+H_span = range(0, 1, length=N_span) |> collect
+cij_span = range(0, 1, length=N_span) |> collect
+
+gamma_ = [0.32, 0.36] ./ (365 * 0.42)
+
+# Tamaños promedio de adultos antes y después de la implementacion de la normativa 
+S_A_MPA_FA = [46.44, 44.45]
+H_emp = [0.693, 0.57]
+
+# -----------------------------
+# Funciones auxiliares
+# -----------------------------
+function reproductive_period(t, t_0, k)
+    return (t % t_0 / t_0) >= k ? 1.0 : 0.0
+end
+
+function reproductive_capacity(avg_size, Smax)
+    Smat = 1.34 * avg_size - 28.06
+    return min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax - Smat)), 0.0), 1.0)
+end
+
+# Modelos de escenarios
+extinction_scenario() = (0.0, 0.0)
+
+function one_species_extinction(cii,cjj, r, R, d, H, K, survivor)
+    return survivor == 1 ? (K*(r[1] * R[1] - d[1] - H) / (cii + r[1] * R[1]), 0.0) :
+                           (0.0, K*(r[2] * R[2] - d[2] - H) / (cjj + r[2] * R[2]))
+end
 
 
-h_span = length(zeros(Float64, size(0:0.1:1)))
-H_r = range(0, 1, length=h_span)
-Cij_r = range(0, 1, length=h_span)
+function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, K)
+if cij == 0.0 || cji == 0.0
+    N1 = (K*(r[1] * R[1] - d[1] - H) / (r[1] * R[1]))
+    N2 = (K*(r[2] * R[2] - d[2] - H) / (r[2] * R[2]))
+    return (abs(N1), abs(N2))
+else
 
-H_span = ones(Float64,h_span)
-cij_span = ones(Float64,h_span)
+Gamma = K^(-1)
+rho1 = r[1] * R[1] - d[1] - H
+rho2 = r[2] * R[2] - d[2] - H
+z1 = cii + r[1] * R[1] * Gamma
+z2 = cjj + r[2] * R[2] * Gamma
+denom = cij * cji - z1 * z2
 
-for i in 1:length(h_span)
-  H_span[i] = H_r[i]
-  cij_span[i] = Cij_r[i]
+# Poblaciones de equilibrio
+N1, N2 = (cij * rho1 - z1 * rho1) / denom, (cji * rho2 - z2 * rho2) / denom
+
+# Asegurar que las poblaciones no sean negativas
+return (max(N1), max(N2))
+end
 end
 
 
 #Fig 4a: with discrete leyend
+# -----------------------------
+# Simulaciones
+# -----------------------------
+N_simulations = 100
+t0_ = 365.14 * 0.42
 
- for j in 1:11 # Cij
-    cij = cij_span[j]  #Simetric competence component
-    
-    for n in 1:11 # H 
-        H = H_span[n] #Exploitation
-        
-        # Almacenar los conjuntos resultados de cada simulación
-        
-        resultados_t = Float64[]  # Para almacenar los valores de t
-        
-        resultados_Na1 = Float64[]  # Para almacenar los valores de Na1
-        resultados_Na2 = Float64[]  # Para almacenar los valores de Na2
 
-        resultados_Sa1 = Float64[]  # Para almacenar los valores de Sa1
-        resultados_Sa2 = Float64[]  # Para almacenar los valores de Sa2
+extinction_results, one_species_results, coexistence_results = [], [], []
 
-        # Almacenar los conjuntos resultados de todas las simulaciones del escenario
-        resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
-        
-        resultados_Na1_concatenados = Float64[]  # Para almacenar los valores de Na1
-        resultados_Na2_concatenados = Float64[]  # Para almacenar los valores de Na2
-        resultados_Sa1_concatenados = Float64[]  # Para almacenar los valores de Sa1
-        resultados_Sa2_concatenados = Float64[]  # Para almacenar los valores de Sa2
-    
-       
-    
-        # Realizamos las simulaciones
-        for i in 1:n_simulaciones
-        # Generamos valores aleatorios para los parámetros (distribución normal)
-        t_0 = t0_ + 0.0001 * randn()
-        k = k_ + 0.01 * randn()
-        r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
-        K = K_ + 0.1 * randn()
-        gamma = [size_growth_rate[1] + 0.01 * randn(),size_growth_rate[2] + 0.01 * randn()]
-        d = [d_[1], d_[2]]
-        Smax = Smax_ + 0.1 * randn()
-        
-        #Condiciones iniciales
-        U0_ = [10^4,10^4, mean([33.4,37.4]), mean([34.6,37.5])]
-        
-        #Definir el problema diferencial
-        prob = ODEProblem(SLC!, U0_, t_span, [t_0, k, r, K, H, d, Smax, gamma, cij])
-        
-        #Resolver el problema
-        sol = solve(prob, maxiters=500)
-        
-        #Almacenar las soluciones de t, Na1, Na2, Sa1, Sa2
-        for m in 1:size(sol.t , 1)
-        push!(resultados_t, sol.t[m])
-        push!(resultados_Na1, sol.u[m][1])
-        push!(resultados_Na2, sol.u[m][2])
-        push!(resultados_Sa1, sol.u[m][3])
-        push!(resultados_Sa2, sol.u[m][4])
-        end
-        
-        #Concatenar los resultados para obtener las soluciones completas de Na1, Na2, Sa1, Sa2
-        #Iterations (days)
-        resultados_t_concatenados = vcat(resultados_t...)
-        #Abundance (individuals)
-        resultados_Na1_concatenados = vcat(resultados_Na1...)
-        resultados_Na2_concatenados = vcat(resultados_Na2...)
-        #Size (mm)
-        resultados_Sa1_concatenados = vcat(resultados_Sa1...)
-        resultados_Sa2_concatenados = vcat(resultados_Sa2...)
-    
-        end  #fin del bucle de simulaciones
 
-        #Graficar los resultados
-        if j == 1 && n == 1
-        limt_cycle = plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-            xlabel="N1", ylabel="N2", 
-            label="H=$H, Cij=$cij",  color = cgrad(:viridis,H),linewidth=5)
-        else
-        limt_cycle =  plot!(resultados_Na1_concatenados, resultados_Na2_concatenados, 
-        label="H=$H, Cij=$cij", linewidth=5)
-        end
-    display(limt_cycle)
+Threads.@threads for n in 1:N_span
+    cij = cij_span[n]
+    cji = cij
+    for j in 1:N_span
+    H = H_span[j]
+    for i in 1:N_simulations
+    k = k_ #+ k_ * randn()
+    r = [r_[1] #+ (r_[1]) * randn()
+    , r_[2] #+ (r_[2]) * randn()
+    ] 
+    K = K_ #+ (K_) * randn()
+    d = [d_[1] #+(d_[1]) * randn()
+    , d_[2] #+ (d_[2]) * randn()
+    ]
+    Smax = Smax_ #+ (Smax_) * randn()
+    
+    R_ = [reproductive_capacity(S_A_MPA_FA[1], Smax), reproductive_capacity(S_A_MPA_FA[2], Smax)]
+    
+    push!(extinction_results, (cij, H, extinction_scenario()))
+    push!(one_species_results, (cij, H, one_species_extinction(c_11,c_22, r, R_, d, H, K, 1), 
+                                one_species_extinction(c_11,c_22, r, R_, d, H, K, 2)))
+    push!(coexistence_results, (cij, H, coexistence_scenario(cij, cji,c_11,c_22, r_, R_, d, H, K)))
     end
 end
-    
-plot!(legend=false)
-xlims!(0, 7.0*10^4)
-ylims!(0, 7.0*10^4)
-plot!(background_color=:transparent, grid=true)
-
-
-# #Fig 4b: with discrete leyend
-# Variables para almacenar las frecuencias consolidadas
-n_simulaciones = 100
-n_bins = 100
-consolidated_frequencies_ = zeros(Float64, n_bins, n_bins)
-heat_0=surface()
-j=1
-#n=1
-
-for j in 1
-  cij = cij_span[j]  # Componente de competencia simétrica
-  for n in 1:11
-      H = H_span[n]  # Valor de explotación      
-      # Reiniciar resultados para esta combinación de H y cij
-      resultados_Na1_concatenados = Float64[]
-      resultados_Na2_concatenados = Float64[]
-      resultados_Sa1_concatenados = Float64[]
-      resultados_Sa2_concatenados = Float64[]
-
-      for i in 1:n_simulaciones
-          # Generar valores aleatorios para parámetros
-          t_0 = t0_ + 0.0001 * randn()
-          k = k_ + 0.01 * randn()
-          r = [r_[1] + 0.01 * randn(), r_[2] + 0.01 * randn()] 
-          K = K_ + 0.1 * randn()
-          gamma = [size_growth_rate[1] + 0.01 * randn(), size_growth_rate[2] + 0.01 * randn()]
-          d = [d_[1], d_[2]]
-          Smax = Smax_ + 0.1 * randn()
-
-          # Condiciones iniciales
-          U0_ = [10^4, 10^4, mean([33.4, 37.4]), mean([34.6, 37.5])]
-
-          # Resolver el problema diferencial
-          prob = ODEProblem(SLC!, U0_, t_span, [t_0, k, r, K, H, d, Smax, gamma, cij])
-          sol = solve(prob, maxiters=1000)
-
-          # Almacenar resultados de Na1 y Na2
-          for m in 1:length(sol.t)
-              push!(resultados_Na1_concatenados, sol.u[m][1])
-              push!(resultados_Na2_concatenados, sol.u[m][2])
-              push!(resultados_Sa1_concatenados, sol.u[m][3])
-              push!(resultados_Sa2_concatenados, sol.u[m][4])
-
-          end
-      end
-
-      # Rango y la Resolución del grid para Na1 y Na2
-      x_min, x_max = 0, 6.7*10^4
-      y_min, y_max = 0, 6.7*10^4
-      # Grid de bins para Na1 y Na2
-      x_bins = range(x_min, stop=x_max, length=n_bins)
-      y_bins = range(y_min, stop=y_max, length=n_bins)
-      # Contabilizar frecuencias para esta combinación de H y cij
-      local_frequencies = zeros(Int, n_bins, n_bins)
-
-      for i in 1:length(resultados_Na1_concatenados)
-          # Localización del bin correspondiente para Na1 y Na2
-          x_bin = searchsortedlast(x_bins, resultados_Na1_concatenados[i])
-          y_bin = searchsortedlast(y_bins, resultados_Na2_concatenados[i])
-      
-          # Verificar que los índices estén dentro de los límites
-          if x_bin > 0 && x_bin <= n_bins && y_bin > 0 && y_bin <= n_bins
-              local_frequencies[x_bin, y_bin] += 1
-          end
-      end
-
-      # Normalizar frecuencias 
-      frequencies_norm = local_frequencies / sum(local_frequencies)
-      # Acumular en las frecuencias consolidadas
-      consolidated_frequencies_.+= frequencies_norm
-      # Crear heatmap
-      if j == 1 && n == 1
-        heat_0 = surface!(x_bins,
-         y_bins, 
-         consolidated_frequencies_,
-         xlabel="Na1", 
-         ylabel="Na2", 
-         title="(Na1 vs Na2)", 
-         color=cgrad(:thermal, rev=false),
-         clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
-      else
-        heat_0 = surface(x_bins,
-         y_bins, 
-         consolidated_frequencies_,
-         xlabel="Na1", 
-         ylabel="Na2", 
-         title="(Na1 vs Na2)", 
-         color=cgrad(:thermal, rev=false),
-         clims=(minimum(consolidated_frequencies_), maximum(consolidated_frequencies_)))
-      end
-      display(heat_0)
-  end
 end
 
-# Mostrar gráfico final
-heat_0
-surface!(background_color=:transparent, grid=true)
+extinction_results
+one_species_results 
+coexistence_results
+# -----------------------------
+# Resultados
+# -----------------------------
+df1 = DataFrame(cij= getindex.(extinction_results, 1),
+                H = getindex.(extinction_results, 2),
+                N_1 = getindex.(getindex.(extinction_results, 3),1),
+                N_2 = getindex.(getindex.(extinction_results, 3),1))
+df2 = DataFrame(cij = first.(one_species_results),
+                H = getindex.(getindex.(one_species_results, 2), 1),
+                N1_PRIMA = getindex.(getindex.(one_species_results, 3), 1),
+                N2_0 = getindex.(getindex.(one_species_results, 3), 2),
+                N1_0 = getindex.(getindex.(one_species_results, 4), 1),
+                N2_PRIMA = getindex.(getindex.(one_species_results, 4), 2))
+df3 = DataFrame(cij= getindex.(coexistence_results, 1),
+                H = getindex.(coexistence_results, 2),
+                N_1 = getindex.(getindex.(coexistence_results, 3),1),
+                N_2 = getindex.(getindex.(coexistence_results, 3),2))
 
+# Filtrar valores positivos
+df1_H_0_c0 = filter(row -> row.H == 0.0 && row.cij == 0.0, df1)
+df1_H_0_c1 = filter(row -> row.H == 0.0 && row.cij == 1.0, df1)
+df1_H_1_c0 = filter(row -> row.H == 1.0 && row.cij == 0.0, df1)
+df1_H_1_c1 = filter(row -> row.H == 1.0 && row.cij == 1.0, df1)
+
+
+df2_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df2)
+df2_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df2)
+df2_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df2)
+df2_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df2)
+
+
+df3_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df3)
+df3_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df3)
+df3_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df3)
+df3_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df3)
+
+ 
+# Coexistence scemarop
+scatter(df3_H_0_c0.N_1, df3_H_0_c0.N_2, label="H = 0; cij = 0", color=:yellow, legend=:outertop)
+scatter!(df3_H_0_c1.N_1, df3_H_0_c1.N_2, label="H = 0; cij = 1", color=:blue, legend=:outertop)
+scatter!(df3_H_1_c0.N_1, df3_H_1_c0.N_2, label="H = 1; cij = 0", color=:green, legend=:outertop)
+scatter!(df3_H_1_c1.N_1, df3_H_1_c1.N_2, label="H = 1; cij = 1", color=:red, legend=:outertop)
+xlabel!("N1")
+ylabel!("N2")
+
+n_bins = 101
+mean_N1 = zeros(Float64, n_bins, n_bins)
+mean_N2 = zeros(Float64, n_bins, n_bins)
+# Filtrar los datos para H=0 y cij=0
+
+# Iterar sobre todas las combinaciones de H y cij
+for n in 1:N_span
+    H = H_span[n]
+    for j in 1:N_span
+        cij = cij_span[j]
+        
+        # Filtrar los datos para la combinación actual de H y cij
+        subset = filter(row -> row.H == H && row.cij == cij, df3)
+        
+        # Calcular la media de N_1 y N_2 para la combinación actual de H y cij
+        if !isempty(subset)
+            mean_N1[n, j] = mean(filter(x -> x > 0, subset.N_1))  # Ignorar valores no positivos
+            mean_N2[n, j] = mean(filter(x -> x > 0, subset.N_2))  # Ignorar valores no positivos
+        else
+            mean_N1[n, j] = 0  # Asignar NaN si no hay datos
+            mean_N2[n, j] = 0  # Asignar NaN si no hay datos
+        end
+    end
+end
+mean_N1 
+mean_N2 
+
+# Calcular los límites del rango de valores de N_1 y N_2 en el DataFrame original
+min_N1 = minimum(filter(x -> x > 0, df3.N_1))  # Ignorar valores no positivos
+max_N1 = maximum(df3.N_1)
+
+min_N2 = minimum(filter(x -> x > 0, df3.N_2))  # Ignorar valores no positivos
+max_N2 = maximum(df3.N_2)
+
+# Crear un gradiente de color continuo
+color_gradient = cgrad(:viridis)  # Puedes cambiar a otras paletas como :plasma, :inferno, etc.
+
+# Crear heatmaps con el gradiente basado en el rango de valores de df3
+heatmap(H_span, cij_span, mean_N1.^(-1),
+        xlabel="H", ylabel="cij", title="N1",
+        color=color_gradient, clims=(min_N1, max_N1))
+
+heatmap(H_span, cij_span, mean_N2,
+        xlabel="H", ylabel="cij", title="N2",
+        color=color_gradient, clims=(min_N2, max_N2))
