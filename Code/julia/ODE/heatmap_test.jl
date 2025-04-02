@@ -91,20 +91,15 @@ t_span = (0.0, 365.14*10)  # Tiempo de simulación (por ejemplo, un año)
 t_plt = 0.0:1.0:365.14*10  # Los tiempos en los que se evaluará la solución
 
 
-h_span = length(zeros(Float64, size(0:0.1:1)))
-H_r = range(0, 1, length=h_span)
-Cij_r = range(0, 1, length=h_span)
+h_span = length(0:0.1:1)  # Número de elementos en el rango
+H_r = range(0, 1, length=h_span)  # Rango de H
+Cij_r = range(0, 1, length=h_span)  # Rango de Cij
 
-H_span = ones(Float64,h_span)
-cij_span = ones(Float64,h_span)
-
-for i in 1:length(h_span)
-  H_span[i] = H_r[i]
-  cij_span[i] = Cij_r[i]
-end
-
+# Convertir los rangos en vectores
+H_span = collect(H_r)
+cij_span = collect(Cij_r)
+ 
 limt_cycle = plot()
-H_span 
 
 #Fig 4a: with discrete leyend
 for j in 1:11 # Cij
@@ -189,13 +184,7 @@ ylims!(0, 7.0*10^4)
 plot!(background_color=:transparent, grid=true)
 savefig("Figure_4a.png")
 
-j = 1
-n = 2
 
-H = H_span[n] #Exploitation
-cij = cij_span[j]  #Simetric competence component
-
-    
 # Almacenar los conjuntos resultados de las simulaciones
 resultados_t_concatenados = Float64[]  # Para almacenar los valores de t
     
@@ -446,7 +435,7 @@ savefig("Figure_4b_surface.png")
 
 
 
-N_span = 101
+N_span = 11  # Número de elementos en el rango
 H_span = range(0, 1, length=N_span) |> collect
 cij_span = range(0, 1, length=N_span) |> collect
 
