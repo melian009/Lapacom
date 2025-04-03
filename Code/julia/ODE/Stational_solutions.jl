@@ -204,15 +204,13 @@ Threads.@threads for n in 1:N_span
     for j in 1:N_span
     H = H_span[j]
     for i in 1:N_simulations
-    k = k_ #+ k_ * randn()
-    r = [r_[1] #+ (r_[1]) * randn()
-    , r_[2] #+ (r_[2]) * randn()
+    k = k_ + k_*1/10 * randn()
+    r = [r_[1] + (r_[1])*1/10 * randn()
+    , r_[2] + (r_[2])*1/10 * randn()
     ] 
-    K = K_ #+ (K_) * randn()
-    d = [d_[1] #+(d_[1]) * randn()
-    , d_[2] #+ (d_[2]) * randn()
-    ]
-    Smax = Smax_ #+ (Smax_) * randn()
+    K = K_ + (K_)*1/10 * randn()
+    d = [d_[1] + (d_[1])*1/10* randn(), d_[2] + (d_[2])*1/10 * randn()]
+    Smax = Smax_ + (Smax_)*1/10 * randn()
     
     R_ = [reproductive_capacity(S_A_MPA_FA[1], Smax), reproductive_capacity(S_A_MPA_FA[2], Smax)]
     
@@ -244,7 +242,7 @@ df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 H = getindex.(coexistence_results, 2),
                 N_1 = getindex.(getindex.(coexistence_results, 3),1),
                 N_2 = getindex.(getindex.(coexistence_results, 3),2))
-
+                show(df3, allrows=true)
 # Filtrar valores positivos
 df1_H_0_c0 = filter(row -> row.H == 0.0 && row.cij == 0.0, df1)
 df1_H_0_c1 = filter(row -> row.H == 0.0 && row.cij == 1.0, df1)
@@ -263,14 +261,30 @@ df3_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df3)
 df3_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df3)
 df3_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df3)
 
+df3_H_05_c0 = filter(row -> row.H == 0.5 && row.cij == 0, df3)
+df3_H_0_c05 = filter(row -> row.H == 0 && row.cij == 0.5, df3)
+df3_H_0_c05 = filter(row -> row.H == 0.5 && row.cij == 0.5, df3)
+
+df3_H_0 = filter(row -> row.H == 0, df3)
+df3_c_0 = filter(row -> row.cij == 0, df3)
+
  
 # Coexistence scemarop
-scatter(df3_H_0_c0.N_1, df3_H_0_c0.N_2, label="H = 0; cij = 0", color=:yellow, legend=:outertop)
-scatter!(df3_H_0_c1.N_1, df3_H_0_c1.N_2, label="H = 0; cij = 1", color=:blue, legend=:outertop)
-scatter!(df3_H_1_c0.N_1, df3_H_1_c0.N_2, label="H = 1; cij = 0", color=:green, legend=:outertop)
-scatter!(df3_H_1_c1.N_1, df3_H_1_c1.N_2, label="H = 1; cij = 1", color=:red, legend=:outertop)
+scatter(log10.(df3_H_0_c0.N_1), log10.(df3_H_0_c0.N_2), label="H = 0; cij = 0", color=:yellow, legend=:outertop)
+scatter!(log10.(df3_H_0_c1.N_1), log10.(df3_H_0_c1.N_2), label="H = 0; cij = 1", color=:blue, legend=:outertop)
+scatter!(log10.(df3_H_1_c0.N_1), log10.(df3_H_1_c0.N_2), label="H = 1; cij = 0", color=:green, legend=:outertop)
+scatter!(log10.(df3_H_1_c1.N_1), log10.(df3_H_1_c1.N_2), label="H = 1; cij = 1", color=:red, legend=:outertop)
+
+scatter!(log10.(df3_H_05_c0.N_1), log10.(df3_H_05_c0.N_2), label="H = 0.5; cij = 0", color=:black, legend=:outertop)
+scatter!(log10.(df3_H_0_c05.N_1), log10.(df3_H_0_c05.N_2), label="H = 0; cij = 0.5", color=:brown, legend=:outertop)
+scatter!(log10.(df3_H_05_c05.N_1), log10.(df3_H_05_c05.N_2), label="H = 0.5; cij = 0.5", color=:orange, legend=:outertop)
+
+scatter!((df3_H_0.N_1), (df3_H_0.N_2), label="cij= [0,1]; H = 0; ", color=:brown, legend=:outertop)
+scatter((df3_c_0.N_1), (df3_c_0.N_2), label="H=[0,1]; cij = 0", color=:orange, legend=:outertop)
+
 xlabel!("N1")
 ylabel!("N2")
+savefig("Fig4a.png")
 
 n_bins = 101
 mean_N1 = zeros(Float64, n_bins, n_bins)
@@ -296,25 +310,25 @@ for n in 1:N_span
         end
     end
 end
-mean_N1 
-mean_N2 
+log10.(mean_N1) 
+log10.(mean_N2) 
 
 # Calcular los límites del rango de valores de N_1 y N_2 en el DataFrame original
-min_N1 = minimum(filter(x -> x > 0, df3.N_1))  # Ignorar valores no positivos
-max_N1 = maximum(df3.N_1)
+min_N1 = log10(minimum(filter(x -> x > 0, df3.N_1))) # Ignorar valores no positivos
+max_N1 = log10(maximum(df3.N_1))
 
-min_N2 = minimum(filter(x -> x > 0, df3.N_2))  # Ignorar valores no positivos
-max_N2 = maximum(df3.N_2)
+min_N2 = log10(minimum(filter(x -> x > 0, df3.N_2)))  # Ignorar valores no positivos
+max_N2 = log10(maximum(df3.N_2))
 
 # Crear un gradiente de color continuo
 color_gradient = cgrad(:viridis)  # Puedes cambiar a otras paletas como :plasma, :inferno, etc.
 
 # Crear heatmaps con el gradiente basado en el rango de valores de df3
-heatmap(H_span, cij_span, mean_N1,
+heatmap(H_span, cij_span, log10.(mean_N1),
         xlabel="H", ylabel="cij", title="N1",
         color=color_gradient, clims=(min_N1, max_N1))
 savefig("N1_heatmap.png")
-heatmap(H_span, cij_span, mean_N2,
+heatmap(H_span, cij_span, log10.(mean_N2),
         xlabel="H", ylabel="cij", title="N2",
         color=color_gradient, clims=(min_N2, max_N2))
 savefig("N2_heatmap.png")
