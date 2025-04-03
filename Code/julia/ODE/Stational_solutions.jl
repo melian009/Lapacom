@@ -191,7 +191,7 @@ end
 # -----------------------------
 # Simulaciones
 # -----------------------------
-N_simulations = 100
+N_simulations = 10
 t0_ = 365.14 * 0.42
 
 
@@ -268,6 +268,12 @@ df3_H_0_c05 = filter(row -> row.H == 0.5 && row.cij == 0.5, df3)
 df3_H_0 = filter(row -> row.H == 0, df3)
 df3_c_0 = filter(row -> row.cij == 0, df3)
 
+df3_H_05 = filter(row -> row.H == 1, df3)
+df3_c_055 = filter(row -> row.cij == 1, df3)
+
+
+df3_H_1 = filter(row -> row.H == 1, df3)
+df3_c_1 = filter(row -> row.cij == 1, df3)
  
 # Coexistence scemarop
 scatter(log10.(df3_H_0_c0.N_1), log10.(df3_H_0_c0.N_2), label="H = 0; cij = 0", color=:yellow, legend=:outertop)
@@ -279,8 +285,11 @@ scatter!(log10.(df3_H_05_c0.N_1), log10.(df3_H_05_c0.N_2), label="H = 0.5; cij =
 scatter!(log10.(df3_H_0_c05.N_1), log10.(df3_H_0_c05.N_2), label="H = 0; cij = 0.5", color=:brown, legend=:outertop)
 scatter!(log10.(df3_H_05_c05.N_1), log10.(df3_H_05_c05.N_2), label="H = 0.5; cij = 0.5", color=:orange, legend=:outertop)
 
+scatter!((df3_c_0.N_1), (df3_c_0.N_2), label="H=[0,1]; cij = 0", color=:orange, legend=:outertop)
 scatter!((df3_H_0.N_1), (df3_H_0.N_2), label="cij= [0,1]; H = 0; ", color=:brown, legend=:outertop)
-scatter((df3_c_0.N_1), (df3_c_0.N_2), label="H=[0,1]; cij = 0", color=:orange, legend=:outertop)
+scatter!((df3_H_1.N_1), (df3_H_1.N_2), label="cij= [0,1]; H = 1; ", color=:red, legend=:outertop)
+scatter((df3_c_1.N_1), (df3_c_1.N_2), label="H= [0,1]; cij = 1; ", color=:purple, legend=:outertop)
+
 
 xlabel!("N1")
 ylabel!("N2")
@@ -320,6 +329,10 @@ max_N1 = log10(maximum(df3.N_1))
 min_N2 = log10(minimum(filter(x -> x > 0, df3.N_2)))  # Ignorar valores no positivos
 max_N2 = log10(maximum(df3.N_2))
 
+
+
+
+
 # Crear un gradiente de color continuo
 color_gradient = cgrad(:viridis)  # Puedes cambiar a otras paletas como :plasma, :inferno, etc.
 
@@ -332,3 +345,62 @@ heatmap(H_span, cij_span, log10.(mean_N2),
         xlabel="H", ylabel="cij", title="N2",
         color=color_gradient, clims=(min_N2, max_N2))
 savefig("N2_heatmap.png")
+
+
+heatmap(df3.H, df3.cij, df3.N_1)
+
+minimum(df)
+
+# Filtrar valores positivos de N_1
+df3_positive = filter(row -> row.N_1 > 0, df3)
+
+# Obtener valores únicos de H y cij
+unique_H = unique(df3_positive.H)
+unique_cij = unique(df3_positive.cij)
+
+# Crear una matriz para los valores de N_1
+heatmap_matrix = fill(NaN, length(unique_H), length(unique_cij))
+
+# Llenar la matriz con los valores de N_1
+for row in eachrow(df3_positive)
+    i = findfirst(==(row.H), unique_H)
+    j = findfirst(==(row.cij), unique_cij)
+    heatmap_matrix[i, j] = row.N_1
+end
+
+# Crear el heatmap
+heatmap(unique_H, unique_cij, log10.(heatmap_matrix),
+        xlabel="H", ylabel="cij", title="Heatmap de N1",
+        color=:viridis, clims=(log10.(minimum(df3_positive.N_1)), log10.(maximum(df3_positive.N_1))))
+
+
+       #Agrupar por las combinaciones únicas de cij y H
+        grouped_df3 = groupby(df3, [:cij, :H])
+        
+        # Calcular el promedio de N_1 para cada combinación única de cij y H
+        averaged_df3 = combine(grouped_df3, :N_1 => mean => :mean_N_1)
+        
+        # Obtener valores únicos de H y cij
+        unique_H = unique(averaged_df3.H)
+        unique_cij = unique(averaged_df3.cij)
+        
+        # Crear una matriz para los valores promedio de N_1
+        heatmap_matrix = fill(NaN, length(unique_H), length(unique_cij))
+        
+        # Llenar la matriz con los valores promedio de N_1
+        for row in eachrow(averaged_df3)
+            i = findfirst(==(row.H), unique_H)
+            j = findfirst(==(row.cij), unique_cij)
+            heatmap_matrix[i, j] = row.mean_N_1
+        end
+        
+        using NaNMath  # Para manejar NaN si es necesario
+
+# Filtrar valores positivos en la matriz del heatmap
+filtered_heatmap_matrix = map(x -> x > 0 ? x : NaN, heatmap_matrix)
+
+# Crear el heatmap con la matriz filtrada
+heatmap(unique_H, unique_cij, filtered_heatmap_matrix,
+        xlabel="H", ylabel="cij", title="Heatmap de N1 (Solo Positivos)",
+        color=:viridis, clims=(log10.(minimum(filtered_heatmap_matrix, dims=1)),
+         log10.(maximum(filtered_heatmap_matrix, dims=1))))
