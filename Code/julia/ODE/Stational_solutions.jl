@@ -9,7 +9,7 @@ using Distributions
 using StatsPlots
 using DataFrames
 
-```
+#=```
 Parameters and variables:
  - Ne = eggs abundance
  - Nt = trocophore abuncance
@@ -30,7 +30,7 @@ Parameters and variables:
  - da = natural mortality rate or death rate for adults (da = [0.55,0.59]) # Note: empirical estimated values
  - Smax = maximum adult size estimated (56.0mm) # Note: Empirical value from the sample analized
  - gamma = adult growth rate (gamma=[0.32,0.36] year^{-1})
-```
+```=#
 
 #Simple Life Cycle ([Na1,Sa1], Patella aspera, [Na2,Sa2], Patella ordinaria)
 
@@ -68,7 +68,7 @@ function SLC!(du, u, p, t)
   
 end
 
-```
+#=
 Empirical estimated mortalities (Z,d,F) and exploitation rates (E):
 
  {Patella ordinaria} (Henriques, 2012)
@@ -106,7 +106,7 @@ Average sizes before and after marine protected area implementations
  Patella aspera = 43.41mm
  Patella ordinaria = 45.72mm
 
-```
+=#
   
 #   Parameters for SLC 
 avg_oocytes = [77404, 385613] 
@@ -129,7 +129,7 @@ k_ = 0.42
 Smax_ = 53.0
 
 # Intervalo y tasas de crecimiento
-#N_span = 11
+#N_span = 101
 #H_span = range(0, 1, length=N_span) |> collect
 #cij_span = range(0, 1, length=N_span) |> collect
 
@@ -191,7 +191,7 @@ end
 # -----------------------------
 # Simulaciones
 # -----------------------------
-N_simulations = 10
+N_simulations = 101
 t0_ = 365.14 * 0.42
 
 
@@ -243,6 +243,7 @@ df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 N_1 = getindex.(getindex.(coexistence_results, 3),1),
                 N_2 = getindex.(getindex.(coexistence_results, 3),2))
                 show(df3, allrows=true)
+
 # Filtrar valores positivos
 df1_H_0_c0 = filter(row -> row.H == 0.0 && row.cij == 0.0, df1)
 df1_H_0_c1 = filter(row -> row.H == 0.0 && row.cij == 1.0, df1)
@@ -257,23 +258,27 @@ df2_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df2)
 
 
 df3_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df3)
+
 df3_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df3)
+
 df3_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df3)
 df3_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df3)
 
 df3_H_05_c0 = filter(row -> row.H == 0.5 && row.cij == 0, df3)
+
 df3_H_0_c05 = filter(row -> row.H == 0 && row.cij == 0.5, df3)
-df3_H_0_c05 = filter(row -> row.H == 0.5 && row.cij == 0.5, df3)
+df3_H_05_c05 = filter(row -> row.H == 0.5 && row.cij == 0.5, df3)
 
 df3_H_0 = filter(row -> row.H == 0, df3)
 df3_c_0 = filter(row -> row.cij == 0, df3)
 
-df3_H_05 = filter(row -> row.H == 1, df3)
-df3_c_055 = filter(row -> row.cij == 1, df3)
+df3_H_05 = filter(row -> row.H == 0.5, df3)
+df3_c_05 = filter(row -> row.cij == 0.5, df3)
 
 
 df3_H_1 = filter(row -> row.H == 1, df3)
 df3_c_1 = filter(row -> row.cij == 1, df3)
+
  
 # Coexistence scemarop
 scatter(log10.(df3_H_0_c0.N_1), log10.(df3_H_0_c0.N_2), label="H = 0; cij = 0", color=:yellow, legend=:outertop)
@@ -285,15 +290,17 @@ scatter!(log10.(df3_H_05_c0.N_1), log10.(df3_H_05_c0.N_2), label="H = 0.5; cij =
 scatter!(log10.(df3_H_0_c05.N_1), log10.(df3_H_0_c05.N_2), label="H = 0; cij = 0.5", color=:brown, legend=:outertop)
 scatter!(log10.(df3_H_05_c05.N_1), log10.(df3_H_05_c05.N_2), label="H = 0.5; cij = 0.5", color=:orange, legend=:outertop)
 
-scatter!((df3_c_0.N_1), (df3_c_0.N_2), label="H=[0,1]; cij = 0", color=:orange, legend=:outertop)
+scatter((df3_c_0.N_1), (df3_c_0.N_2), label="H=[0,1]; cij = 0", color=:orange, legend=:outertop)
 scatter!((df3_H_0.N_1), (df3_H_0.N_2), label="cij= [0,1]; H = 0; ", color=:brown, legend=:outertop)
 scatter!((df3_H_1.N_1), (df3_H_1.N_2), label="cij= [0,1]; H = 1; ", color=:red, legend=:outertop)
-scatter((df3_c_1.N_1), (df3_c_1.N_2), label="H= [0,1]; cij = 1; ", color=:purple, legend=:outertop)
+scatter!((df3_c_1.N_1), (df3_c_1.N_2), label="H= [0,1]; cij = 1; ", color=:purple, legend=:outertop)
 
 
 xlabel!("N1")
 ylabel!("N2")
-savefig("Fig4a.png")
+# savefig("Fig4a.png")
+
+=#
 
 n_bins = 101
 mean_N1 = zeros(Float64, n_bins, n_bins)
@@ -311,24 +318,25 @@ for n in 1:N_span
         
         # Calcular la media de N_1 y N_2 para la combinación actual de H y cij
         if !isempty(subset)
-            mean_N1[n, j] = mean(filter(x -> x > 0, subset.N_1))  # Ignorar valores no positivos
-            mean_N2[n, j] = mean(filter(x -> x > 0, subset.N_2))  # Ignorar valores no positivos
+            mean_N1[n, j] = mean(subset.N_1)  # Ignorar valores no positivos
+            mean_N2[n, j] = mean(subset.N_2)  # Ignorar valores no positivos
         else
-            mean_N1[n, j] = 0  # Asignar NaN si no hay datos
-            mean_N2[n, j] = 0  # Asignar NaN si no hay datos
+            mean_N1[n, j] = mean(abs(subset.N_1))  # Asignar NaN si no hay datos
+            mean_N2[n, j] = mean(abs(subset.N_2))  # Asignar NaN si no hay datos
         end
     end
 end
-log10.(mean_N1) 
-log10.(mean_N2) 
+
+mean_N1
+mean_N2
+
 
 # Calcular los límites del rango de valores de N_1 y N_2 en el DataFrame original
-min_N1 = log10(minimum(filter(x -> x > 0, df3.N_1))) # Ignorar valores no positivos
-max_N1 = log10(maximum(df3.N_1))
+min_N1 = minimum(filter(x -> x > 0, df3.N_1)) # Ignorar valores no positivos
+max_N1 = maximum(filter(x -> x < 10000, df3.N_1))
 
-min_N2 = log10(minimum(filter(x -> x > 0, df3.N_2)))  # Ignorar valores no positivos
-max_N2 = log10(maximum(df3.N_2))
-
+min_N2 = minimum(filter(x -> x > 0, df3.N_2))  # Ignorar valores no positivos
+max_N2 = maximum(filter(x -> x < 10000, df3.N_2))
 
 
 
@@ -337,19 +345,16 @@ max_N2 = log10(maximum(df3.N_2))
 color_gradient = cgrad(:viridis)  # Puedes cambiar a otras paletas como :plasma, :inferno, etc.
 
 # Crear heatmaps con el gradiente basado en el rango de valores de df3
-heatmap(H_span, cij_span, log10.(mean_N1),
+heatmap(H_span, cij_span, (mean_N1),
         xlabel="H", ylabel="cij", title="N1",
         color=color_gradient, clims=(min_N1, max_N1))
 savefig("N1_heatmap.png")
-heatmap(H_span, cij_span, log10.(mean_N2),
+heatmap(H_span, cij_span, (mean_N2),
         xlabel="H", ylabel="cij", title="N2",
         color=color_gradient, clims=(min_N2, max_N2))
 savefig("N2_heatmap.png")
 
 
-heatmap(df3.H, df3.cij, df3.N_1)
-
-minimum(df)
 
 # Filtrar valores positivos de N_1
 df3_positive = filter(row -> row.N_1 > 0, df3)
@@ -397,10 +402,10 @@ heatmap(unique_H, unique_cij, log10.(heatmap_matrix),
         using NaNMath  # Para manejar NaN si es necesario
 
 # Filtrar valores positivos en la matriz del heatmap
-filtered_heatmap_matrix = map(x -> x > 0 ? x : NaN, heatmap_matrix)
+filtered_heatmap_matrix = map(x -> x > 0 ? x : 1, heatmap_matrix)
 
 # Crear el heatmap con la matriz filtrada
 heatmap(unique_H, unique_cij, filtered_heatmap_matrix,
         xlabel="H", ylabel="cij", title="Heatmap de N1 (Solo Positivos)",
-        color=:viridis, clims=(log10.(minimum(filtered_heatmap_matrix, dims=1)),
-         log10.(maximum(filtered_heatmap_matrix, dims=1))))
+        color=:viridis, clims=(minimum(filtered_heatmap_matrix, dims=1)),
+         maximum(filtered_heatmap_matrix, dims=1))
