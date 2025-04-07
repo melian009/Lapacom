@@ -244,7 +244,7 @@ df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 N_2 = getindex.(getindex.(coexistence_results, 3),2))
                 show(df3, allrows=true)
 
-# Filtrar valores positivos
+#= Filtrar valores positivos
 df1_H_0_c0 = filter(row -> row.H == 0.0 && row.cij == 0.0, df1)
 df1_H_0_c1 = filter(row -> row.H == 0.0 && row.cij == 1.0, df1)
 df1_H_1_c0 = filter(row -> row.H == 1.0 && row.cij == 0.0, df1)
