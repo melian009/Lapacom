@@ -379,27 +379,27 @@ heatmap(unique_H, unique_cij, log10.(heatmap_matrix),
         color=:viridis, clims=(log10.(minimum(df3_positive.N_1)), log10.(maximum(df3_positive.N_1))))
 
 
-       #Agrupar por las combinaciones únicas de cij y H
-        grouped_df3 = groupby(df3, [:cij, :H])
+#Agrupar por las combinaciones únicas de cij y H
+grouped_df3 = groupby(df3, [:cij, :H])
         
-        # Calcular el promedio de N_1 para cada combinación única de cij y H
-        averaged_df3 = combine(grouped_df3, :N_1 => mean => :mean_N_1)
+ # Calcular el promedio de N_1 para cada combinación única de cij y H
+averaged_df3 = combine(grouped_df3, :N_1 => mean => :mean_N_1)
         
-        # Obtener valores únicos de H y cij
-        unique_H = unique(averaged_df3.H)
-        unique_cij = unique(averaged_df3.cij)
+# Obtener valores únicos de H y cij
+unique_H = unique(averaged_df3.H)
+unique_cij = unique(averaged_df3.cij)
         
-        # Crear una matriz para los valores promedio de N_1
-        heatmap_matrix = fill(NaN, length(unique_H), length(unique_cij))
+# Crear una matriz para los valores promedio de N_1
+heatmap_matrix = fill(NaN, length(unique_H), length(unique_cij))
         
-        # Llenar la matriz con los valores promedio de N_1
-        for row in eachrow(averaged_df3)
-            i = findfirst(==(row.H), unique_H)
-            j = findfirst(==(row.cij), unique_cij)
-            heatmap_matrix[i, j] = row.mean_N_1
-        end
+# Llenar la matriz con los valores promedio de N_1
+for row in eachrow(averaged_df3)
+    i = findfirst(==(row.H), unique_H)
+    j = findfirst(==(row.cij), unique_cij)
+    heatmap_matrix[i, j] = row.mean_N_1
+end
         
-        using NaNMath  # Para manejar NaN si es necesario
+using NaNMath  # Para manejar NaN si es necesario
 
 # Filtrar valores positivos en la matriz del heatmap
 filtered_heatmap_matrix = map(x -> x > 0 ? x : 1, heatmap_matrix)
