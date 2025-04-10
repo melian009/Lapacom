@@ -129,7 +129,7 @@ k_ = 0.42
 Smax_ = 53.0
 
 # Intervalo y tasas de crecimiento
-#N_span = 101
+#N_span = 11
 #H_span = range(0, 1, length=N_span) |> collect
 #cij_span = range(0, 1, length=N_span) |> collect
 
@@ -318,11 +318,17 @@ for n in 1:N_span
         
         # Calcular la media de N_1 y N_2 para la combinación actual de H y cij
         if !isempty(subset)
-            mean_N1[n, j] = mean(subset.N_1)  # Ignorar valores no positivos
-            mean_N2[n, j] = mean(subset.N_2)  # Ignorar valores no positivos
+            # Reemplazar valores negativos por ceros
+            subset.N_1 = map(x -> x < 0 ? 0 : x, subset.N_1)
+            subset.N_2 = map(x -> x < 0 ? 0 : x, subset.N_2)
+            
+            # Calcular la media de los valores ajustados
+            mean_N1[n, j] = mean(subset.N_1)
+            mean_N2[n, j] = mean(subset.N_2)
         else
-            mean_N1[n, j] = mean(abs(subset.N_1))  # Asignar NaN si no hay datos
-            mean_N2[n, j] = mean(abs(subset.N_2))  # Asignar NaN si no hay datos
+            # Si el subset está vacío, asignar ceros
+            mean_N1[n, j] = 0.0
+            mean_N2[n, j] = 0.0
         end
     end
 end
