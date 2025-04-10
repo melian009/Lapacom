@@ -12,27 +12,27 @@ using NaNMath
 
 
 #=```
-Parameters and variables:
- - Ne = eggs abundance
- - Nt = trocophore abuncance
- - Nv = veliger abuncance
- - Nj = juvenile abuncance
- - Na = adults abuncance
+#Parameters and variables:
+# - Ne = eggs abundance
+# - Nt = trocophore abuncance
+# - Nv = veliger abuncance
+# - Nj = juvenile abuncance
+# - Na = adults abuncance
 
- - Sa = adults size (Average sizes Before MPS+FULL = [46.44,44.45])
+# - Sa = adults size (Average sizes Before MPS+FULL = [46.44,44.45])
  
- - r = population growth rate [9.17,5.03]
- - R = reproductive capacity
- - K = carrying capacity (k = 1e^4)
- - X = Reproductive period [1,0] 
- - (1-X) = Exploitation period [1,0]
- - H = Exploitation rate (H = [0.639,0.57])
- - gEA = instant conversion rate of life stages (EA = Eggs to Adults) (gEA = 0.006)
- - de = natural mortality rate or death rate for eggs (de = [de_po,de_pa]) # Note: this value needs to be defined.
- - da = natural mortality rate or death rate for adults (da = [0.55,0.59]) # Note: empirical estimated values
- - Smax = maximum adult size estimated (56.0mm) # Note: Empirical value from the sample analized
- - gamma = adult growth rate (gamma=[0.32,0.36] year^{-1})
-```=#
+# - r = population growth rate [9.17,5.03]
+# - R = reproductive capacity
+# - K = carrying capacity (k = 1e^4)
+# - X = Reproductive period [1,0] 
+# - (1-X) = Exploitation period [1,0]
+# - H = Exploitation rate (H = [0.639,0.57])
+# - gEA = instant conversion rate of life stages (EA = Eggs to Adults) (gEA = 0.006)
+# - de = natural mortality rate or death rate for eggs (de = [de_po,de_pa]) # Note: this value needs to be defined.
+# - da = natural mortality rate or death rate for adults (da = [0.55,0.59]) # Note: empirical estimated values
+# - Smax = maximum adult size estimated (56.0mm) # Note: Empirical value from the sample analized
+# - gamma = adult growth rate (gamma=[0.32,0.36] year^{-1})
+#```=#
 
 #Simple Life Cycle ([Na1,Sa1], Patella aspera, [Na2,Sa2], Patella ordinaria)
 
@@ -243,65 +243,27 @@ df2 = DataFrame(cij = first.(one_species_results),
 df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 H = getindex.(coexistence_results, 2),
                 N_1 = getindex.(getindex.(coexistence_results, 3),1),
-                N_2 = getindex.(getindex.(coexistence_results, 3),2),
-                show(df3, allrows=true))
-#= Filtrar valores positivos
-df1_H_0_c0 = filter(row -> row.H == 0.0 && row.cij == 0.0, df1)
-df1_H_0_c1 = filter(row -> row.H == 0.0 && row.cij == 1.0, df1)
-df1_H_1_c0 = filter(row -> row.H == 1.0 && row.cij == 0.0, df1)
-df1_H_1_c1 = filter(row -> row.H == 1.0 && row.cij == 1.0, df1)
+                N_2 = getindex.(getindex.(coexistence_results, 3),2))
+
+# Filtrar los datos para H=0
+df3_H_0 = subset(df3, :H => ByRow(==(0)))
+df3_c_0 = subset(df3, :cij => ByRow(==(0)))
 
 
-df2_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df2)
-df2_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df2)
-df2_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df2)
-df2_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df2)
+scatter(df3_c_0.N_1, df3_c_0.N_2,
+        zcolor=df3_c_0[!, :H],  # Usar los valores de cij para el gradiente de color
+        xlabel="N1", ylabel="N2", title="",
+        colorbar_title="", palette=:plasma, label="cij=0, H = [0,1]")
+
+scatter!(df3_H_0.N_1, df3_H_0.N_2,
+        zcolor=df3_H_0[!, :cij],  # Usar los valores de cij para el gradiente de color
+        xlabel="N1", ylabel="N2", title="",
+        colorbar_title="H = [0,1]; cij = [0,1]", palette=:plasma,
+        markerstrokecolor=:red,markerstrokewidth=1, label = "H=0, cij = [0,1]")
+
+savefig("Figure_4a_grad.png")
 
 
-df3_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df3)
-
-df3_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df3)
-
-df3_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df3)
-df3_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df3)
-
-df3_H_05_c0 = filter(row -> row.H == 0.5 && row.cij == 0, df3)
-
-df3_H_0_c05 = filter(row -> row.H == 0 && row.cij == 0.5, df3)
-df3_H_05_c05 = filter(row -> row.H == 0.5 && row.cij == 0.5, df3)
-
-df3_H_0 = filter(row -> row.H == 0, df3)
-df3_c_0 = filter(row -> row.cij == 0, df3)
-
-df3_H_05 = filter(row -> row.H == 0.5, df3)
-df3_c_05 = filter(row -> row.cij == 0.5, df3)
-
-
-df3_H_1 = filter(row -> row.H == 1, df3)
-df3_c_1 = filter(row -> row.cij == 1, df3)
-
- 
-# Coexistence scemarop
-scatter(log10.(df3_H_0_c0.N_1), log10.(df3_H_0_c0.N_2), label="H = 0; cij = 0", color=:yellow, legend=:outertop)
-scatter!(log10.(df3_H_0_c1.N_1), log10.(df3_H_0_c1.N_2), label="H = 0; cij = 1", color=:blue, legend=:outertop)
-scatter!(log10.(df3_H_1_c0.N_1), log10.(df3_H_1_c0.N_2), label="H = 1; cij = 0", color=:green, legend=:outertop)
-scatter!(log10.(df3_H_1_c1.N_1), log10.(df3_H_1_c1.N_2), label="H = 1; cij = 1", color=:red, legend=:outertop)
-
-scatter!(log10.(df3_H_05_c0.N_1), log10.(df3_H_05_c0.N_2), label="H = 0.5; cij = 0", color=:black, legend=:outertop)
-scatter!(log10.(df3_H_0_c05.N_1), log10.(df3_H_0_c05.N_2), label="H = 0; cij = 0.5", color=:brown, legend=:outertop)
-scatter!(log10.(df3_H_05_c05.N_1), log10.(df3_H_05_c05.N_2), label="H = 0.5; cij = 0.5", color=:orange, legend=:outertop)
-
-scatter((df3_c_0.N_1), (df3_c_0.N_2), label="H=[0,1]; cij = 0", color=:orange, legend=:outertop)
-scatter!((df3_H_0.N_1), (df3_H_0.N_2), label="cij= [0,1]; H = 0; ", color=:brown, legend=:outertop)
-scatter!((df3_H_1.N_1), (df3_H_1.N_2), label="cij= [0,1]; H = 1; ", color=:red, legend=:outertop)
-scatter!((df3_c_1.N_1), (df3_c_1.N_2), label="H= [0,1]; cij = 1; ", color=:purple, legend=:outertop)
-
-
-xlabel!("N1")
-ylabel!("N2")
-# savefig("Fig4a.png")
-
-=#
 
 n_bins = 101
 mean_N1 = zeros(Float64, n_bins, n_bins)
