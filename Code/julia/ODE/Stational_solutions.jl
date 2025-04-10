@@ -243,9 +243,8 @@ df2 = DataFrame(cij = first.(one_species_results),
 df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 H = getindex.(coexistence_results, 2),
                 N_1 = getindex.(getindex.(coexistence_results, 3),1),
-                N_2 = getindex.(getindex.(coexistence_results, 3),2)),
-                show(df3, allrows=true)
-
+                N_2 = getindex.(getindex.(coexistence_results, 3),2),
+                show(df3, allrows=true))
 #= Filtrar valores positivos
 df1_H_0_c0 = filter(row -> row.H == 0.0 && row.cij == 0.0, df1)
 df1_H_0_c1 = filter(row -> row.H == 0.0 && row.cij == 1.0, df1)
@@ -310,20 +309,21 @@ mean_N2 = zeros(Float64, n_bins, n_bins)
 # Filtrar los datos para H=0 y cij=0
 
 # Iterar sobre todas las combinaciones de H y cij
+# Iterar sobre todas las combinaciones de H y cij
 for n in 1:N_span
     cij = cij_span[n]
     for j in 1:N_span
         H = H_span[j]
-        
-        # Filtrar los datos para la combinación actual de H y cij
-        subset = filter(row -> row.H == H && row.cij == cij, df3)
-        
-        # Calcular la media de N_1 y N_2 para la combinación actual de H y cij
+
+        # Filtrar los datos para la combinación actual de H y cij del DataFrame df3
+        subset = filter(row -> hasproperty(row, :H) && hasproperty(row, :cij) && row.H == H && row.cij == cij, df3)
+
+        # Verificar si el subset no está vacío
         if !isempty(subset)
-            # Reemplazar valores negativos por ceros
-            subset.N_1 = map(x -> x < 0 ? 0 : x, subset.N_1)
-            subset.N_2 = map(x -> x < 0 ? 0 : x, subset.N_2)
-            
+            # Reemplazar valores negativos por ceros en las columnas N_1 y N_2
+            subset.N_1 .= map(x -> x < 0 ? 0 : x, subset.N_1)
+            subset.N_2 .= map(x -> x < 0 ? 0 : x, subset.N_2)
+
             # Calcular la media de los valores ajustados
             mean_N1[n, j] = mean(subset.N_1)
             mean_N2[n, j] = mean(subset.N_2)
@@ -366,17 +366,17 @@ averaged_df3_N2 = combine(groupby(df3, [:cij, :H]), :N_2 => mean => :mean_N_2)
 
 # Crear matriz para los valores promedio de N_1
 unique_H_N1, unique_cij_N1 = unique(averaged_df3_N1.H), unique(averaged_df3_N1.cij)
-heatmap_matrix_N1 = fill(NaN, length(unique_H_N1), length(unique_cij_N1))
+heatmap_matrix_N1 = fill(NaN, length(unique_cij_N1), length(unique_H_N1))
 for row in eachrow(averaged_df3_N1)
-    heatmap_matrix_N1[findfirst(==(row.H), unique_H_N1), findfirst(==(row.cij),
-    unique_cij_N1)] = row.mean_N_1
+    heatmap_matrix_N1[findfirst(==(row.cij), unique_cij_N1), findfirst(==(row.H),
+    unique_H_N1)] = row.mean_N_1
 end
 # Crear matriz para los valores promedio de N_2
 unique_H_N2, unique_cij_N2 = unique(averaged_df3_N2.H), unique(averaged_df3_N2.cij)
-heatmap_matrix_N2 = fill(NaN, length(unique_H_N2), length(unique_cij_N2))
+heatmap_matrix_N2 = fill(NaN, length(unique_cij_N2), length(unique_H_N2))
 for row in eachrow(averaged_df3_N2)
-    heatmap_matrix_N2[findfirst(==(row.H), unique_H_N2), findfirst(==(row.cij),
-    unique_cij_N2)] = row.mean_N_2
+    heatmap_matrix_N2[findfirst(==(row.cij), unique_cij_N2), findfirst(==(row.H),
+    unique_H_N2)] = row.mean_N_2
 end
 
 
@@ -386,23 +386,30 @@ filtered_heatmap_matrix_N2 = map(x -> isinf(x) ? K_ : (x > 0 ? x : 1), heatmap_m
 
 
 # Crear y guardar el heatmap filtrado
-heatmap(unique_H_N1, unique_cij_N1, log10.(filtered_heatmap_matrix_N1),
-        xlabel="H", ylabel="cij", title="H vs Cij for N1",
-        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N1)), maximum(log10.(filtered_heatmap_matrix_N1))))
+pyplot()  # Cambiar al backend PyPlot
+heatmap(unique_H_N1, unique_cij_N1, log2.(filtered_heatmap_matrix_N1),
+        xlabel="H", ylabel="cij", title="H vs Cij for N1", clabel="Ln(N1)",
+        color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N1)),
+         maximum(log2.(filtered_heatmap_matrix_N1))))
 savefig("Heatmap_N1.png")
-heatmap(unique_H_N2, unique_cij_N2, log10.(filtered_heatmap_matrix_N2),
+heatmap(unique_H_N2, unique_cij_N2, log2.(filtered_heatmap_matrix_N2),
         xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
-        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N2)), maximum(log10.(filtered_heatmap_matrix_N2))))
+        color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N2)),
+         maximum(log2.(filtered_heatmap_matrix_N2))),clabel="Ln(N2)")
 savefig("Heatmap_N2.png")
 
 
 # Crear y guardar el heatmap filtrado
-surface(unique_H_N1, unique_cij_N1, log10.(filtered_heatmap_matrix_N1),
+surface(unique_H_N1, unique_cij_N1, log2.(filtered_heatmap_matrix_N1),
         xlabel="H", ylabel="cij", title="H vs Cij for N1",
-        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N1)), maximum(log10.(filtered_heatmap_matrix_N1))))
-savefig("Heatmap_N1.png")
-surface(unique_H_N2, unique_cij_N2, log10.(filtered_heatmap_matrix_N2),
+        color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N1)),
+         maximum(log2.(filtered_heatmap_matrix_N1))),
+         camera=(80, 10))
+#savefig("Surface_N1.png")
+surface(unique_H_N2, unique_cij_N2, log2.(filtered_heatmap_matrix_N2),
         xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
-        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N2)), maximum(log10.(filtered_heatmap_matrix_N2))))
-savefig("Heatmap_N2.png")
+        color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N2)),
+        maximum(log2.(filtered_heatmap_matrix_N2))),
+        camera=(80, 10))
+#savefig("Surface_N2.png")
 
