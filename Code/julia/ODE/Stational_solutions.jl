@@ -386,12 +386,16 @@ filtered_heatmap_matrix_N2 = map(x -> isinf(x) ? K_ : (x > 0 ? x : 1), heatmap_m
 
 
 # Crear y guardar el heatmap filtrado
+using Plots
 pyplot()  # Cambiar al backend PyPlot
+
 heatmap(unique_H_N1, unique_cij_N1, log2.(filtered_heatmap_matrix_N1),
         xlabel="H", ylabel="cij", title="H vs Cij for N1", clabel="Ln(N1)",
         color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N1)),
          maximum(log2.(filtered_heatmap_matrix_N1))))
-savefig("Heatmap_N1.png")
+         
+         savefig("Heatmap_N1.png")
+
 heatmap(unique_H_N2, unique_cij_N2, log2.(filtered_heatmap_matrix_N2),
         xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
         color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N2)),
