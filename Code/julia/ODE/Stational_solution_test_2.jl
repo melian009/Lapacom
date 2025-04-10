@@ -8,10 +8,10 @@ using Random
 using Distributions
 using StatsPlots
 using DataFrames
+using NaNMath  
 
-# -----------------------------
-# Parámetros iniciales
-# -----------------------------
+
+#   Parameters for SLC 
 avg_oocytes = [77404, 385613] 
 reggs = avg_oocytes ./ (365.14 * 0.42) 
 r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629  
@@ -20,7 +20,7 @@ r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629
 r_overlap = minimum(r_) / sum(r_) * sum(r_)
 
 # Coeficientes de competencia
-# c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
+c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
 c_11, c_22 = r_[1] / (r_[1] + r_overlap), r_[2] / (r_[2] + r_overlap)        #Intraspecific competition
 
 # Parámetros biológicos
@@ -31,12 +31,7 @@ K_ = 64000.0
 k_ = 0.42
 Smax_ = 53.0
 
-# Intervalo y tasas de crecimiento
-#N_span = 11
-#H_span = range(0, 1, length=N_span) |> collect
-#cij_span = range(0, 1, length=N_span) |> collect
-
-N_span = 11
+N_span = 101
 H_span = range(0, 1, length=N_span) |> collect
 cij_span = range(0, 1, length=N_span) |> collect
 
@@ -46,8 +41,6 @@ gamma_ = [0.32, 0.36] ./ (365 * 0.42)
 S_A_MPA_FA = [46.44, 44.45]
 H_emp = [0.693, 0.57]
 
-# -----------------------------
-# Funciones auxiliares
 # -----------------------------
 function reproductive_period(t, t_0, k)
     return (t % t_0 / t_0) >= k ? 1.0 : 0.0
@@ -61,6 +54,7 @@ end
 # Modelos de escenarios
 extinction_scenario() = (0.0, 0.0)
 
+
 function one_species_extinction(cii,cjj, r, R, d, H, K, survivor)
     return survivor == 1 ? (K*(r[1] * R[1] - d[1] - H) / (cii + r[1] * R[1]), 0.0) :
                            (0.0, K*(r[2] * R[2] - d[2] - H) / (cjj + r[2] * R[2]))
@@ -68,11 +62,12 @@ end
 
 
 function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, K)
-if cij == 0.0 || cji == 0.0
+#if cij == 0.0 || cji == 0.0
     N1 = (K*(r[1] * R[1] - d[1] - H) / (r[1] * R[1]))
     N2 = (K*(r[2] * R[2] - d[2] - H) / (r[2] * R[2]))
     return (abs(N1), abs(N2))
-else
+#else
+#end
 
 Gamma = K^(-1)
 rho1 = r[1] * R[1] - d[1] - H
@@ -81,35 +76,35 @@ z1 = cii + r[1] * R[1] * Gamma
 z2 = cjj + r[2] * R[2] * Gamma
 denom = cij * cji - z1 * z2
 
+
 # Poblaciones de equilibrio
 N1, N2 = (cij * rho1 - z1 * rho1) / denom, (cji * rho2 - z2 * rho2) / denom
-
 # Asegurar que las poblaciones no sean negativas
 return (max(N1), max(N2))
-end
+#end
 end
 
-# -----------------------------
-# Simulaciones
-# -----------------------------
-N_simulations = 50
+
+N_simulations = 1
 t0_ = 365.14 * 0.42
+
 
 extinction_results, one_species_results, coexistence_results = [], [], []
 
-#Threads.@threads for n in 1:10:11
-Threads.@threads for n in 1:10:11
+
+Threads.@threads for n in 1:N_span
     cij = cij_span[n]
     cji = cij
-    #for j in 1:10:11  
-        for j in 1:10:11  
+    for j in 1:N_span
     H = H_span[j]
     for i in 1:N_simulations
-    k = k_ + k_/3 * randn()
-    r = [r_[1] + r_[1]/3 * randn(), r_[2] + r_[2]/3 * randn()] 
-    K = K_ + K_/10 * randn()
-    d = [d_[1]+d_[1]/3*randn(), d_[2]+d_[2]/3*randn()]
-    Smax = Smax_ + Smax_/3 * randn()
+    k = k_ + k_*1/10 * randn()
+    r = [r_[1] + (r_[1])*1/10 * randn()
+    , r_[2] + (r_[2])*1/10 * randn()
+    ] 
+    K = K_ + (K_)*1/10 * randn()
+    d = [d_[1] + (d_[1])*1/10* randn(), d_[2] + (d_[2])*1/10 * randn()]
+    Smax = Smax_ + (Smax_)*1/10 * randn()
     
     R_ = [reproductive_capacity(S_A_MPA_FA[1], Smax), reproductive_capacity(S_A_MPA_FA[2], Smax)]
     
@@ -121,228 +116,71 @@ Threads.@threads for n in 1:10:11
 end
 end
 
-# -----------------------------
-# Resultados
-# -----------------------------
-df1 = DataFrame(cij= getindex.(extinction_results, 1),
-                H = getindex.(extinction_results, 2),
-                N_1 = getindex.(getindex.(extinction_results, 3),1),
-                N_2 = getindex.(getindex.(extinction_results, 3),1))
-df2 = DataFrame(cij = first.(one_species_results),
-                H = getindex.(getindex.(one_species_results, 2), 1),
-                N1_PRIMA = getindex.(getindex.(one_species_results, 3), 1),
-                N2_0 = getindex.(getindex.(one_species_results, 3), 2),
-                N1_0 = getindex.(getindex.(one_species_results, 4), 1),
-                N2_PRIMA = getindex.(getindex.(one_species_results, 4), 2))
+extinction_results
+one_species_results 
+coexistence_results
+
 df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 H = getindex.(coexistence_results, 2),
                 N_1 = getindex.(getindex.(coexistence_results, 3),1),
-                N_2 = getindex.(getindex.(coexistence_results, 3),2))
-
-# Filtrar valores positivos
-df1_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df1)
-df1_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df1)
-df1_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df1)
-df1_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df1)
-
-
-df2_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df2)
-df2_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df2)
-df2_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df2)
-df2_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df2)
+                N_2 = getindex.(getindex.(coexistence_results, 3),2)
+                )
+               
+                
+#n_bins = 101
+#mean_N1 = zeros(Float64, n_bins, n_bins)
+#mean_N2 = zeros(Float64, n_bins, n_bins)
 
 
-df3_H_0_c0 = filter(row -> row.H == 0 && row.cij == 0, df3)
-df3_H_0_c1 = filter(row -> row.H == 0 && row.cij == 1, df3)
-df3_H_1_c0 = filter(row -> row.H == 1 && row.cij == 0, df3)
-df3_H_1_c1 = filter(row -> row.H == 1 && row.cij == 1, df3)
+#for n in 1:N_span
+#    cij = cij_span[n]
+#     for j in 1:N_span
+#        H = H_span[j]
+
+        # Filtrar los datos para la combinación actual de H y cij del DataFrame df3
+#        subset = filter(row -> hasproperty(row, :H) && hasproperty(row, :cij) && row.H == H && row.cij == cij, df3)
+
+        # Verificar si el subset no está vacío
+#        if !isempty(subset)
+            # Reemplazar valores negativos por ceros en las columnas N_1 y N_2
+#            subset.N_1 .= map(x -> x < 0 ? 0 : x, subset.N_1)
+#            subset.N_2 .= map(x -> x < 0 ? 0 : x, subset.N_2)
+
+            # Calcular la media de los valores ajustados
+#            mean_N1[n, j] = mean(subset.N_1)
+#            mean_N2[n, j] = mean(subset.N_2)
+#        else
+            # Si el subset está vacío, asignar ceros
+#            mean_N1[n, j] = 0.0
+#            mean_N2[n, j] = 0.0
+#        end
+#    end
+#end
 
 
-
-# -----------------------------
-# Visualización
-# -----------------------------
-#scatter(df2.N1_PRIMA, df2.N2_0, label="N2 = 0;  N1 = N1*", color=:red)
-#scatter!(df2.N1_0, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:green)
-scatter(df3.N_1, df3.N_2, label="H = $H; cij = $cij", color=:yellow, legend=:outertop)
-#scatter!(df1.N_1, df1.N_2, label="N1 = N2 = 0", color=:black)
-xlabel!("N1")
-ylabel!("N2")
-#savefig("Figure_4a.png")
-
-
-scatter(df3_H_0_c0.N_1, df3_H_0_c0.N_2, label="H = 0; cij = 0", color=:yellow, legend=:outertop)
-scatter!(df3_H_0_c1.N_1, df3_H_0_c1.N_2, label="H = 0; cij = 1", color=:blue, legend=:outertop)
-scatter!(df3_H_1_c0.N_1, df3_H_1_c0.N_2, label="H = 1; cij = 0", color=:green, legend=:outertop)
-scatter!(df3_H_1_c1.N_1, df3_H_1_c1.N_2, label="H = 1; cij = 1", color=:red, legend=:outertop)
-xlabel!("N1")
-ylabel!("N2")
+#size(df3.N_1)
+#mean_N1
+#mean_N2
 
 
 
+# Calcular los límites del rango de valores de N_1 y N_2 en el DataFrame original
+#min_N1 = minimum(filter(x -> x > 0, df3.N_1)) # Ignorar valores no positivos
+#max_N1 = maximum(filter(x -> x < K_, df3.N_1))
+
+#min_N2 = minimum(filter(x -> x > 0, df3.N_2))  # Ignorar valores no positivos
+#max_N2 = maximum(filter(x -> x < K_, df3.N_2))
 
 
-
-# Exploitation Gradient
-#scatter(df1_positive.H, df1_positive.N_1, label="N1 = 0", color=:black)
-#scatter!(df1_positive.H, df1_positive.N_2, label="N2 = 0", color=:grey)
-#scatter!(df2_positive.H, df2_positive.N1_PRIMA, label="N2 = 0;  N1 = N1*", color=:red)
-#scatter!(df2_positive.H, df2_positive.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:pink)
-#scatter!(df3_positive.H, df3_positive.N_1, label="N1 = N1* Coexistencia", color=:darkblue)
-#scatter!(df3_positive.H, df3_positive.N_2, label="N2 = N2* Coexistencia", color=:blue,legend=:outertop)
-#ylabel!("N2")
-#xlabel!("H")
-#ylims!(0,100)
-
-# Competence gradient
-#scatter(df1.cij, df1.N_1, label="N1 = 0", color=:black)
-#scatter!(df1.cij, df1.N_2, label="N2 = 0", color=:grey)
-#scatter!(df2.cij, df2.N1_PRIMA, label="N2 = 0;  N1 = N1*", color=:red)
-#scatter!(df2.cij, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*", color=:pink)
-#scatter!(df3.cij, df3.N_1, label="N1 = N1* Coexistencia", color=:darkblue)
-#scatter!(df3.cij, df3.N_2, label="N2 = N2* Coexistencia", color=:yellow)
-#ylims!(0,100)
-#ylabel!("N2")
-#xlabel!("H")
+sort!(df3, [:cij, :H])
+cij_vals = unique(df3.cij)
+H_vals = unique(df3.H)
+# Reshape into matrix N1
+z = reshape(df3.N_1, length(H_vals), length(cij_vals))  # rows = H, cols = cij
+heatmap(cij_vals,H_vals,z,xlabel="cij",ylabel="H",title="Heatmap of N_1",colorbar_title="N_1",c=:viridis)
 
 
-# Discrete colors for competence and exploitation range values. 
-# Mapping different colors for unice values of cij and H.
-cij_values = unique(df1.cij)
-H_values = unique(df1.H)
-
-# Mapping each unique combination of cij and H to a distinct color.
-color_map = Dict()
-
-# Function to assign a color to each combination (cij, H)
-function get_color(cij, H)
-    key = (cij, H)
-    if !haskey(color_map, key)
-    #If it doesn't have a color assigned, it generates a random one.
-    color_map[key] = RGB(rand(), rand(), rand())
-    end
-    return color_map[key]
-end
-
-# Function to obtain opacity (based on cij and H)
-function get_opacity_4c(cij)
-    # Normalize the cij and H values ​​to obtain an opacity between 0 and 1.
-    cij_norm = (cij - minimum(cij_values)) / (maximum(cij_values) - minimum(cij_values))
-    return (cij_norm)
-end
-
-function get_opacity_4h(H)
-    # Normalize the cij and H values ​​to obtain an opacity between 0 and 1.
-    H_norm = (H - minimum(H_values)) / (maximum(H_values) - minimum(H_values))
-    return (H_norm)
-end
-    
-
-# Plot the points of the first scenario (df1_positive) with colors and opacity according to cij and H
-scatter(df1.N_1, df1.N_2, label="N1 = N2 = 0",
-        xlabel="N1", ylabel="N2",
-        markers=(:diamond, 5),
-        color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-        marker_z=[get_opacity_4c(cij) for cij in df1.cij])
-
-# Only one survivor - Patella ordinaris (df2_positive)
-scatter(df2.N1_PRIMA, df2.N2_0, 
-        label="N2 = 0;  N1 = N1*", 
-        markers=(:square, 5),
-        color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-        marker_z=[get_opacity_4c(cij) for cij in df2.cij])
-
-# Only one survivor - Patella aspera (df2_positive)
-#scatter(df2.N1_0, df2.N2_PRIMA, 
-#         label="N1 = 0;  N2 = N2*", 
-#         color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#         markers=(:square, 5))
-#         ylims!(5.6075*10^4,5.61*10^4)
-
-
-# Coexistence (df3_positive)
-#scatter!(df3.N_1, df3.N_2, 
-#         label="N1 = N1* ;  N2 = N2*", 
-#         color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-#         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-#markers=(:hexagon, 5), legend=:outertop)
-
-
-#xlims!(0,1.5)
-#ylims!(0,2)
-#avefig("Figure_4_a.png")
-# -----------------------------
-
-
-# Exploitation Gradient
-#scatter(df1.H, df1.N_1, label="N1 = 0", 
-#color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#        marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#        markers=(:utriangle, 5))
-
-#scatter!(df1.H, df1.N_2, label="N2 = 0", 
-#color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#        marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#       markers=(:dtriangle, 5))
-
-#scatter!(df2.H, df2.N1_PRIMA, label="N2 = 0;  N1 = N1*", 
-#color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#        markers=(:square, 5))
-
-
-#scatter!(df2.H, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*",
-#        color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#       marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#        markers=(:hentagon, 5))
-
-
-#scatter!(df3.H, df3.N_1, label="N1 = N1* Coexistencia",
-# color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-# marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-# markers=(:diamond, 5))
-
-
-#scatter!(df3.H, df3.N_2, label="N2 = N2* Coexistencia",  color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-# marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-#markers=(:pentagon, 5), legend=:outertop)
-
-#ylims!(0,40)
-
-# Competence gradient
-#scatter(df1.cij, df1.N_1, label="N1 = 0", 
-#color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#        marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#        markers=(:utriangle, 5))
-
-#scatter!(df1.cij, df1.N_2, label="N2 = 0", 
-#color=[get_color(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#        marker_z=[get_opacity(cij, H) for (cij, H) in zip(df1.cij, df1.H)],
-#       markers=(:dtriangle, 5))
-
-#scatter(df2.cij, df2.N1_PRIMA, label="N2 = 0;  N1 = N1*", 
-#color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#         marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#        markers=(:square, 5))
-
-
-#scatter!(df2.cij, df2.N2_PRIMA, label="N1 = 0;  N2 = N2*",
-#        color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#       marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-#        markers=(:hentagon, 5))
-
-
-#scatter(df3.cij, df3.N_1, label="N1 = N1* Coexistencia",
-# color=[get_color(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-# marker_z=[get_opacity(cij, H) for (cij, H) in zip(df2.cij, df2.H)],
-# markers=(:diamond, 5))
-
-
-#scatter!(df3.cij, df3.N_2, label="N2 = N2* Coexistencia",  color=[get_color(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-# marker_z=[get_opacity(cij, H) for (cij, H) in zip(df3.cij, df3.H)],
-#markers=(:pentagon, 5), legend=:outertop)
-
-#xlabel!("Cij")
-#ylabel!("Na")
+# Reshape into matrix N2
+#z = reshape(df3.N_2, length(H_vals), length(cij_vals))  # rows = H, cols = cij
+#heatmap(cij_vals,H_vals,z,xlabel="cij",ylabel="H",title="Heatmap of N_2",colorbar_title="N_2",c=:viridis)
 

@@ -70,45 +70,7 @@ function SLC!(du, u, p, t)
   
 end
 
-#=
-Empirical estimated mortalities (Z,d,F) and exploitation rates (E):
 
- {Patella ordinaria} (Henriques, 2012)
-
- - Natural Mortality rate (d) was 0.55 year^{-1}
- - Fishing mortality rate (F) was 1.24 year^{−1} 
- - Total mortality rate (Z=d+F) was 1.79 year^{−1}; 
- - Exploitation rate (E=F/Z) was 0.693. 
-
- {Patella aspera} (Sousa, 2017)
-
- - Natural mortality (d) was 0.59 year^{-1};
- - Fishing mortality (F) was 0.79 year^{-1};
- - Total mortality (Z=d+F) was 1.38 year^{-1};
- - Exploitation rate (E=F/Z) was 0.57. 
-
-For numerical simulation use these rates (d and E).
-
-Average sizes before and after marine protected area implementations
-
- Before (1996-2006): FULL ACCESS.
- Patella apera = 43.53mm
- Patella ordinaria = 46.26mm
-
- After  (2007-2017): MPA+FULL
- Patella aspera = 44.45mm
- Patella ordinaria = 46.44mm
-
- Only MPS (2007-2017)
- Patella aspera = 50.61mm
- Patella ordinaria = 49.25mm
-
- Only Full Access (2007-2017) 
-
- Patella aspera = 43.41mm
- Patella ordinaria = 45.72mm
-
-=#
   
 #   Parameters for SLC 
 avg_oocytes = [77404, 385613] 
@@ -119,7 +81,7 @@ r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629
 r_overlap = minimum(r_) / sum(r_) * sum(r_)
 
 # Coeficientes de competencia
-# c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
+c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
 c_11, c_22 = r_[1] / (r_[1] + r_overlap), r_[2] / (r_[2] + r_overlap)        #Intraspecific competition
 
 # Parámetros biológicos
@@ -193,7 +155,7 @@ end
 # -----------------------------
 # Simulaciones
 # -----------------------------
-N_simulations = 101
+N_simulations = 10
 t0_ = 365.14 * 0.42
 
 
