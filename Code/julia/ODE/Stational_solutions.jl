@@ -8,6 +8,8 @@ using Random
 using Distributions
 using StatsPlots
 using DataFrames
+using NaNMath  
+
 
 #=```
 Parameters and variables:
@@ -241,7 +243,7 @@ df2 = DataFrame(cij = first.(one_species_results),
 df3 = DataFrame(cij= getindex.(coexistence_results, 1),
                 H = getindex.(coexistence_results, 2),
                 N_1 = getindex.(getindex.(coexistence_results, 3),1),
-                N_2 = getindex.(getindex.(coexistence_results, 3),2))
+                N_2 = getindex.(getindex.(coexistence_results, 3),2)),
                 show(df3, allrows=true)
 
 #= Filtrar valores positivos
@@ -309,9 +311,9 @@ mean_N2 = zeros(Float64, n_bins, n_bins)
 
 # Iterar sobre todas las combinaciones de H y cij
 for n in 1:N_span
-    H = H_span[n]
+    cij = cij_span[n]
     for j in 1:N_span
-        cij = cij_span[j]
+        H = H_span[j]
         
         # Filtrar los datos para la combinación actual de H y cij
         subset = filter(row -> row.H == H && row.cij == cij, df3)
@@ -339,79 +341,68 @@ mean_N2
 
 # Calcular los límites del rango de valores de N_1 y N_2 en el DataFrame original
 min_N1 = minimum(filter(x -> x > 0, df3.N_1)) # Ignorar valores no positivos
-max_N1 = maximum(filter(x -> x < 10000, df3.N_1))
+max_N1 = maximum(filter(x -> x < K_, df3.N_1))
 
 min_N2 = minimum(filter(x -> x > 0, df3.N_2))  # Ignorar valores no positivos
-max_N2 = maximum(filter(x -> x < 10000, df3.N_2))
-
+max_N2 = maximum(filter(x -> x < K_, df3.N_2))
 
 
 
 # Crear un gradiente de color continuo
-color_gradient = cgrad(:viridis)  # Puedes cambiar a otras paletas como :plasma, :inferno, etc.
+color_gradient = cgrad(:viridis)
 
-# Crear heatmaps con el gradiente basado en el rango de valores de df3
-heatmap(H_span, cij_span, (mean_N1),
-        xlabel="H", ylabel="cij", title="N1",
-        color=color_gradient, clims=(min_N1, max_N1))
-savefig("N1_heatmap.png")
-heatmap(H_span, cij_span, (mean_N2),
-        xlabel="H", ylabel="cij", title="N2",
-        color=color_gradient, clims=(min_N2, max_N2))
-savefig("N2_heatmap.png")
-
-
-
-# Filtrar valores positivos de N_1
-df3_positive = filter(row -> row.N_1 > 0, df3)
-
-# Obtener valores únicos de H y cij
-unique_H = unique(df3_positive.H)
-unique_cij = unique(df3_positive.cij)
-
-# Crear una matriz para los valores de N_1
-heatmap_matrix = fill(NaN, length(unique_H), length(unique_cij))
-
-# Llenar la matriz con los valores de N_1
-for row in eachrow(df3_positive)
-    i = findfirst(==(row.H), unique_H)
-    j = findfirst(==(row.cij), unique_cij)
-    heatmap_matrix[i, j] = row.N_1
+# Crear y guardar heatmaps para mean_N1 y mean_N2
+for (data, title, filename, clims) in [(mean_N1, "N1", "N1_heatmap.png", (log10.(min_N1), log10.(max_N1))),
+                                       (mean_N2, "N2", "N2_heatmap.png", (log10.(min_N2), log10.(max_N2)))]
+    hm =heatmap(H_span, cij_span, log10.(data), xlabel="H", ylabel="cij", title=title, 
+    color=color_gradient, clims=clims)
+    display(hm)
 end
 
-# Crear el heatmap
-heatmap(unique_H, unique_cij, log10.(heatmap_matrix),
-        xlabel="H", ylabel="cij", title="Heatmap de N1",
-        color=:viridis, clims=(log10.(minimum(df3_positive.N_1)), log10.(maximum(df3_positive.N_1))))
+# Agrupar por combinaciones únicas de cij y H y calcular promedios
+averaged_df3_N1 = combine(groupby(df3, [:cij, :H]), :N_1 => mean => :mean_N_1)
+averaged_df3_N2 = combine(groupby(df3, [:cij, :H]), :N_2 => mean => :mean_N_2)
 
 
-#Agrupar por las combinaciones únicas de cij y H
-grouped_df3 = groupby(df3, [:cij, :H])
-        
- # Calcular el promedio de N_1 para cada combinación única de cij y H
-averaged_df3 = combine(grouped_df3, :N_1 => mean => :mean_N_1)
-        
-# Obtener valores únicos de H y cij
-unique_H = unique(averaged_df3.H)
-unique_cij = unique(averaged_df3.cij)
-        
-# Crear una matriz para los valores promedio de N_1
-heatmap_matrix = fill(NaN, length(unique_H), length(unique_cij))
-        
-# Llenar la matriz con los valores promedio de N_1
-for row in eachrow(averaged_df3)
-    i = findfirst(==(row.H), unique_H)
-    j = findfirst(==(row.cij), unique_cij)
-    heatmap_matrix[i, j] = row.mean_N_1
+# Crear matriz para los valores promedio de N_1
+unique_H_N1, unique_cij_N1 = unique(averaged_df3_N1.H), unique(averaged_df3_N1.cij)
+heatmap_matrix_N1 = fill(NaN, length(unique_H_N1), length(unique_cij_N1))
+for row in eachrow(averaged_df3_N1)
+    heatmap_matrix_N1[findfirst(==(row.H), unique_H_N1), findfirst(==(row.cij),
+    unique_cij_N1)] = row.mean_N_1
 end
-        
-using NaNMath  # Para manejar NaN si es necesario
+# Crear matriz para los valores promedio de N_2
+unique_H_N2, unique_cij_N2 = unique(averaged_df3_N2.H), unique(averaged_df3_N2.cij)
+heatmap_matrix_N2 = fill(NaN, length(unique_H_N2), length(unique_cij_N2))
+for row in eachrow(averaged_df3_N2)
+    heatmap_matrix_N2[findfirst(==(row.H), unique_H_N2), findfirst(==(row.cij),
+    unique_cij_N2)] = row.mean_N_2
+end
 
-# Filtrar valores positivos en la matriz del heatmap
-filtered_heatmap_matrix = map(x -> x > 0 ? x : 1, heatmap_matrix)
 
-# Crear el heatmap con la matriz filtrada
-heatmap(unique_H, unique_cij, filtered_heatmap_matrix,
-        xlabel="H", ylabel="cij", title="Heatmap de N1 (Solo Positivos)",
-        color=:viridis, clims=(minimum(filtered_heatmap_matrix, dims=1)),
-         maximum(filtered_heatmap_matrix, dims=1))
+# Filtrar valores positivos en la matriz del heatmap y reemplazar Inf por K_
+filtered_heatmap_matrix_N1 = map(x -> isinf(x) ? K_ : (x > 0 ? x : 1), heatmap_matrix_N1)
+filtered_heatmap_matrix_N2 = map(x -> isinf(x) ? K_ : (x > 0 ? x : 1), heatmap_matrix_N2)
+
+
+# Crear y guardar el heatmap filtrado
+heatmap(unique_H_N1, unique_cij_N1, log10.(filtered_heatmap_matrix_N1),
+        xlabel="H", ylabel="cij", title="H vs Cij for N1",
+        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N1)), maximum(log10.(filtered_heatmap_matrix_N1))))
+savefig("Heatmap_N1.png")
+heatmap(unique_H_N2, unique_cij_N2, log10.(filtered_heatmap_matrix_N2),
+        xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
+        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N2)), maximum(log10.(filtered_heatmap_matrix_N2))))
+savefig("Heatmap_N2.png")
+
+
+# Crear y guardar el heatmap filtrado
+surface(unique_H_N1, unique_cij_N1, log10.(filtered_heatmap_matrix_N1),
+        xlabel="H", ylabel="cij", title="H vs Cij for N1",
+        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N1)), maximum(log10.(filtered_heatmap_matrix_N1))))
+savefig("Heatmap_N1.png")
+surface(unique_H_N2, unique_cij_N2, log10.(filtered_heatmap_matrix_N2),
+        xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
+        color=:viridis, clims=(minimum(log10.(filtered_heatmap_matrix_N2)), maximum(log10.(filtered_heatmap_matrix_N2))))
+savefig("Heatmap_N2.png")
+
