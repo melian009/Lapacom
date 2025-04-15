@@ -62,11 +62,11 @@ end
 
 
 function coexistence_scenario(cij, cji, cii, cjj, r, R, d, H, K)
-#if cij == 0.0 || cji == 0.0
+if cij == 0.0 || cji == 0.0
     N1 = (K*(r[1] * R[1] - d[1] - H) / (r[1] * R[1]))
     N2 = (K*(r[2] * R[2] - d[2] - H) / (r[2] * R[2]))
     return (abs(N1), abs(N2))
-#else
+else
 #end
 
 Gamma = K^(-1)
@@ -81,7 +81,7 @@ denom = cij * cji - z1 * z2
 N1, N2 = (cij * rho1 - z1 * rho1) / denom, (cji * rho2 - z2 * rho2) / denom
 # Asegurar que las poblaciones no sean negativas
 return (max(N1), max(N2))
-#end
+end
 end
 
 
