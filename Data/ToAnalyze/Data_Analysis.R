@@ -215,3 +215,6 @@ print(tabla_resumen)
 
 # Usar modelos posteriormente:
 summary(res_asp$modelo)  # 
+
+
+
