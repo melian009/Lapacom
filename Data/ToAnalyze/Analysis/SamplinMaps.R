@@ -29,13 +29,13 @@ library(viridis)
 library(ggridges)
 library(gridExtra)
 library(flextable)
-library(cowplot)\
+library(cowplot)
 
 #️ Datos espaciales
 library(sf)
 library(ggspatial)
 library(ggmap)
-library(geodata)  # Nuevo: reemplaza a raster::getData
+library(geodata)
 library(ggpubr)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -48,7 +48,7 @@ library(stringr)
 # ───────────────────────────────────────────────
 # DATOS
 
-Mad_RAW <- read_excel("Madeira/BD_LIMPETS_MAD_1996-2018.xlsx",
+Mad_RAW <- read_excel("E:/Investigación/Repositorios/Lapacom/Data/ToAnalyze/Madeira/BD_LIMPETS_MAD_1996-2018.xlsx",
                       sheet = "Data", range = "A1:T69707")
 Mad_RAW_Clean <- Mad_RAW %>% clean_names()
 
