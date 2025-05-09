@@ -72,11 +72,28 @@ library(moderndive)
 library(stringr)
 ```
 
+
+
+## Objective:
+Analyze if introduction in 2007 of Marine Protected Areas (MPA) and exploitation regulation (H(X)) in non protected areas (Full Access) for Limpets populations ('Patella aspera','Patella ordinaria') in Maderia Archipelago, have changed the temporal tendencies of Mature adults proportion (mature_inmature == 'mature'), comparing:
+
+* Protection regims: MPA vs. Full access
+
+* Before after regulation implamantation in 2007: NR (pre-regulation) vs. R (post-regulation)
+
+
+
+
+
+
+
+
 ## Import data
 
-```{r}
 
-Mad_RAW <- read_excel("Madeira/BD_LIMPETS_MAD_1996-2018.xlsx", sheet = "Data", range = "A1:T69707")
+```{r, warning=FALSE}
+
+Mad_RAW <- read_excel("E:/Investigación/Repositorios/Lapacom/Data/ToAnalyze/Madeira/BD_LIMPETS_MAD_1996-2018.xlsx", sheet = "Data", range = "A1:T69707")
 Mad_RAW_Clean <- Mad_RAW %>% clean_names()
 
 Mad_selected <- Mad_RAW_Clean %>%
@@ -107,14 +124,10 @@ Mad_2sp_analisis <- Mad_2sp %>%
                                 "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente"))%>% 
   mutate(across(where(is.character), as.factor))
 
-# Grouping of samples before and after the 2007 regulations
-
-Mad_2sp_analisis <- Mad_2sp_analisis %>%
-  mutate(regulation_period = if_else(year < 2007, "NR", "R") %>% as.factor())
-
+summary(Mad_2sp_analisis)
 ```
 
-# Sampling Map visualization
+# Sampling Sites
 
 ```{r}
 # North atlantic regional map
@@ -167,7 +180,7 @@ convert_dms_to_decimal <- function(dms) {
   ifelse(dir %in% c("S", "W"), -decimal, decimal)
 }
 
-coords <- Mad_2sp %>%
+coords <- Mad_2sp_maps %>%
   dplyr::select(sampling_site, lat, long) %>%
   distinct() %>%
   drop_na() %>%
@@ -261,15 +274,42 @@ lineas <- c(
 )
 
 # Final plot: mature proportion by protection regime
-MATURE_PROP_protreg <- ggplot(madurez_prop_mensual_pr, aes(x = fecha, y = proporcion_madura,
-                                                           color = grupo, linetype = grupo)) +
+MATURE_PROP_protreg <- ggplot(
+  data = madurez_prop_mensual_pr, 
+         aes(x = fecha,
+             y = proporcion_madura,
+             color = grupo,
+             linetype = grupo)) +
+  
   geom_line(linewidth = 1) +
-  geom_vline(xintercept = as.Date("2007-01-01"), linetype = "dashed", color = "black", linewidth = 0.7) +
-  scale_color_manual(values = colores) +
-  scale_linetype_manual(values = lineas) +
+  
+  geom_vline(
+    xintercept = as.Date("2007-01-01"),
+    linetype = "dashed",
+     color = "black",
+     linewidth = 0.7) +
+  
+  scale_color_manual(
+    values = colores) +
+  
+  scale_linetype_manual(
+    values = lineas) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)) +
+  
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(x = "Date", y = "Mature Proportion (%)") +
+  scale_x_date(
+    date_breaks = "2 year",
+    date_labels = "%Y"
+  ) +
+  
+  labs(
+    x = "Date",
+    y = "Mature Proportion (%)") +
+  
   theme_minimal() +
+  
   theme(
     legend.position = "bottom",
     legend.title = element_blank(),
@@ -307,15 +347,43 @@ lineas <- c(
 )
 
 # Final plot: mature proportion by accessibility
-MATURE_PROP_ACC <- ggplot(madurez_prop_mensual_ac, aes(x = fecha, y = proporcion_madura,
-                                                       color = grupo, linetype = grupo)) +
-  geom_line(linewidth = 1) +
-  geom_vline(xintercept = as.Date("2007-01-01"), linetype = "dashed", color = "black", linewidth = 0.7) +
-  scale_color_manual(values = colores) +
-  scale_linetype_manual(values = lineas) +
+MATURE_PROP_ACC <- ggplot(
+  madurez_prop_mensual_ac,
+  aes(x = fecha,
+      y = proporcion_madura,
+      color = grupo, 
+      linetype = grupo)) +
+  
+  geom_line(
+    linewidth = 1) +
+  
+  geom_vline(
+    xintercept = as.Date("2007-01-01"),
+    linetype = "dashed",
+    color = "black",
+    linewidth = 0.7) +
+  
+  scale_color_manual(
+    values = colores) +
+  
+  scale_linetype_manual(
+    values = lineas) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)) +
+  
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(x = "Date", y = "Mature proportion (%)") +
+  scale_x_date(
+    date_breaks = "2 year",
+    date_labels = "%Y"
+  ) +
+  
+  labs(
+    x = "Date",
+    y = "Mature proportion (%)") +
+  
   theme_minimal() +
+  
   theme(
     legend.position = "bottom",
     legend.title = element_blank(),
@@ -328,7 +396,7 @@ plot_grid(
   labels = c("A)", "B)"),
   label_size = 16,
   label_x = 0.02,   # Horizontal alignment (closer to edge)
-  label_y = 0.2,    # Vertical alignment
+  label_y = 0.3,    # Vertical alignment
   hjust = 0,        # Left justified
   vjust = 1,        # Top justified
   ncol = 1,

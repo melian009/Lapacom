@@ -123,7 +123,7 @@ convert_dms_to_decimal <- function(dms) {
 }
 
 coords <- Mad_2sp %>%
-  select(sampling_site, lat, long) %>%
+  dplyr::select(sampling_site, lat, long) %>%
   distinct() %>%
   drop_na() %>%
   mutate(
