@@ -337,7 +337,7 @@ savefig!("SLC_Adults_Full_access.png")
 
 
 
-#= 
+#
 #Exp_lim = 0.9999                 # Exploitation max limit 
 #m = 0.0001                       # Interval of exploitation values
  
@@ -388,4 +388,3 @@ sol = solve(prob, solver)
 plot!(sol, xlabel="Time", ylabel="State Variables", label=["x1" "x2" "y1" "y2"])
 
 end
-=#

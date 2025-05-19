@@ -7,7 +7,8 @@ using LinearAlgebra
 using DifferentialEquations
 using Plots
 using Statistics
-
+Pkg.rm("Makie")
+Pkg.rm("CairoMakie")
 
 # Simple life cycle on one site.
 
@@ -118,6 +119,8 @@ Kspan = ones(Float64,size(1:365.14*n))*K_
 Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
 
 H_r = range(0, 1, length=h_span)
+t_r = range(1, 365.14*n, length=t_span)
+
 H_span = ones(Float64,h_span)
 cij_span = ones(Float64,h_span)
 
@@ -166,13 +169,17 @@ for i in 1:length(cij_span)
 
 end
 
+t = [1:365.14*10] 
 #Sa vs t (by H)
-HX_NAt = plot(Nai_h, label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], ylim=(0,K_/2*1.2), legend =:outerright)
+plot(Nai_h, 
+    label=["H=0" "H=0.1" "H=0.2" "H=0.3" "H=0.4" "H=0.5" "H=0.6" "H=0.7" "H=0.8" "H=0.9" "H=1"], 
+    ylim=(0, K_/2*1.2), 
+    legend=:outerright)
 plot!(Kspan/2,label=false, color=:red)
 annotate!(50, K_/2*1.03, text("K/2", :red, :center, 7))
 ylabel!("Adult abundance (nº individuals)")
 xlabel!("Time (days)")
-plot!(periodX*(K_/2), label="X(t)",color=:blue, style = :dash)
+plot!(periodX*(K_/2*1.03), label="X(t)",color=:blue, style = :dash)
 plot!(span*(31299.796819466865), c=:blue, style = :dash, label=false)
 plot!(span*0, color=:blue, style = :dash, label=false)
 annotate!(50, 30000, text("X(t)=1", :blue, :center, 8))
@@ -262,13 +269,14 @@ end
 for j in 1:length(H_span)
     H_j = H_span[j]
     cij_i = cij_span[1]
-    c=1
-    n=1.5 #Years
+    c=0
+    n=10 #Years
     Nai1 = zeros(Float64,size(1:365.14*n))
     Sai1 = zeros(Float64,size(1:365.14*n))
     periodX = zeros(t_span)
     avg_size = 33.4
     for t_ in 1:(365.25*n)
+      c=c+1
       t_0 = (365.25*0.42)
       k=0.42
         phi(t_) = 2*pi*(t_ - t_0)/(365.25)
@@ -280,7 +288,7 @@ for j in 1:length(H_span)
         Sai1[c] = 1/2*(Smax_ * (1 - H_j * (1 - periodX[c])))
     
         avg_size = mean(Sai1)  
-        c=c+1
+        
     end
     Nai_cij[:,j] = Nai1
     Sai_cij[:,j] = Sai1
@@ -418,13 +426,12 @@ solve_= solve(prob_, Tsit5())
 t_l = length(zeros(Float64,size(1:length(solve_.u))))
 n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
-days = ones(t_l,1)
+days = collect(1:floor(Int, solve_.t[end]))
 
 for j in 1:length(solve_.u)
   for i in 1:6
     vars[j,i] = solve_.u[j][i]
-    days[j] = solve_.t[j]
-   end 
+   end
 end
 
 Ne = vars[:,1]
@@ -434,7 +441,8 @@ Nj = vars[:,4]
 Na = vars[:,5]
 Sa = vars[:,6]
 
-plot!(days, Na, label="cij=0.5", legend=:outerright)
+
+plot(days, Na, label="cij=0.5", legend=:outerright)
 
 
 CLC_NeNt_ = plot(days.-(0.7 + 1.3 + 7 + 230), Ne, label="Eggs", xlim=(0,365.25*1.5), legend=:outerright, color=:red)
@@ -485,99 +493,68 @@ png("CLC_SAt")
 
 
 # Non-trivial solution for Na and Sa on a Single Site.
-#Parameters
-avg_oocytes = mean([92098, 804183]) # This is the actual mean. 
-reggs = avg_oocytes / (365 * 0.42) # conversion rate of adults to eggs.
-r_= reggs
-K_ = 64000    # Carrying capacity
+# Parameters
+avg_oocytes = mean([92098, 804183])
+reggs = avg_oocytes / (365 * 0.42)
+r_ = reggs
+K_ = 64000
 d1_ = 0.590
 H1_ = 0.639
-#c12_ = 0.5 #competition term species 2 on 1
-Smax_ = 56.0             # Maximum size for adults
+Smax_ = 56.0
 Naj = 2500
 avg_size = 33.4
 
+# Vectores para simulaciones y gráficos
+n = 10
+t_steps = Int(round(365.25 * n))  # Usa SIEMPRE este valor
+h_span = 11
 
-
-
-#Vectors for ploting and simulations
-n=10    #Number of years in the simulation
-t_span = length(zeros(Float64,size(1:365.14*n)))
-h_span = length(zeros(Float64, size(0:0.1:1)))
-span = ones(Float64,size(1:365.14*n))
-Kspan = ones(Float64,size(1:365.14*n))*K_ 
-Sm_span = ones(Float64,size(1:365.14*n))*Smax_/2   # Linea de Smax/2 
+span   = ones(Float64, t_steps)
+Kspan  = ones(Float64, t_steps) * K_
+Sm_span = ones(Float64, t_steps) * Smax_ / 2
 
 H_r = range(0, 1, length=h_span)
-H_span = ones(Float64,h_span)
-cij_span = ones(Float64,h_span)
+H_span = collect(H_r)
+cij_span = collect(H_r)
 
-zero_line = zeros(Float64,h_span)
+zero_line = zeros(Float64, h_span)
 
-for i in 1:length(H_span)
-    H_span[i] = H_r[i]
-    cij_span[i] = H_r[i]
-end
+# Salidas de simulaciones
+Nai_cij = zeros(t_steps, h_span)
+Sai_cij = zeros(t_steps, h_span)
 
-H_span
-cij_span 
-
-#Outputs of simulations
-Nai_h = zeros(t_span,h_span)
-Sai_h = zeros(t_span,h_span)
-periodX = zeros(t_span)
-Nai_h_c = zeros(h_span,h_span)
-Sai_h_c = zeros(h_span,h_span)
-
-
-#for m in 1:length(cij_span)
-m=1
-for i in 1:length(H_span)
-    cij_ = cij_span[m]
-    H_i = H_span[i]
-    c=1 
-
-    Nai1 = zeros(Float64,size(1:365.14*n))
-    Sai1 = zeros(Float64,size(1:365.14*n))
-    periodX = zeros(t_span)
-
-    for t_ in 1:(365.14*n)
-      t_0 = (365.14*0.42)
-      k=0.1
-      phi(t_) = 2*pi*(t_ - t_0)/(365.25)
-      periodX[c] = 1/2*(1+tanh(2*sin(phi(t_)) - k))
-      Smat = 1.34 * (avg_size) - 28.06
-      R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
-      #Non trivial solution expresions
-        Nai1[c] = -(H_i * (1 - periodX[c]) + cij_ * Naj - periodX[c] * r_ * R_ + d1_)* K_ / (periodX[c] * r_ * R_ * 2) 
-        Sai1[c] = 1/2*(Smax_ * (1 - H_i * (1 - periodX[c])))
-    
-      avg_size = mean(Sai1)  
-      c=c+1
+for j in 1:h_span
+    H_j = H_span[j]
+    cij_i = cij_span[1]
+    Nai1 = zeros(Float64, t_steps)
+    Sai1 = zeros(Float64, t_steps)
+    periodX = zeros(Float64, t_steps)
+    avg_size = 33.4
+    for t_ in 1:t_steps
+        t_0 = 365.25 * 0.42
+        k = 0.42
+        phi = 2 * pi * (t_ - t_0) / 365.25
+        periodX[t_] = 0.5 * (1 + tanh(2 * sin(phi) - k))
+        Smat = 1.34 * avg_size - 28.06
+        R_ = min(max(0.5 * (1.0 + (avg_size - Smat) / (Smax_ - Smat)), 0.0), 1.0)
+        Nai1[t_] = -(H_j * (1 - periodX[t_]) + cij_i * Naj - periodX[t_] * r_ * R_ + d1_) * K_ / (periodX[t_] * r_ * R_ * 2)
+        Sai1[t_] = 0.5 * (Smax_ * (1 - H_j * (1 - periodX[t_])))
+        avg_size = mean(Sai1)
     end
-    Nai_h[:,i] = Nai1
-    Sai_h[:,i] = Sai1 
+    Nai_cij[:, j] = Nai1
+    Sai_cij[:, j] = Sai1
+end
+
+Sa_c = ones(Float64, h_span)
+Na_c = ones(Float64, h_span)
+for m in 1:h_span
+    Sa_c[m] = minimum(Sai_cij[:, m])
+    Na_c[m] = maximum(Nai_cij[:, m])
 end
 
 
-  #Na and Sa vs H
 
-  Sa_H = ones(Float64,h_span)
-  Na_H = ones(Float64,h_span)
-
-  for j in 1:h_span
-  Sa_H[m] = minimum(Sai_h[:,j])
-  Na_H[m] = maximum(Nai_h[:,j])
-  end
-
-Sai_h_c[:,1] = Sa_H
-Nai_h_c[:,1] = Na_H
-
-
-
-
-
-plot(H_span,log(Nai_h_c), label="cij=0", legend=:outerright, color=:blue)
+plot(H_span,Nai_h_c, label="cij=0", legend=:outerright, color=:blue)
 xlabel!("Exploitation rate (H)")
 ylabel!("Adult abundance (nº individuals)")
 png("H_decay_for_cij_gradient_N_log")
@@ -643,10 +620,10 @@ Smax_ = 53.0             # Maximum size for adults3
 
 
 
-H1_ = 1.0
+H0_ = 0.0
 
-cij_= 1.0
-p_span = [t0_, k_, r_, K_, H1_, d, Smax_, size_growth_rate,cij_,Naj_] 
+cij_= 0.0
+p_span = [t0_, k_, r_, K_, H0_, d, Smax_, size_growth_rate,cij_,Naj_] 
 n=10  #Number of years in the simulation
 tspan = (0,365.14*n)
 U0_ = [10^4, 49.25]
@@ -658,6 +635,8 @@ n_v = length(zeros(Float64,size(1:length(solve_.u[1]))))
 vars = zeros(t_l,n_v)
 time2 = zeros(t_l,1)
 
+
+
 for j in 1:length(solve_.u)
   for i in 1:2
     vars[j,i] = solve_.u[j][i]
@@ -666,10 +645,9 @@ for j in 1:length(solve_.u)
 end
 
 Na1c0 = vars[:,1]
+Sa2 = vars[:,2]
 
-
-
-plot!(Na1c0, label="cij=1.0", color=:red, legend=:outerright, background=nothing)
+plot(Na1c0, label="cij=1.0", color=:red, legend=:outerright)
 xlims!(0,100)
 ylims!(0,7*10^4)
 xlabel!("Time (days)", font=12)

@@ -4,7 +4,6 @@ Pkg.activate(".")
 using LinearAlgebra
 using DifferentialEquations
 using GlobalSensitivity
-using CairoMakie
 using Statistics
 using DataFrames
 using CSV
@@ -231,7 +230,7 @@ gs = [0.998611, 0.971057, 0.4820525, 0.00629]
 Kt = 640000.0        # Carrying capacity
 rates = [0.639,0.57] # Exploitation rate (H)
 
-gEA = 0.006         # Instant conversion between stages.
+gEA = gs[1]*gs[2]*gs[3]*gs[3]*gs[4] # Instant conversion between stages.
 
 # Natural mortality rates:
 # see estimate_mortality_rates.jl for how these values were estimated.
@@ -286,15 +285,25 @@ prob_SLC_full = ODEProblem(SLC!, u0_SLC_po_full, t_span, p_SLC_po)
 sol_SLC_full = solve(prob_SLC_full, Tsit5())
 
 
-fig1 = Figure()
-ax1 = Axis(fig1[1, 1])
-lines!(ax1, sol_SLC_full.t, [u[1] for u in sol_SLC_full.u], yscale=:log10, label="Na")
-#save("SLC_N_Full_access.png", fig1, dpi = 300)
 
-fig11 = Figure()
-ax11 = Axis(fig11[1, 1])
-lines!(ax11, sol_SLC_full.t, [u[2] for u in sol_SLC_full.u], yscale=:log10, label="Sa")
-save("SLC_S_Full_access.png", fig11, dpi = 300)
+# Graficar Na (abundancia adulta)
+# Graficar Na (abundancia adulta)
+gr()  # Fuerza el backend GR
+
+p1 = plot(sol_SLC_full.t, [u[1] for u in sol_SLC_full.u],
+     yscale=:log10, label="Na", xlabel="Tiempo (días)", ylabel="Na (nº individuos)",
+     legend=:topright, lw=2, title="Dinámica de Na")
+display(p1)
+savefig(p1, "SLC_N_Full_access.png")
+#savefig("SLC_N_Full_access.png")
+
+# Graficar Sa (tamaño adulto)
+# Graficar Sa (tamaño adulto)
+p2 = plot(sol_SLC_full.t, [u[2] for u in sol_SLC_full.u],
+     yscale=:log10, label="Sa", xlabel="Tiempo (días)", ylabel="Sa (mm)",
+     legend=:topright, lw=2, title="Dinámica de Sa")
+display(p2)
+#savefig("SLC_S_Full_access.png")
 
 
 
@@ -307,7 +316,7 @@ sol_SCLC_full = solve(prob_SCLC_full, Tsit5())
 
 fig2 = Figure()
 ax2 = Axis(fig2[1, 1])
-lines!(ax2, sol_SCLC_full.t, [u[1] for u in sol_SCLC_full.u], yscale=:log10, label="Ne")
+plot(ax2, sol_SCLC_full.t, [u[1] for u in sol_SCLC_full.u], yscale=:log10, label="Ne")
 lines!(ax2, sol_SCLC_full.t, [u[2] for u in sol_SCLC_full.u], yscale=:log10, label="Na")
 save("SCLC_N_Full_access.png", fig2, dpi = 300)
 
