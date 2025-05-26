@@ -138,9 +138,9 @@ Sm = 56              # Maximum size for adults
 gammas = [0.32,0.36] # Adult growth rate
 i = [1,2]            # Species: "Patella ordinaria" (i=1); "Patella aspera" (i=2)
 
-#de_ = [de_po,de_pe] # Not estimated values. Need to be calculated by numerical aproximation
+de_ = [de_po,de_pe] # Not estimated values. Need to be calculated by numerical aproximation
 
-#= Numerical aproximation: jacobian matrix determination for Full acces SLC metapopulation model
+# Numerical aproximation: jacobian matrix determination for Full acces SLC metapopulation model
 
 @variables Na, Ne , Sa, r, K, rate, Exp, X, g, de, da, Smax, gamma
 
@@ -165,7 +165,7 @@ Ne = K/2*(1-((de*da+g*de)/r*g))
 #Despejamos de del determinante
 
 de=((2*K*g)/(K*(da+g)))*((K/2)-Ne)
-=#
+#
 
 # En base a la cantidad de huevos promedio que pone cada especie,
 # definimos una capacidad de carga de huevos común para ambas metapoblaciones (KTotal).
