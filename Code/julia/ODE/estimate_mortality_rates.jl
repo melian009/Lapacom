@@ -5,14 +5,15 @@
 # First, let's define the life stages numerically: 0 for egg, 1 for trocophore, 2 for veliger, 3 for juvenile, and 4 for adult.
 # exponential decay function:
 # Mortality_rate(stage) = A * exp(-B * (4 - stage))
-# Here, "A" is the mortality rate at the adult stage, "B" is the decay constant, and "stage" represents the life stage. This equation ensures that the mortality rate is highest at the egg stage (stage = 0) and decreases as the limpet progresses through its life stages.
+# Here, "A" is the mortality rate at the adult stage, "B" is the decay constant, and "stage" represents the life stage. 
+# This equation ensures that the mortality rate is highest at the egg stage (stage = 0) and decreases as the limpet progresses through its life stages.
 
 
 using Optim
 
-adult_mortality_rate = 0.1175  # P. ordinaria
+adult_mortality_rate = 0.1175  # P. ordinaria A = 0.55, P. aspera A = 0.59 !!!
 
-# Initial guess for B
+# Initial guess for B (mean life span of adults is about 8.5 years))
 B0 = [0.1]
 
 # Define the life stages
