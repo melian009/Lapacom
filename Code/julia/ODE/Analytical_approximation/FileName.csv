@@ -1,4 +1,0 @@
--d + ((1 - Na)*R*r - Na*R*r) / K - H*(1 - X) - Nb*c,-Na*c,0,0
--Nb*c,-d + (-Nb*R*r + (1 - Nb)*R*r) / K - H*(1 - X) - Na*c,0,0
-0,0,(-Sa*g) / (Smax - H*Smax*(1 - X)) + g*(1 + (-Sa) / (Smax - H*Smax*(1 - X))),0
-0,0,0,(-Sb*g) / (Smax - H*Smax*(1 - X)) + g*(1 + (-Sb) / (Smax - H*Smax*(1 - X)))
