@@ -8,18 +8,9 @@ How does complex life-cycle alter extinction probability in a metacommunity alon
 * Switchdrive: https://drive.switch.ch/index.php/s/CnVXHOa0YHL2iMb
 * Distance matrix: Empirical distance matrix with flow 
         
-## Code 
-* Github: https://github.com/melian009/Lapacom
-                                                                                                                                                  
-## Modeling
-
-# Theory
-* ODEs system to explore the extinction probability in a exploitation-competition Simple Life Cycle (SLC) model.
-
-# Theory-empirical (see table 1 main ms)
-* Fit distance to human vs number of reproductives and extinction probability under the SLC and CLC scenarios for the case of Madeira:
-* Language: julia
-* Package: Flux.jl
+## Modeling and Code figures
+* Simple Life Cycle (SLC) https://github.com/melian009/Lapacom/tree/master/Code/julia/ODE
+* Complex Life Cycle (CLC) https://github.com/melian009/Lapacom/tree/master/Code/julia/ABM
 
 ## References
 * Mendeley: https://www.mendeley.com/reference-manager/library/groups/private/3d5a2b3a-4020-30bc-a6fb-d5b9a2386c3a/all-references/
