@@ -1,4 +1,8 @@
----
+
+
+
+
+Yes---
 title: "Limpet Maturity Analysis for Madeira Samples"
 author: "Eros Fernando Geppi"
 output:
@@ -281,13 +285,17 @@ MATURE_PROP_protreg <- ggplot(
              color = grupo,
              linetype = grupo)) +
   
-  geom_line(linewidth = 1) +
+  geom_point(aes(color = grupo)) +
+  
+  geom_line(linewidth = 0.1) +
   
   geom_vline(
     xintercept = as.Date("2007-01-01"),
     linetype = "dashed",
      color = "black",
      linewidth = 0.7) +
+  
+  
   
   scale_color_manual(
     values = colores) +
@@ -354,8 +362,10 @@ MATURE_PROP_ACC <- ggplot(
       color = grupo, 
       linetype = grupo)) +
   
+  geom_point(aes(color = grupo)) +
+  
   geom_line(
-    linewidth = 1) +
+    linewidth = 0.1) +
   
   geom_vline(
     xintercept = as.Date("2007-01-01"),
