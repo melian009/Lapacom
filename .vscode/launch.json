@@ -10,7 +10,7 @@
             "request": "launch",
             "name": "Run active Julia file",
             "program": "${file}",
-            "stopOnEntry": false,
+            "stopOnEntry": true,
             "cwd": "${workspaceFolder}",
             "juliaEnv": "${command:activeJuliaEnvironment}"
         }
