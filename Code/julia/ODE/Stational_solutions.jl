@@ -119,7 +119,7 @@ r_ = reggs .* 0.998611 .* 0.971057 .* 0.4820525 .* 0.00629
 r_overlap = minimum(r_) / sum(r_) * sum(r_)
 
 # Coeficientes de competencia
-# c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
+c_12, c_21 = r_[1] / (sum(r_) - r_overlap), r_[2] / (sum(r_) - r_overlap)  #Interspecific  competition
 c_11, c_22 = r_[1] / (r_[1] + r_overlap), r_[2] / (r_[2] + r_overlap)        #Intraspecific competition
 
 # Parámetros biológicos
@@ -250,14 +250,17 @@ df3_H_0 = subset(df3, :H => ByRow(==(0)))
 df3_c_0 = subset(df3, :cij => ByRow(==(0)))
 
 
-scatter(df3_c_0.N_1, df3_c_0.N_2,
-        zcolor=df3_c_0[!, :H],  # Usar los valores de cij para el gradiente de color
-        xlabel="N1", ylabel="N2", title="",
-        colorbar_title="", palette=:plasma, label="cij=0, H = [0,1]")
+p = scatter(df3_c_0.N_1, df3_c_0.N_2,
+        zcolor = df3_c_0[!, :H],  # Usar los valores de H para el gradiente de color
+        xlabel="Patella aspera (N1)", ylabel="Patella ordinaria (N2)", title="", legend= false, colorbar = true,
+        colorbar_title="Exploitation rate", palette=:plasma, background_color=:transparent)
+ylims!(0, 9*10^(4))
 
-scatter!(df3_H_0.N_1, df3_H_0.N_2,
+savefig(p, "Fig4_a.svg")
+
+scatter(df3_H_0.N_1, df3_H_0.N_2,
         zcolor=df3_H_0[!, :cij],  # Usar los valores de cij para el gradiente de color
-        xlabel="N1", ylabel="N2", title="",
+        xlabel="Patella aspera (N1)", ylabel="Patella ordinaria (N2)", title="Competence rate (cij)",
         colorbar_title="H = [0,1]; cij = [0,1]", palette=:plasma,
         markerstrokecolor=:red,markerstrokewidth=1, label = "H=0, cij = [0,1]")
 
