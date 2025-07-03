@@ -1,0 +1,16 @@
+Figure 3. Empirical time series showing the mean proportion of mature individuals, 
+dots in lines represent sampled years in both figures.
+
+Figure 3a) Patella aspera (orange) and Patella ordinaria (blue) in Full access (continuous line) and
+in the MPAs sites (discontinuous  line).
+
+Figure 3b) Patella aspera (orange) and Patella ordinaria (blue) in the north (discontinuous line) and south
+(continuous) from Madeira island.
+
+Figure 4. Coexistence in exploited SLCs metacommunities scenario simulated (Equation 6 and 7).
+
+Figure 4a) Patella aspera (N1) and Patella ordinaria (N2) abundances decay along the exploitation gradient H (colorbar).
+
+Figure 4b) Surface representation (3D) of exploitation and competition combinated scenarios on abundance for Patella aspera (N1).
+
+Figure 4b) Surface representation (3D) of exploitation and competition combinated scenarios on abundance for Patella ordinaria (N2).
