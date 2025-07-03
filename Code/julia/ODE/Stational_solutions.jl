@@ -359,7 +359,7 @@ heatmap(unique_H_N1, unique_cij_N1, log2.(filtered_heatmap_matrix_N1),
         color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N1)),
          maximum(log2.(filtered_heatmap_matrix_N1))))
          
-         savefig("Heatmap_N1.png")
+savefig("Heatmap_N1.png")
 
 heatmap(unique_H_N2, unique_cij_N2, log2.(filtered_heatmap_matrix_N2),
         xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
@@ -367,18 +367,24 @@ heatmap(unique_H_N2, unique_cij_N2, log2.(filtered_heatmap_matrix_N2),
          maximum(log2.(filtered_heatmap_matrix_N2))),clabel="Ln(N2)")
 savefig("Heatmap_N2.png")
 
-
+gr()
 # Crear y guardar el heatmap filtrado
-surface(unique_H_N1, unique_cij_N1, log2.(filtered_heatmap_matrix_N1),
-        xlabel="H", ylabel="cij", title="H vs Cij for N1",
-        color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N1)),
-         maximum(log2.(filtered_heatmap_matrix_N1))),
-         camera=(80, 10))
-#savefig("Surface_N1.png")
-surface(unique_H_N2, unique_cij_N2, log2.(filtered_heatmap_matrix_N2),
-        xlabel="H", ylabel="cij", title="H vs Cij for N2 ",
-        color=:viridis, clims=(minimum(log2.(filtered_heatmap_matrix_N2)),
-        maximum(log2.(filtered_heatmap_matrix_N2))),
-        camera=(80, 10))
-#savefig("Surface_N2.png")
+surface(unique_H_N1, unique_cij_N1,(filtered_heatmap_matrix_N1),
+        xlabel="H", ylabel="cij", zlabel="Abundance", title="B) Patella aspera (N1)",
+        color=:viridis, clims=(minimum((filtered_heatmap_matrix_N1)),
+        maximum((filtered_heatmap_matrix_N1))),
+        camera=(35, 30), 
+        background_color=:transparent,
+        colorbar_title="")
+savefig("Figure4_b.svg")
+
+
+surface(unique_H_N2, unique_cij_N2,(filtered_heatmap_matrix_N2),
+        xlabel="H", ylabel="cij", zlabel="Abundance", title="C) Patella ordinaria (N2)",
+        color=:viridis, clims=(minimum((filtered_heatmap_matrix_N2)),
+        maximum((filtered_heatmap_matrix_N2))),
+        camera=(35, 30), 
+        background_color=:transparent,
+        colorbar_title="")
+savefig("Figure4_c.svg")
 
