@@ -1,0 +1,716 @@
+---
+title: "Reproductive maturity analysis results of Patella spp. in Madeira"
+author: "Eros Fernando Geppi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+# Data manipulation
+library(tidyverse)   # Includes dplyr, ggplot2, tibble, readr, etc.
+library(lubridate)   # Date and time parsing
+library(janitor)     # Data cleaning
+library(readxl)      # Excel file import
+library(stringr)     # String manipulation
+library(tidyr)       # Data reshaping
+library(dplyr)
+# Visualization
+library(ggplot2)     # Base plotting
+library(scales)      # Axis formatting
+library(cowplot)     # Plot composition
+library(ggthemes)    # Custom themes
+library(hrbrthemes)  # Additional themes
+library(viridis)     # Color palettes
+library(ggridges)    # Ridgeline plots
+library(ggrepel)     # Smart text labels
+library(gridExtra)   # Grid layouts
+library(grid)        # Base grid system
+library(ggpubr)      # Publication-ready plots
+
+# Spatial data / maps
+library(sf)              # Simple Features for spatial data
+library(ggspatial)       # Scale bars and north arrows
+library(ggmap)           # Map backgrounds
+library(geodata)         # GADM shapefiles
+library(rnaturalearth)   # Country outlines
+library(rnaturalearthdata)
+
+# Statistical modeling
+library(broom)       # Tidy model output
+library(emmeans)     # Estimated marginal means
+library(car)         # ANOVA, VIF
+library(multcomp)    # Multiple comparisons
+library(lmtest)      # Model testing
+library(MASS)        # Classic datasets and models
+library(moderndive)  # Teaching statistics with tidy tools
+
+# Statistical tests & summaries
+library(moments)     # Skewness, kurtosis
+library(DescTools)   # Descriptive statistics
+library(descr)       # Frequency tables
+library(effsize)     # Effect sizes
+library(vcd)         # Visualizing categorical data
+library(conover.test)# Conover test (non-parametric)
+library(pROC)        # ROC curves
+library(flextable)
+```
+
+## 0. Imports and cleaning data
+
+```{r}
+Mad_RAW <- readxl::read_excel("E:/Investigación/Repositorios/Lapacom/Data/ToAnalyze/Madeira/BD_LIMPETS_MAD_1996-2018.xlsx", sheet = "Data", range = "A1:T69707")
+Mad_RAW_Clean <- Mad_RAW %>% clean_names()
+
+Mad_selected <- Mad_RAW_Clean %>%
+  dplyr::select(species, year, month, total_length_mm, total_length_class_mm, weight_g, mature_imature,
+         sampling_site, lat, long, protective_regime, proximity_human_settlements,
+         accessibility, age_lt, age_months, age_class)
+
+Mad_2sp <- Mad_selected %>%
+  filter(species %in% c("Patella ordinaria", "Patella aspera")) %>%
+  filter(!is.na(sampling_site) & trimws(sampling_site) != "") %>%
+  mutate(across(where(is.character), as.factor),
+         regulation_period = if_else(year < 2007, "Before", "After") %>% as.factor())
+
+Mad_2sp_analisis <- Mad_2sp %>%
+  filter(sampling_site %in% c("Porto Moniz", "Paúl do Mar", "Funchal", "Desertas",
+                              "Caniçal", "Santa Cruz", "Ribeira Brava", "São Vicente")) %>%
+  mutate(
+    across(where(is.character), as.factor),
+    regulation_period = factor(regulation_period, levels = c("Before", "After"))
+  )
+
+Mad_2sp_analisis <- Mad_2sp_analisis %>%
+  mutate(
+    accessibility = case_when(
+      protective_regime == "MPA" ~ "South",              # asignar categoría South a todas las MPA
+      TRUE ~ as.character(accessibility)                 # mantener el resto tal como está
+    )
+  ) %>%
+  filter(!is.na(accessibility), accessibility %in% c("North", "South")) %>%  # eliminar NA y "North-South"
+  mutate(
+    accessibility = factor(accessibility, levels = c("North", "South"))      # asegurar orden y formato
+  )
+summary(Mad_2sp_analisis)
+
+```
+
+## 1. Localización geográfica de los sitios de muestreo
+
+```{r mapa-muestreo}
+
+# shapefiles and polígonos
+
+world <- ne_countries(scale = 10, returnclass = "sf")
+portugal_gadm <- geodata::gadm("PRT", level = 1, path = tempdir()) %>% st_as_sf()
+portugal_mainland <- portugal_gadm %>% filter(!NAME_1 %in% c("Madeira", "Açores"))
+madeira_sf <- portugal_gadm %>% filter(NAME_1 == "Madeira")
+azores_sf <- portugal_gadm %>% filter(NAME_1 == "Açores")
+
+# Coordenadas DMS a decimales
+convert_dms_to_decimal <- function(dms) {
+  parts <- str_match(dms, "(\\d+)°(\\d+)'(\\d+\\.?\\d*)\"?([NSEW])")
+  deg <- as.numeric(parts[, 2])
+  min <- as.numeric(parts[, 3])
+  sec <- as.numeric(parts[, 4])
+  dir <- parts[, 5]
+  decimal <- deg + min / 60 + sec / 3600
+  ifelse(dir %in% c("S", "W"), -decimal, decimal)
+}
+
+coords <- Mad_2sp_analisis %>%
+  dplyr::select(sampling_site, lat, long,protective_regime) %>%
+  distinct() %>%
+  drop_na() %>%
+  mutate(
+    lat_dd = convert_dms_to_decimal(lat),
+    long_dd = convert_dms_to_decimal(long)
+  )
+
+coords_sf <- st_as_sf(coords, coords = c("long_dd", "lat_dd"), crs = 4326)
+
+etiquetas <- tibble::tibble(
+  lugar = c("Portugal", "Selvagens", "Azores", "Canary Islands", "Morocco", "Gibraltar", "Spain"),
+  lon = c(-10.5, -16.1, -26.0, -16.5, -8.5, -5.4, -6.5),
+  lat = c(39.5, 31.0, 38.6, 29.2, 31.0, 36.1, 43.0)
+)
+
+# Mapas
+map_region <- ggplot() +
+  geom_sf(data = world, fill = "grey90", color = "darkgrey") +
+  geom_sf(data = portugal_mainland, fill = "darkgrey") +
+  geom_sf(data = madeira_sf, fill = "darkgrey") +
+  geom_sf(data = azores_sf, fill = "darkgrey") +
+  geom_text(data = etiquetas, aes(x = lon, y = lat, label = lugar),
+            size = 3.2, fontface = "italic") +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotate("rect", xmin = -17.6, xmax = -16.2, ymin = 32.4, ymax = 33.2,
+           fill = "grey", alpha = 0.3, color = "grey20", size = 0.7) +
+  annotate("text", x = -20, y = 36, label = "Atlantic Ocean", angle = 45, size = 7,
+           fontface = "italic", color = "gray30") +
+  annotate("text", x = -17.0, y = 33.5, label = "Madeira", size = 3.2, fontface = "bold",
+           color = "black") +
+  annotation_north_arrow(location = "tl", which_north = "true",
+                         style = north_arrow_fancy_orienteering()) +
+  coord_sf(xlim = c(-30, -5), ylim = c(27, 44), expand = FALSE) +
+  labs(x = "Longitude", y = "Latitude") +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_line(color = "darkgrey", size = 0.2),
+    axis.title = element_blank(),
+    plot.margin = margin(5, 5, 5, 5)
+  )
+
+map_madeira <- ggplot() +
+  geom_sf(data = madeira_sf, fill = "gray90", color = "darkgrey") +
+  geom_sf(data = coords_sf, aes(color = sampling_site, shape=protective_regime), size = 3) +
+  coord_sf(xlim = c(-17.6, -16.2), ylim = c(32.4, 33.2), expand = FALSE) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true",
+                         style = north_arrow_fancy_orienteering()) +
+  labs(color = "Sitios de muestreo") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+legend_b <- ggplotGrob(map_madeira) %>%
+  gtable::gtable_filter("guide-box")
+map_madeira_noleg <- map_madeira + theme(legend.position = "none")
+
+panel_maps <- plot_grid(
+  map_region, map_madeira_noleg,
+  labels = c("A)", "B)"),
+  label_size = 14,
+  ncol = 2,
+  rel_widths = c(1, 1.2)
+)
+
+final_plot <- plot_grid(
+  panel_maps,
+  legend_b,
+  ncol = 1,
+  rel_heights = c(1, 0.1)
+)
+
+final_plot
+```
+
+```{r}
+
+madurez_prop_mensual_pr <- Mad_2sp_analisis %>%
+  filter(!is.na(mature_imature)) %>%
+  group_by(year, month, species, sampling_site, accessibility, protective_regime) %>%
+  summarise(
+    total = n(),
+    maduros = sum(mature_imature == "Mature"),
+    proporcion_madura = maduros / total,
+    .groups = "drop"
+  ) %>%
+  mutate(
+    grupo = interaction(species, protective_regime, sep = " - "),
+    fecha = lubridate::make_date(year, month, 1)  # For a continuous time axis
+  )
+
+# Visual style for protection regime plot
+colores <- c(
+  "Patella aspera - Full acess" = "#D39C00",
+  "Patella ordinaria - Full acess" = "#0072B2",
+  "Patella aspera - MPA" = "#D39C00",
+  "Patella ordinaria - MPA" = "#0072B2"
+)
+
+lineas <- c(
+  "Patella aspera - Full acess" = "solid",
+  "Patella ordinaria - Full acess" = "solid",
+  "Patella aspera - MPA" = "dotted",
+  "Patella ordinaria - MPA" = "dotted"
+)
+
+# Final plot: mature proportion by protection regime
+MATURE_PROP_protreg <- ggplot(
+  data = madurez_prop_mensual_pr, 
+         aes(x = fecha,
+             y = proporcion_madura,
+             color = grupo,
+             linetype = grupo)) +
+  
+  geom_line(linewidth = 1) +
+  
+  geom_vline(
+    xintercept = as.Date("2007-01-01"),
+    linetype = "dashed",
+     color = "black",
+     linewidth = 0.7) +
+  
+  scale_color_manual(
+    values = colores) +
+  
+  scale_linetype_manual(
+    values = lineas) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)) +
+  
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_x_date(
+    date_breaks = "2 year",
+    date_labels = "%Y"
+  ) +
+  
+  labs(
+    x = "Date",
+    y = "Mature Proportion (%)") +
+  
+  theme_minimal() +
+  
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# Monthly proportion of mature individuals by accessibility
+madurez_prop_mensual_ac <- Mad_2sp_analisis %>%
+  filter(!is.na(mature_imature)) %>%
+  group_by(year, month, species, sampling_site, accessibility, protective_regime) %>%
+  summarise(
+    total = n(),
+    maduros = sum(mature_imature == "Mature"),
+    proporcion_madura = maduros / total,
+    .groups = "drop"
+  ) %>%
+  mutate(
+    grupo = interaction(species, accessibility, sep = " - "),
+    fecha = lubridate::make_date(year, month, 1)  # For a continuous time axis
+  )
+
+# Visual style for accessibility plot
+colores <- c(
+  "Patella aspera - North" = "#D39C00",
+  "Patella ordinaria - North" = "#0072B2",
+  "Patella aspera - South" = "#D39C00",
+  "Patella ordinaria - South" = "#0072B2"
+)
+
+lineas <- c(
+  "Patella aspera - South" = "solid",
+  "Patella ordinaria - South" = "solid",
+  "Patella aspera - North" = "dotted",
+  "Patella ordinaria - North" = "dotted"
+)
+
+# Final plot: mature proportion by accessibility
+MATURE_PROP_ACC <- ggplot(
+  madurez_prop_mensual_ac,
+  aes(x = fecha,
+      y = proporcion_madura,
+      color = grupo, 
+      linetype = grupo)) +
+  
+  geom_line(
+    linewidth = 1) +
+  
+  geom_vline(
+    xintercept = as.Date("2007-01-01"),
+    linetype = "dashed",
+    color = "black",
+    linewidth = 0.7) +
+  
+  scale_color_manual(
+    values = colores) +
+  
+  scale_linetype_manual(
+    values = lineas) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)) +
+  
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_x_date(
+    date_breaks = "2 year",
+    date_labels = "%Y"
+  ) +
+  
+  labs(
+    x = "Date",
+    y = "Mature proportion (%)") +
+  
+  theme_minimal() +
+  
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# Plot both panels (A and B)
+plot_grid(
+  MATURE_PROP_protreg, MATURE_PROP_ACC,
+  labels = c("A)", "B)"),
+  label_size = 16,
+  label_x = 0.02,   # Horizontal alignment (closer to edge)
+  label_y = 0.3,    # Vertical alignment
+  hjust = 0,        # Left justified
+  vjust = 1,        # Top justified
+  ncol = 1,
+  rel_heights = c(1, 1)
+)
+```
+
+## 2. Monthly proportion of mature adults per year.
+
+```{r}
+madurez_prop <- Mad_2sp_analisis %>%
+  filter(!is.na(mature_imature)) %>%
+  group_by(year, month, species, protective_regime, regulation_period) %>%
+  summarise(
+    total = n(),
+    maduros = sum(mature_imature == "Mature"),
+    prop_maduros = maduros / total,
+    .groups = "drop"
+  ) %>%
+  mutate(fecha = make_date(year, month, 1))
+
+ggplot(madurez_prop, 
+       aes(x = fecha, y = prop_maduros, 
+           color = interaction(protective_regime, regulation_period), linetype = species)) +
+  geom_line(linewidth = 1) +
+  geom_vline(xintercept = as.Date("2007-01-01"), 
+             linetype = "dashed", color = "black") +
+  labs(
+    title = "Monthly evolution of the proportion of mature individuals",
+    x = "Year",
+    y = "Mature proportion (%)",
+    color = "Protection × Period",
+    linetype = "Species"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_x_date(
+  date_breaks = "2 year",
+  date_labels = "%Y"
+  )+
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+```
+
+## 3. Comparación antes y después de 2007
+
+```{r}
+madurez_yearly <- madurez_prop %>%
+  group_by(year, species, protective_regime, regulation_period) %>%
+  summarise(prop_m = mean(prop_maduros, na.rm = TRUE), .groups = "drop")
+
+ggplot(madurez_yearly, aes(x = regulation_period, y = prop_m, fill = protective_regime)) +
+  geom_boxplot() +
+  facet_wrap(~species) +
+  labs(title = "Mature adult proportion befor and after 2007", y = "Mature Proportion (%)", x = "Regulation") +
+  theme_minimal()
+```
+
+## 4. Estacionalidad y periodos de veda
+
+```{r}
+madurez_mes <- madurez_prop %>%
+  group_by(month, species, protective_regime) %>%
+  summarise(prop_m = mean(prop_maduros, na.rm = TRUE), .groups = "drop")
+
+periodos <- tibble(
+  month = 1:12,
+  periodo = case_when(
+    month %in% 4:9 ~ "Exploitation",
+    TRUE ~ "Reproductive"
+  )
+)
+
+madurez_mes_plot <- madurez_mes %>%
+  left_join(periodos, by = "month")
+
+ggplot(madurez_mes_plot, aes(x = month, y = prop_m, 
+                             color = protective_regime, 
+                             linetype = species)) +
+  # Fondo por periodo con baja opacidad
+  geom_tile(aes(x = month, fill = periodo, y = 0.5), height = 1, alpha = 0.1,
+            inherit.aes = FALSE, show.legend = FALSE) +
+
+  # Línea y puntos
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5) +
+
+  # Escalas
+  scale_x_continuous(breaks = 1:12) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_fill_manual(values = c("Exploitation" = "mistyrose", 
+                               "Reproductive" = "palegreen")) +
+
+  # Etiquetas
+  labs(title = "Seasonality of maturity and exploitation vs reproductive period",
+       x = "Month", y = "Mature proportion") +
+
+  # Tema limpio
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    legend.box = "horizontal",
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+```
+
+## 5. Modelo GLM binomial para evaluar efecto MPA y regulación
+
+### Patella aspera
+
+```{r}
+# Modelo sobre datos individuales para Patella aspera
+modelo_comparado_pa <- Mad_2sp_analisis %>%
+filter(species == "Patella aspera", !is.na(mature_imature)) %>%
+mutate(
+maduro = mature_imature == "Mature",
+grupo = case_when(
+protective_regime == "Full acess" & regulation_period == "Before" ~ "FA_Before",
+protective_regime == "Full acess" & regulation_period == "After" ~ "FA_After",
+protective_regime == "MPA" & regulation_period == "After" ~ "MPA_After"
+),
+grupo = factor(grupo, levels = c("FA_Before", "FA_After", "MPA_After"))
+) %>%
+glm(maduro ~ grupo, data = ., family = binomial())
+# Resultados del modelo (odds ratios con IC 95%)
+broom::tidy(modelo_comparado_pa, exponentiate = TRUE, conf.int = TRUE)
+
+em_pa <- emmeans(modelo_comparado_pa, ~ grupo, type = "response")
+
+contrastes_interes_pa <- contrast(em_pa, method = list(
+  "FA_Before vs FA_After" = c(1, -1, 0),
+  "FA_Before vs MPA_After" = c(1, 0, -1),
+  "FA_After vs MPA_After" = c(0, 1, -1)
+), type = "response")
+
+
+# Convertir resultados de emmeans a data frame
+contrastes_df_pa <- as.data.frame(summary(contrastes_interes_pa))
+
+# Formatear columnas:
+# - Redondear todas las columnas numéricas excepto p.value
+# - Formatear p.value en notación científica
+tabla_formateada_pa <- contrastes_df_pa %>%
+  mutate(
+    across(where(is.numeric) & !matches("p.value"), ~ round(., 3)),
+    p.value = format(p.value, scientific = TRUE, digits = 6)
+  )
+
+# Mostrar como flextable con título
+flextable(tabla_formateada_pa) %>%
+  set_caption(caption = "Marginal Effects (EMMEANS) - Patella aspera")
+```
+
+### Patella ordinaria
+
+```{r}
+modelo_comparado_po <- Mad_2sp_analisis %>%
+filter(species == "Patella ordinaria", !is.na(mature_imature)) %>%
+mutate(
+maduro = mature_imature == "Mature",
+grupo = case_when(
+protective_regime == "Full acess" & regulation_period == "Before" ~ "FA_Before",
+protective_regime == "Full acess" & regulation_period == "After" ~ "FA_After",
+protective_regime == "MPA" & regulation_period == "After" ~ "MPA_After"
+),
+grupo = factor(grupo, levels = c("FA_Before", "FA_After", "MPA_After"))
+) %>%
+glm(maduro ~ grupo, data = ., family = binomial())
+# Resultados del modelo (odds ratios con IC 95%)
+broom::tidy(modelo_comparado_po, exponentiate = TRUE, conf.int = TRUE)
+
+em_po <- emmeans(modelo_comparado_po, ~ grupo, type = "response")
+
+contrastes_interes_po <- contrast(em_po, method = list(
+  "FA_Before vs FA_After" = c(1, -1, 0),
+  "FA_Before vs MPA_After" = c(1, 0, -1),
+  "FA_After vs MPA_After" = c(0, 1, -1)
+), type = "response")
+
+em_po <- emmeans(modelo_comparado_po, ~ grupo, type = "response")
+
+contrastes_interes_po <- contrast(em_po, method = list(
+  "FA_Before vs FA_After" = c(1, -1, 0),
+  "FA_Before vs MPA_After" = c(1, 0, -1),
+  "FA_After vs MPA_After" = c(0, 1, -1)
+), type = "response")
+
+
+# Convertir resultados de emmeans a data frame
+contrastes_df_po <- as.data.frame(summary(contrastes_interes_po))
+
+# Formatear columnas:
+# - Redondear todas las columnas numéricas excepto p.value
+# - Formatear p.value en notación científica
+tabla_formateada_po <- contrastes_df_po %>%
+  mutate(
+    across(where(is.numeric) & !matches("p.value"), ~ round(., 3)),
+    p.value = format(p.value, scientific = TRUE, digits = 6)
+  )
+
+# Mostrar como flextable con título
+flextable(tabla_formateada_po) %>%
+  set_caption(caption = "Marginal Effects (EMMEANS) - Patella ordinaria")
+```
+
+## 6. Gráfico de odds ratios del modelo de implementacion de MPA y regulaciones.
+
+```{r}
+# Obtener resultados tidy para ambas especies
+po_df <- broom::tidy(modelo_comparado_po, exponentiate = TRUE, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    term = dplyr::recode(term,
+                         "grupoFA_After" = "Full access (After)",
+                         "grupoMPA_After" = "MPA (After)"),
+    species = "Patella ordinaria"
+  )
+
+pa_df <- broom::tidy(modelo_comparado_pa, exponentiate = TRUE, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    term = dplyr::recode(term,
+                         "grupoFA_After" = "Full access (After)",
+                         "grupoMPA_After" = "MPA (After)"),
+    species = "Patella aspera"
+  )
+# Combinar en un solo data frame
+odds_df <- bind_rows(po_df, pa_df)
+
+# Graficar
+ggplot(odds_df, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high, color = species)) +
+  geom_pointrange(position = position_dodge(width = 0.5), size = 0.8) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "gray40") +
+  coord_flip() +
+  labs(
+    title = "Odds ratios by species and management regime",
+    x = "", y = "Odds Ratio (95% CI)", color = "Species"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "bottom"
+  )
+
+```
+
+## 7. Efecto de la accesibilidad (conectividad)
+
+Evaluate the effect of geographic accessibility (North/South) on the proportion of mature individuals, considering the interaction with:
+
+protective regime (Total access / MPA)
+
+regulatory period (Before / After)
+
+### Efecto de la accesibilidad en zonas Full access – Patella ordinaria
+
+```{r}
+
+resumen_acc_po <- Mad_2sp_analisis %>%
+  filter(
+    species == "Patella ordinaria",
+    protective_regime == "Full acess",
+    !is.na(mature_imature),
+    !is.na(accessibility)
+  ) %>%
+  mutate(
+    maduro = mature_imature == "Mature"
+  ) %>%
+  group_by(accessibility) %>%
+  summarise(
+    maduros = sum(maduro),
+    total = n(),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    accessibility = factor(accessibility, levels = c("North", "South"))
+  )
+
+modelo_acc_po <- glm(
+  cbind(maduros, total - maduros) ~ accessibility,
+  data = resumen_acc_po,
+  family = binomial()
+)
+
+broom::tidy(modelo_acc_po, exponentiate = TRUE, conf.int = TRUE)
+```
+
+### Efecto de accesibilidad en zonas Full access -- Patella aspera
+
+```{r}
+
+resumen_acc_pa <- Mad_2sp_analisis %>%
+  filter(
+    species == "Patella aspera",
+    protective_regime == "Full acess",
+    !is.na(mature_imature),
+    !is.na(accessibility)
+  ) %>%
+  mutate(
+    maduro = mature_imature == "Mature"
+  ) %>%
+  group_by(accessibility) %>%
+  summarise(
+    maduros = sum(maduro),
+    total = n(),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    accessibility = factor(accessibility, levels = c("North", "South"))
+  )
+
+modelo_acc_pa <- glm(
+  cbind(maduros, total - maduros) ~ accessibility,
+  data = resumen_acc_pa,
+  family = binomial()
+)
+
+broom::tidy(modelo_acc_pa, exponentiate = TRUE, conf.int = TRUE)
+```
+
+## 8. Gráfico de odds ratios de modelos de accesibilidad
+
+```{r accesibilidad-lineas, fig.width=8, fig.height=5}
+# Patella ordinaria
+res_po <- broom::tidy(modelo_acc_po, exponentiate = TRUE, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(species = "Patella ordinaria")
+
+# Patella aspera
+res_pa <- broom::tidy(modelo_acc_pa, exponentiate = TRUE, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(species = "Patella aspera")
+
+# Unimos ambos modelos
+res_combinado <- bind_rows(res_po, res_pa) %>%
+  dplyr::mutate(term = dplyr::recode(term,
+    "accessibilitySouth" = "South vs North"
+  ))
+
+# Gráfico
+ggplot(res_combinado, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high, color = species)) +
+  geom_pointrange(position = position_dodge(width = 0.6), size = 0.9) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "gray50") +
+  coord_flip() +
+  labs(
+    title = "Odds Ratios – Efecto de accesibilidad (Full access)",
+    x = "", y = "Odds Ratio (IC 95%)", color = "Especie"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "bottom"
+  )
+```

@@ -14,3 +14,8 @@ Figure 4a) Patella aspera (N1) and Patella ordinaria (N2) abundances decay along
 Figure 4b) Surface representation (3D) of exploitation and competition combinated scenarios on abundance for Patella aspera (N1).
 
 Figure 4b) Surface representation (3D) of exploitation and competition combinated scenarios on abundance for Patella ordinaria (N2).
+
+Figure 5A mean population size as a function of exploitation rate
+Figure 5B Population size time series for the eight sampling sites for low exploitation rate
+Figure 5C Population size time series for the eight sampling sites for medium exploitation rate
+Figure 5D Population size time series for the eight sampling sites for high exploitation rate
